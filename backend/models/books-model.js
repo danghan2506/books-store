@@ -16,7 +16,7 @@ const bookSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     slug: { type: String, unique: true },
-    image: { type: String },
+    image: [{type: String}],
     author: { type: String, required: true },
     type: { type: String, required: true },
     genre: {type: String, required: true},

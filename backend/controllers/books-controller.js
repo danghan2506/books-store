@@ -37,21 +37,96 @@ const addBook = asyncHandler(async(req, res) => {
         res.status(400).json(error.message);
     }
 })
-const removeBook = asyncHandler(async(req, res) => {
+const updateBook = asyncHandler(async(req, res) => {
+  try {
+    const {bookId} = req.params
+    const book = await Book.findOne({ _id: bookId})
+    if(!book){
+      res.status(404).json("No book found!")
+    }
+    else{
+      book.name = req.body.name || book.name
+      book.author = req.body.author || book.author
+      book.type = req.body.type || book.type
+      book.genre = req.body.genre || book.genre
+      book.publishingHouse = req.body.publishingHouse || book.publishingHouse
+      book.publishYear = req.body.publishYear || book.publishYear
+      book.language = req.body.language || book.language
+      book.pageNumber = req.body.pageNumber || book.pageNumber
+      book.description = req.body.description || book.description
+      book.price = req.body.price || book.price
+      book.stock = req.body.stock || book.stock
+      const updateBook = await book.save()
+    res.json(updateBook)
+    }
+  } catch (error) {
+    console.log(error)
+  }
+})
+const deleteBook = asyncHandler(async(req, res) => {
+  const {bookId} = req.params
     try {
-        
+      const deleteBook = await Book.findByIdAndDelete(bookId);
+      res.json(deleteBook)
+      res.json(deleteProduct);
     } catch (error) {
-        
+        console.log(error)
+    }
+})
+const getBookDetails = asyncHandler(async(req, res) => {
+    const {bookSlug} = req.params
+    const bookDetails = await Book.findOne({slug: bookSlug})
+    if(!bookDetails){
+      throw new Error("Book not found!")
+    }
+    else{
+      res.json(bookDetails)
     }
 })
 const getAllBooks = asyncHandler(async(req, res) => {
     try {
-        
+        const books = await Book.find({}).sort({createAt: -1})
+        res.json(books)
     } catch (error) {
-        
+        console.log(error)
     }
 })
-const getBookBySlug = asyncHandler(async(req, res) => {
+const getBooks = asyncHandler(async (req, res) => {
+  try {
+    const pageSize = 6;
+    const keyword = req.query.keyword
+      ? {name: {$regex: req.query.keyword,$options: "i"}}
+      : {};
+    const count = await Book.countDocuments({ ...keyword });
+    const books = await Book.find({ ...keyword }).limit(pageSize);
 
+    res.json({
+      books,
+      page: 1,
+      pages: Math.ceil(count / pageSize),
+      hasMore: false,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
+
+const getNewBooks = asyncHandler(async(req, res) => {
+  try {
+    const books = await Book.find({}).sort({createAt: -1}).limit(12)
+    res.json(books)
+  } catch (error) {
+    console.log(error)
+  }
 })
-export {addBook, removeBook, getAllBooks, getBookBySlug}
+const getTopSalesBooks = asyncHandler(async(req, res) => {
+  try {
+    const topSalesBooks = await books.find({}).sort({saleCount: -1}).limit(12)
+    res.json(topSalesBooks)
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+export {addBook, deleteBook, getAllBooks, getBookDetails, updateBook, getNewBooks, getBooks, getTopSalesBooks}

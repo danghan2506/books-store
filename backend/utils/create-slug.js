@@ -1,6 +1,6 @@
 const handleSlug = (name) => {
     if(!name) return ''
-    return text
+    return name
         .toLowerCase()
         .trim()
         // Xử lý tiếng Việt

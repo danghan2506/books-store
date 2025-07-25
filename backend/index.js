@@ -1,7 +1,9 @@
 import express from "express";
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser";
+
 import userRoute from "./routes/users-routes.js"
+import bookRoute from "./routes/books-routes.js"
 import connectDatabase from "./config/connect-database.js";
 const app = express()
 dotenv.config()
@@ -12,6 +14,7 @@ const port = process.env.port
 const database = process.env.DATABASE_URI
 connectDatabase(database)
 app.use("/api/users", userRoute)
+app.use("/api/books", bookRoute)
 app.listen(port, (req, res) => {
     console.log(`Server is running on port: ${port}`)
 })

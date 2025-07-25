@@ -15,11 +15,11 @@ const reviewsSchema = mongoose.Schema(
 const bookSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
-    slug: { type: String, unique: true, required: true },
-    image: { type: String, required: true },
+    slug: { type: String, unique: true },
+    image: { type: String },
     author: { type: String, required: true },
     type: { type: String, required: true },
-    genres: [{ name: String, slug: String }],
+    genre: {type: String, required: true},
     publishingHouse: { type: String, required: true },
     publishYear: {
       type: Number,
@@ -54,3 +54,5 @@ const bookSchema = new mongoose.Schema(
   { timestamps: true }
 );
 const Book = new mongoose.model("Book", bookSchema);
+export default Book
+

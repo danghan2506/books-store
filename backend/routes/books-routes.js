@@ -12,5 +12,4 @@ router.route("/genres/:genre").get(authenticate, getBooksByGenre)
 router.route("/types/:type").get(authenticate, getBooksByType)
 router.route("/new-books").get(authenticate, getNewBooks)
 router.route("/top-sales").get(authenticate, getTopSalesBooks)
-
 export default router

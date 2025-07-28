@@ -4,7 +4,7 @@ const initialState = {
     ? JSON.parse(localStorage.getItem("userInfo"))
     : null
 }
-const expirationTime = newDate().getTime() + 30 * 24 * 60 * 60 * 1000
+const expirationTime =  new Date().getTime() + 30 * 24 * 60 * 60 * 1000
 const authSlice = createSlice({
     name: "auth",
     initialState,

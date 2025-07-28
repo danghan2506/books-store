@@ -8,6 +8,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+
+  server: {
+    proxy: {
+      "/api/": "http://localhost:5000",
+    },
+  }, 
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

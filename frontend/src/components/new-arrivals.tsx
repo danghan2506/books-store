@@ -4,13 +4,13 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 import {Autoplay, Pagination} from "swiper/modules"
-import { useGetAllBooksQuery } from '@/redux/API/book-api-slice'
+import { useGetNewBooksQuery } from '@/redux/API/book-api-slice'
 import { useEffect, useState } from 'react'
 import type { Book } from '@/types/books-type'
 import BookItems from './books-items'
 const NewArrivals = () => {
   const [newArrivals, setNewArrivals] = useState<Book[]>([]);
-  const {data} = useGetAllBooksQuery()
+  const {data} = useGetNewBooksQuery()
   useEffect(() => {
     if (Array.isArray(data)) {
       const books = data.slice(0, 7);

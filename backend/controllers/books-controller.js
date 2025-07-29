@@ -156,7 +156,7 @@ const getBooks = asyncHandler(async (req, res) => {
 
 const getNewBooks = asyncHandler(async (req, res) => {
   try {
-    const books = await Book.find({}).sort({ createAt: -1 }).limit(12);
+    const books = await Book.find({}).sort({ createdAt: -1 }).limit(12);
     res.json(books);
   } catch (error) {
     console.log(error);
@@ -182,7 +182,6 @@ const getBooksByGenre = asyncHandler(async (req, res) => {
       .status(404)
       .json({ message: `No books found for genre: ${genre}` });
   }
-
   res.json(books);
 });
 const getBooksByType = asyncHandler(async (req, res) => {

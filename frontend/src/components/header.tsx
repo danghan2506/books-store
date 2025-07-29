@@ -6,7 +6,7 @@ import { ShoppingCart, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 const Header = () => {
-    const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [menuOpenned, setMenuOpenned] = useState(false);
   const [active, setActive] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
@@ -14,27 +14,31 @@ const Header = () => {
     setMenuOpenned((prev) => !prev);
   };
   const handleLogout = () => {
-    dispatch(logout)
-  }
+    dispatch(logout);
+  };
   useEffect(() => {
     const handleScroll = () => {
-        if(window.scrollY > 0){
-            // close menu it opnened when scrolling occured
-            if(menuOpenned){
-                setMenuOpenned(false)
-            }
+      if (window.scrollY > 0) {
+        // close menu it opnened when scrolling occured
+        if (menuOpenned) {
+          setMenuOpenned(false);
         }
-        setActive(window.scrollY > 30)
-    }
-    window.addEventListener("scroll", handleScroll)
-    // clean up the event listener 
+      }
+      setActive(window.scrollY > 30);
+    };
+    window.addEventListener("scroll", handleScroll);
+    // clean up the event listener
     return () => {
-        window.removeEventListener("scroll", handleScroll)
-    }
-  }, [menuOpenned])
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [menuOpenned]);
   return (
     <header className="fixed top-0 w-full left-0 right-0 z-50 bg-white shadow-sm">
-      <div className={`${active ? 'bg-white py-2.5' : 'py-3'} py-3 mx-auto max-w-[1440px] px-6 lg:px-12 flex items-center justify-between`}>
+      <div
+        className={`${
+          active ? "bg-white py-2.5" : "bg-zinc-50 py-3"
+        } py-3 mx-auto max-w-[1440px] px-6 lg:px-12 flex items-center justify-between`}
+      >
         {/* Left side - Logo */}
         <Link
           to={"/"}
@@ -49,7 +53,6 @@ const Header = () => {
           ></img>
           <h4 className="font-bold text-xl text-gray-800">Book Store</h4>
         </Link>
-
         {/* Center - Navigation */}
         <div className="flex-1 flex justify-center">
           <Navbar
@@ -93,15 +96,22 @@ const Header = () => {
                 </button>
               </Link>
             )}
- {userInfo && 
- <>
-            <ul className="bg-white p-1 w-32 ring-1 ring-slate-900/5 rounded absolute right-0 top-10 hidden group-hover:flex flex-col text-[14px] font-[400] shadow-md">
-                <li className="p-2 text-gray-300 rounded-md hover:bg-neutral-100 cursor-pointer">Orders</li>
-                <li onClick={handleLogout} className="p-2 text-gray-300 rounded-md hover:bg-neutral-100 cursor-pointer">Logout</li>
-            </ul>
-          </>}
+            {userInfo && (
+              <>
+                <ul className="bg-white p-1 w-32 ring-1 ring-slate-900/5 rounded absolute right-0 top-10 hidden group-hover:flex flex-col text-[14px] font-[400] shadow-md">
+                  <li className="p-2 text-gray-300 rounded-md hover:bg-neutral-100 cursor-pointer">
+                    Orders
+                  </li>
+                  <li
+                    onClick={handleLogout}
+                    className="p-2 text-gray-300 rounded-md hover:bg-neutral-100 cursor-pointer"
+                  >
+                    Logout
+                  </li>
+                </ul>
+              </>
+            )}
           </div>
-         
         </div>
       </div>
     </header>

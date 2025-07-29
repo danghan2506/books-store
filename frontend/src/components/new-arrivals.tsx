@@ -7,7 +7,7 @@ import {Autoplay, Pagination} from "swiper/modules"
 import { useGetAllBooksQuery } from '@/redux/API/book-api-slice'
 import { useEffect, useState } from 'react'
 import type { Book } from '@/types/books-type'
-import BooksItems from './books-items'
+import BookItems from './books-items'
 const NewArrivals = () => {
   const [newArrivals, setNewArrivals] = useState<Book[]>([]);
   const {data} = useGetAllBooksQuery()
@@ -54,7 +54,7 @@ const NewArrivals = () => {
       >
         {newArrivals.map((book) => (
           <SwiperSlide key={book._id}>
-            <BooksItems book={book}/>
+            <BookItems book={book}/>
           </SwiperSlide>
         ))}
       </Swiper>

@@ -6,10 +6,11 @@ import upload from "../middlewares/multer.js";
 const router = express.Router()
 router.route("/").post(authenticate, authorizedAdmin,upload.array("image"), addBook)
 router.route("/all-books").get(authenticate, getAllBooks)
+router.route("/new-books").get(authenticate, getNewBooks)
+router.route("/top-sales").get(authenticate, getTopSalesBooks)
 router.route("/:bookSlug").put(authenticate, authorizedAdmin, updateBook).get(authenticate, getBookDetails)
 router.route("/:bookId").delete(authenticate, authorizedAdmin, deleteBook)
 router.route("/genres/:genre").get(authenticate, getBooksByGenre)
 router.route("/types/:type").get(authenticate, getBooksByType)
-router.route("/new-books").get(authenticate, getNewBooks)
-router.route("/top-sales").get(authenticate, getTopSalesBooks)
+
 export default router

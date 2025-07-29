@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useLoginMutation } from "../../redux/api/user-api-slice";
-import { setCredentials } from "../../redux/features/Auth/auth-slice";
+import { useLoginMutation } from "@/redux/API/user-api-slice";
+import { setCredentials } from "@/redux/features/auth/auth-slice";
 import { toast } from "sonner"
+import type { RootState } from "@/redux/features/store";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,17 +24,17 @@ export default function Login() {
   const navigate = useNavigate();
   const [login] = useLoginMutation();
   const { search } = useLocation();
-  const { userInfo } = useSelector((state) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const sp = new URLSearchParams(search);
   const redirect = sp.get("redirect") || "/";
-  const submitHandler = async (e) => {
+  const submitHandler = async (e : React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({ ...res }));
       toast.success("Login successfully!")
       navigate(redirect)
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error?.data?.message || error.message);
     }
   };

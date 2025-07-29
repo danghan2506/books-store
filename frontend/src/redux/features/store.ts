@@ -12,3 +12,4 @@ export const store = configureStore({
     devTools: true
 })
 setupListeners(store.dispatch)
+export type RootState = ReturnType<typeof store.getState>

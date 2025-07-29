@@ -4,18 +4,30 @@ import { CgMenuLeft } from "react-icons/cg";
 import Navbar from "./navbar";
 import { ShoppingCart, User } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { RootState } from "@/redux/features/store";
 import { useDispatch, useSelector } from "react-redux";
+import { useLogoutMutation } from "@/redux/API/user-api-slice";
+import { logout } from "@/redux/features/auth/auth-slice";
+import { useNavigate } from "react-router-dom";
 const Header = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [menuOpenned, setMenuOpenned] = useState(false);
   const [active, setActive] = useState(false);
-  const { userInfo } = useSelector((state) => state.auth);
+  const [logoutApiCall] = useLogoutMutation()
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const toggleMenu = () => {
     setMenuOpenned((prev) => !prev);
   };
-  const handleLogout = () => {
-    dispatch(logout);
-  };
+  const logoutHandler = async() => {
+    try {
+      await logoutApiCall().unwrap()
+      dispatch(logout())
+      navigate("/login")
+    } catch (error) {
+      console.log(error)
+    }
+  }
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 0) {
@@ -103,7 +115,7 @@ const Header = () => {
                     Orders
                   </li>
                   <li
-                    onClick={handleLogout}
+                    onClick={logoutHandler}
                     className="p-2 text-gray-300 rounded-md hover:bg-neutral-100 cursor-pointer"
                   >
                     Logout

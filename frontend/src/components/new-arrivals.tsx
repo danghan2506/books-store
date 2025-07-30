@@ -14,7 +14,6 @@ const NewArrivals = () => {
   useEffect(() => {
     if (Array.isArray(data)) {
       const books = data.slice(0, 7);
-      console.log(books)
       setNewArrivals(books);
     }
   }, [data])

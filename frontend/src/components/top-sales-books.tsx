@@ -9,7 +9,6 @@ const TopSalesBooks = () => {
   useEffect(() => {
     if(Array.isArray(data)){
       const books = data
-      console.log(books)
       setTopSalesBooks(books)
     }
   }, [data])

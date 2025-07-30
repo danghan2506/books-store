@@ -1,9 +1,99 @@
-import React from 'react'
 
+import {BookA, BookOpen, Flame, Medal, Search, Settings, Smile } from "lucide-react";
+import { useGetAllBooksQuery, useGetAllGenresQuery } from "@/redux/API/book-api-slice";
+import { useEffect, useState } from "react";
+import { DollarSign } from "lucide-react";
+import Title from "@/components/title";
+import type { Book } from "@/types/books-type";
 const Shop = () => {
+  const { data: categories, error, isLoading } = useGetAllGenresQuery();
+  const {data: books, isLoading: bookLoading, error : bookError} = useGetAllBooksQuery()
+  const [allBooks, setAllBooks] = useState<Book[]>([])
+  const [allCategories, setAllCategories] = useState<string[]>([]);
+  const GENRE_ICONS: Record<string, React.ReactNode> = {
+    "Kinh tế": <DollarSign size={44}/>,
+    "Tâm lý": <DollarSign size={44}/>,
+    "Tình cảm": <DollarSign size={44}/>,
+    "Hành động": <Flame size={44}/>,
+    "Bóng đá": <Medal size={44}/>,
+    "Thiếu nhi": <Smile size={44}/>,
+    "Vui nhộn": <Smile size={44}/>,
+    "Truyện ngắn" : <BookA size={44}/>,
+    "Truyện tranh" : <BookOpen size={44}/>,
+    "Sách tiếng việt" : <BookA size={44}/>
+  };
+  useEffect(() => {
+    if (Array.isArray(categories)) {
+      setAllCategories(categories)
+    }
+  }, [categories]);
+  useEffect(() => {
+    if(Array.isArray(books)){
+      setAllBooks(books)
+    }
+  })
+  if (isLoading) return <p>Loading books...</p>;
+  if (error) return <p>Something went wrong!</p>;
+  if (bookLoading) return <p>Loading books...</p>;
+  if (bookError) return <p>Something went wrong!</p>;
   return (
-    <div>Shop</div>
-  )
-}
+    <section className="mx-auto max-w-[1440px] px-6 lg:px-12 bg-white">
+      <div className="pt-28">
+        <div className="w-full max-w-2xl flex items-center justify-center">
+          <div className="inline-flex items-center justify-center bg-zinc-50 overflow-hidden w-full rounded-full p-4 px-5">
+            <div className="text-lg cursor-pointer">
+              <Search />
+            </div>
+            <input
+              type="text"
+              placeholder="Search here"
+              className="border-none outline-none w-full text-sm pl-4 bg-zinc-50"
+            />
+            <div className="flex items-center justify-center cursor-pointer text-lg border-1 pl-2">
+              <Settings />
+            </div>
+          </div>
+        </div>
+        {/* categories  */}
+        <div className="mt-12 mb-16">
+          <h4 className="text-[16px] md:text-[17px] mb-2 font-bold hidden sm:flex">Categories: </h4>
+          <div className="flex items-center justify-center sm:flex sm:items-start sm:justify-start flex-wrap gap-x-12 gap-y-4">
+            {allCategories.map((category) => (
+              <label key={category}>
+                <input type="checkbox" className="hidden peer" />
+                <div className="flex items-center justify-center flex-col gap-2 peer-checked:text-blue-300 cursor-pointer">
+                  <div className="flex items-center justify-center rounded-full bg-zinc-50 h-20 w-20">
+                  <span className="object-cover h-10 w-10">
+                    {GENRE_ICONS[category] ?? <DollarSign />}
+                  </span>
+                  </div>
+                  <span className="text-[14px] font-[500]">{category}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+        {/* Book container */}
+        <div className="mt-8">
+            <div>
+              <Title title1={"Our"} title2={"Books List"} titleStyles={"pb-0 text-start"} paraStyles={"!block"}/>
+              <div>
+                <span>Sort by:</span>
+                <select className="text-sm p-2.5 outline-none bg-primary text-gray-300/10 rounded">
+                  <option value="relevant">Relevant</option>
+                  <option value="low">Low</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+            {/* Books display */}
+            <div>
+              
+            </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
-export default Shop
+export default Shop;

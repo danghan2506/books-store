@@ -172,6 +172,34 @@ const getTopSalesBooks = asyncHandler(async (req, res) => {
     console.log(error);
   }
 });
+const getAllCategories = asyncHandler(async (req, res) => {
+  const result = await Book.aggregate([
+    {
+      $project: {
+        _id: 0,
+        values: ["$genre.genreName", "$type.typeName"] // gom chung thành array
+      }
+    },
+    {
+      $unwind: "$values" // tách từng giá trị
+    },
+    {
+      $group: {
+        _id: "$values" // group theo giá trị để loại trùng
+      }
+    },
+    {
+      $replaceRoot: {
+        newRoot: { value: "$_id" }
+      }
+    }
+  ]);
+
+  // Trả về mảng giá trị đơn giản
+  const uniqueValues = result.map(item => item.value);
+
+  res.json(uniqueValues);
+});
 const getBooksByGenre = asyncHandler(async (req, res) => {
   const { genre } = req.params;
   const books = await Book.find({
@@ -189,7 +217,6 @@ const getBooksByType = asyncHandler(async (req, res) => {
   const books = await Book.find({
     "type.typeSlug": { $regex: `^${type}$`, $options: "i" },
   });
-
   if (books.length === 0) {
     return res
       .status(404)
@@ -198,4 +225,4 @@ const getBooksByType = asyncHandler(async (req, res) => {
   res.json(books);
 });
 
-export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks,getBooksByGenre,getBooksByType};
+export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks,getBooksByGenre,getBooksByType, getAllCategories};

@@ -18,9 +18,9 @@ const bookApiSlice = apiSlice.injectEndpoints({
     getNewBooks: builder.query<Book[], void>({
       query: () => ({
         url: `${BOOKS_URL}/new-books`,
-        method: "GET"
-      })
-    }), 
+        method: "GET",
+      }),
+    }),
     createBook: builder.mutation<Book[], void>({
       query: (data) => ({
         url: `${BOOKS_URL}/`,
@@ -28,6 +28,25 @@ const bookApiSlice = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
+    getAllGenres: builder.query<Book[], void>({
+      query: () => ({
+        url: `${BOOKS_URL}/all-categories`,
+        method: "GET",
+      }),
+    }),
+    getBooks: builder.query<Book[], { keyword?: string }>({
+      query: ({ keyword }) => ({
+        url: `${BOOKS_URL}`,
+        method: "GET",
+        params: { keyword },
+      }),
+    }),
   }),
 });
-export const { useGetAllBooksQuery, useCreateBookMutation, useGetTopSalesBooksQuery, useGetNewBooksQuery } = bookApiSlice;
+export const {
+  useGetAllBooksQuery,
+  useCreateBookMutation,
+  useGetTopSalesBooksQuery,
+  useGetNewBooksQuery,
+  useGetAllGenresQuery,
+} = bookApiSlice;

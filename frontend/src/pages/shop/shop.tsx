@@ -16,23 +16,20 @@ import { useEffect, useState } from "react";
 import Title from "@/components/title";
 import type { Book } from "@/types/books-type";
 import BookItems from "@/components/books-items";
-
 const Shop = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [allCategories, setAllCategories] = useState<
-    { categoryName: string; categorySlug: string }[]
-  >([]);
+  const [allCategories, setAllCategories] = useState<{categoryName: string; categorySlug: string }[]>([]);
   const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"relevant" | "low" | "high">("relevant");
+  const [currentPage, setCurrentPage] = useState(1)
+
   const {
     data,
     isLoading: bookLoading,
     error: bookError,
   } = useGetBooksQuery({ keyword: searchTerm });
-
+  console.log(data.pages)
   const books = data?.books || [];
-
-  // 🎯 Tạo mảng category duy nhất từ book.category (dựa vào slug)
   useEffect(() => {
     const uniqueCategories = Array.from(
       new Map(
@@ -44,8 +41,6 @@ const Shop = () => {
     );
     setAllCategories(uniqueCategories);
   }, [books]);
-
-  // 🎯 Gọi API khi chọn categorySlug
   const {
     data: filteredBooks,
     isLoading: categoryLoading,
@@ -54,7 +49,6 @@ const Shop = () => {
     { keyword: selectedCategorySlug || "" },
     { skip: !selectedCategorySlug }
   );
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     // Reset category khi search
@@ -62,7 +56,6 @@ const Shop = () => {
       setSelectedCategorySlug(null);
     }
   };
-
   const handleCategoryClick = (categorySlug: string) => {
     setSelectedCategorySlug((prev) =>
       prev === categorySlug ? null : categorySlug
@@ -74,11 +67,11 @@ const Shop = () => {
   };
   const sortBooks = (books: Book[]) => {
     if (sortBy === "relevant") return books;
-    
+
     return [...books].sort((a, b) => {
       const priceA = a.price || 0;
       const priceB = b.price || 0;
-      
+
       if (sortBy === "low") {
         return priceA - priceB; // Thấp đến cao
       } else {
@@ -164,7 +157,11 @@ const Shop = () => {
             <span className="hidden sm:flex text-[16px] font-[500]">
               Sort by:
             </span>
-            <select value={sortBy} onChange={handleSortChange} className="text-sm p-2.5 outline-none bg-zinc-50 text-gray-800 rounded">
+            <select
+              value={sortBy}
+              onChange={handleSortChange}
+              className="text-sm p-2.5 outline-none bg-zinc-50 text-gray-800 rounded"
+            >
               <option value="relevant">Relevant</option>
               <option value="low">Low</option>
               <option value="high">High</option>
@@ -175,18 +172,28 @@ const Shop = () => {
         {/* Book Grid */}
         {categoryLoading && <p>Loading category books...</p>}
         {categoryError && (
-          <p className="text-red-500 text-sm">
-            Failed to load category books.
-          </p>
+          <p className="text-red-500 text-sm">Failed to load category books.</p>
         )}
 
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-         {sortBooks(selectedCategorySlug ? filteredBooks || [] : books).map(
+          {sortBooks(selectedCategorySlug ? filteredBooks || [] : books).map(
             (book: Book) => (
               <BookItems book={book} key={book._id} />
-            )
+            ) 
           )}
         </div>
+      </div>
+      {/* pagination */}
+      <div className="flex items-center justify-center mt-14 mb-10 gap-4">
+        <button disabled={currentPage === 1} 
+        onClick={() => setCurrentPage((prev) => prev - 1)} className={`bg-white text-tertiary ring-1 ring-white px-7 py-2.5 rounded-full bg-zinc-200 ring-1 ring-zinc-200 text-white px-7 py-2.5 rounded-full !py-1 !px-3 ${currentPage ===1 && "opacity-50 cursor-not-allowed"}`}>Previous</button>
+        {/* Pages numbers */}
+        {Array.from({length: data?.pages}, (_, index) => (
+          <button key={index + 1} onClick={() => setCurrentPage(index + 1)} className={`bg-white text-tertiary ring-1 ring-white px-7 py-2.5 rounded-full bg-zinc-200 ring-1 ring-white px-7 py-2.5 rounded-full hover:bg-white transition-all duration-300 !py-1 !px-3 ${currentPage === index + 1 && "!bg-blue-300"}`}>{index + 1}</button>
+        ))}
+        {/* next button */}
+         <button disabled={currentPage === data?.pages} 
+         onClick={() => setCurrentPage((prev) => prev + 1)} className={`bg-white text-tertiary ring-1 ring-white px-7 py-2.5 rounded-full bg-zinc-200 ring-1 ring-zinc-200 text-white px-7 py-2.5 rounded-full !py-1 !px-3 ${currentPage ===data?.pages && "opacity-50 cursor-not-allowed"}`}>Next</button>
       </div>
     </section>
   );

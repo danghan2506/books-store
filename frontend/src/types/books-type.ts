@@ -4,10 +4,9 @@ export interface Book {
   _id: string;
   name: string;
   slug: string;
-  image: string[];
+  images: Images;
   author: string;
-  type: BookType;
-  genres: BookGenres;
+  category: BookCategory;
   publishingHouse: string;
   publishYear: number;
   language: string;
@@ -27,18 +26,16 @@ export interface Review {
   createdAt?: string;      
   updatedAt?: string;     
 }
-export interface image {
+export interface Images {
   url: string;
+  public_id: string
 }
-export interface BookType {
-  typeName: string;
-  typeSlug: string;
+export interface BookCategory {
+  categoryName: string;
+  categorySlug: string;
 }
 
-export interface BookGenres {
-  genreName: string;
-  genreSlug: string;
-}
+
 export interface BookQueryResult {
   books: Book[];
   page: number;

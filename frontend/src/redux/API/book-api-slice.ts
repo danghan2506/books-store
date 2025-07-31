@@ -28,7 +28,7 @@ const bookApiSlice = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
-    getAllGenres: builder.query<Book[], void>({
+    getAllCategories: builder.query<Book[], void>({
       query: () => ({
         url: `${BOOKS_URL}/all-categories`,
         method: "GET",
@@ -41,6 +41,13 @@ const bookApiSlice = apiSlice.injectEndpoints({
         params: keyword ? {keyword} : {}
       })
     }),
+    getBookBaseOnCategory: builder.query<Book[], {keyword?: string}>({
+      query: ({keyword}) => ({
+        url: `${BOOKS_URL}/category/${keyword}`,
+        method: "GET",
+        params: keyword ? {keyword} : {}
+      })
+    })
   }),
 });
 export const {
@@ -48,6 +55,7 @@ export const {
   useCreateBookMutation,
   useGetTopSalesBooksQuery,
   useGetNewBooksQuery,
-  useGetAllGenresQuery,
-  useGetBooksQuery
+  useGetAllCategoriesQuery, 
+  useGetBooksQuery,
+  useGetBookBaseOnCategoryQuery
 } = bookApiSlice;

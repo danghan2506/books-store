@@ -7,11 +7,11 @@ interface BookItemsProps {
 const BookItems = ({ book }: BookItemsProps) => {
   return (
     <div>
-      <div className="flex items-center justify-center bg-slate-200/3 p-6 rounded-3xl overflow-hidden relative group">
+      <div className="flex items-center justify-center bg-zinc-50 p-6 rounded-3xl overflow-hidden relative group">
         <img
-          src={book.image[0]}
+          src={book.images[0].url}
           alt={book.slug}
-          className="shadow-xl shadow-slate-900/30 rounded-lg"
+          className="shadow-xl shadow-slate-900/30 rounded-lg w-full aspect-[3/4] object-cover mx-auto"
         ></img>
       </div>
       <div className="p-3">
@@ -24,7 +24,7 @@ const BookItems = ({ book }: BookItemsProps) => {
           </span>
         </div>
         <div className="flex items-center justify-between pt-1">
-          <p className="font-bold capitalize">{book.type.typeName}</p>
+          <p className="font-bold capitalize text-[12px]">{book.category.categoryName}</p>
           <h5 className="tex-red-200 pr-2">{book.price} VNĐ</h5>
         </div>
         <p className="line-clamp-2 py-1">{book.description}</p>

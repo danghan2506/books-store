@@ -197,6 +197,15 @@ const getBooksByCategory = asyncHandler(async (req, res) => {
   }
   res.json(books);
 });
+const getAllCategories = asyncHandler(async(req, res) => {
+  const books = await Book.find({}, "category.categoryName");
+  const categoryNames = books.map(book => book.category?.categoryName).filter(Boolean);
 
+  // Remove duplicates using Set
+  const uniqueCategories = [...new Set(categoryNames)];
 
-export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks, getBooksByCategory};
+  res.json(uniqueCategories);
+
+})
+
+export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks, getBooksByCategory, getAllCategories};

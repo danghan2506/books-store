@@ -16,16 +16,17 @@ const bookSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     slug: { type: String, unique: true },
-    image: [{type: String}],
+    images: [
+      {
+        url: { type: String, required: true },
+        public_id: { type: String, required: true },
+      },
+    ],
     author: { type: String, required: true },
-    type: {
-      typeName: {type: String, required: true},
-      typeSlug: {type: String}
+    category: {
+      categoryName: { type: String, required: true },
+      categorySlug: { type: String },
     },
-    genre: {
-      genreName: {type: String, required: true},
-      genreSlug: {type: String}
-    }, 
     publishingHouse: { type: String, required: true },
     publishYear: {
       type: Number,
@@ -60,5 +61,4 @@ const bookSchema = new mongoose.Schema(
   { timestamps: true }
 );
 const Book = new mongoose.model("Book", bookSchema);
-export default Book
-
+export default Book;

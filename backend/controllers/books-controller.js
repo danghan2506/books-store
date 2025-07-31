@@ -6,8 +6,7 @@ const addBook = asyncHandler(async (req, res) => {
   const {
     name,
     author,
-    type,
-    genre,
+    category, 
     publishingHouse,
     publishYear,
     language,
@@ -22,10 +21,7 @@ const addBook = asyncHandler(async (req, res) => {
         return res.json("Name is required");
       case !author:
         return res.json("Author is required");
-      case !type:
-        return res.json("Type is required!");
-      case !genre:
-        return res.json("Genres is required!");
+      case !category: return res.json("Cateogy is required!")
       case !publishingHouse:
         return res.json("Publishing house is required!");
       case !publishYear:
@@ -42,8 +38,7 @@ const addBook = asyncHandler(async (req, res) => {
         return res.json("Page number is required!");
     }
     const slug = generateSlug(name);
-    const genreSlug = generateSlug(genre);
-    const typeSlug = generateSlug(type);
+    const categorySlug = generateSlug(category)
     let imageUrls = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
@@ -51,24 +46,31 @@ const addBook = asyncHandler(async (req, res) => {
           folder: "books",
           resource_type: "image",
         });
-        imageUrls.push(uploadRes.secure_url);
+        imageUrls.push({
+      url: uploadRes.secure_url,
+      public_id: uploadRes.public_id,
+    });
       }
     } else {
-      imageUrls = ["https://via.placeholder.com/150"];
+       imageUrls = [
+    {
+      url: "https://via.placeholder.com/150",
+      public_id: "placeholder", // hoặc null nếu bạn muốn
+    },
+  ];
     }
     const newBook = new Book({
       name,
       slug,
       author,
-      type: { typeName: type, typeSlug: typeSlug },
-      genre: { genreName: genre, genreSlug: genreSlug },
+      category: {categoryName: category, categorySlug: categorySlug},
       publishingHouse,
       publishYear,
       language,
       description,
       price,
       stock,
-      image: imageUrls,
+      images: imageUrls,
       pageNumber: pageNumber,
     });
     await newBook.save();
@@ -86,13 +88,9 @@ const updateBook = asyncHandler(async (req, res) => {
     } else {
       book.name = req.body.name || book.name;
       book.author = req.body.author || book.author;
-      book.type = {
-        typeName: req.body.type,
-        typeSlug: generateSlug(req.body.type),
-      };
-      book.genre = {
-        genreName: req.body.genre,
-        genreSlug: generateSlug(req.body.genre),
+      book.category = {
+        categoryName: req.body.category,
+        categorySlugSlug: generateSlug(req.body.category),
       };
       book.publishingHouse = req.body.publishingHouse || book.publishingHouse;
       book.publishYear = req.body.publishYear || book.publishYear;
@@ -109,12 +107,27 @@ const updateBook = asyncHandler(async (req, res) => {
   }
 });
 const deleteBook = asyncHandler(async (req, res) => {
-  const { bookId } = req.params;
+  const {bookId} = req.params
   try {
-    const deleteBook = await Book.findByIdAndDelete(bookId);
-    res.json(deleteBook);
+    const book = await Book.findById(bookId)
+    if(!book){
+      return res.status(404).json({ message: "Book not found" });
+    }
+    if (book.image && book.image.length > 0) {
+  for (const img of book.image) {
+    if (img.public_id) {
+      await cloudinary.uploader.destroy(img.public_id);
+    }
+  }
+}
+    const deletedBook = await Book.findByIdAndDelete(bookId)
+    res.json({
+      message: "Book and associated images deleted successfully",
+      deletedBook,
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Delete error:", error);
+    res.status(500).json({ error: "Server error while deleting book" });
   }
 });
 const getBookDetails = asyncHandler(async (req, res) => {
@@ -136,7 +149,7 @@ const getAllBooks = asyncHandler(async (req, res) => {
 });
 const getBooks = asyncHandler(async (req, res) => {
   try {
-    const pageSize = 6;
+    const pageSize = 10;
     const keyword = req.query.keyword
       ? { name: { $regex: req.query.keyword, $options: "i" } }
       : {};
@@ -172,57 +185,18 @@ const getTopSalesBooks = asyncHandler(async (req, res) => {
     console.log(error);
   }
 });
-const getAllCategories = asyncHandler(async (req, res) => {
-  const result = await Book.aggregate([
-    {
-      $project: {
-        _id: 0,
-        values: ["$genre.genreName", "$type.typeName"] // gom chung thành array
-      }
-    },
-    {
-      $unwind: "$values" // tách từng giá trị
-    },
-    {
-      $group: {
-        _id: "$values" // group theo giá trị để loại trùng
-      }
-    },
-    {
-      $replaceRoot: {
-        newRoot: { value: "$_id" }
-      }
-    }
-  ]);
-
-  // Trả về mảng giá trị đơn giản
-  const uniqueValues = result.map(item => item.value);
-
-  res.json(uniqueValues);
-});
-const getBooksByGenre = asyncHandler(async (req, res) => {
-  const { genre } = req.params;
+const getBooksByCategory = asyncHandler(async (req, res) => {
+  const { categorySlug } = req.params;
   const books = await Book.find({
-    "genre.genreSlug": { $regex: `^${genre}$`, $options: "i" },
+    "category.categorySlug": { $regex: `^${categorySlug}$`, $options: "i" },
   });
   if (books.length === 0) {
     return res
       .status(404)
-      .json({ message: `No books found for genre: ${genre}` });
-  }
-  res.json(books);
-});
-const getBooksByType = asyncHandler(async (req, res) => {
-  const { type } = req.params;
-  const books = await Book.find({
-    "type.typeSlug": { $regex: `^${type}$`, $options: "i" },
-  });
-  if (books.length === 0) {
-    return res
-      .status(404)
-      .json({ message: `No books found for type: ${type}` });
+      .json({ message: `No books found for genre: ${categorySlug}` });
   }
   res.json(books);
 });
 
-export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks,getBooksByGenre,getBooksByType, getAllCategories};
+
+export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks, getBooksByCategory};

@@ -39,3 +39,9 @@ export interface BookGenres {
   genreName: string;
   genreSlug: string;
 }
+export interface BookQueryResult {
+  books: Book[];
+  page: number;
+  pages: number;
+  hasMore: boolean;
+}

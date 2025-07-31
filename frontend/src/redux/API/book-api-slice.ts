@@ -1,5 +1,5 @@
 import apiSlice from "./api-slice";
-import type { Book } from "@/types/books-type";
+import {type BookQueryResult, type Book } from "@/types/books-type";
 import { BOOKS_URL } from "../features/constants";
 const bookApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -34,12 +34,12 @@ const bookApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    getBooks: builder.query<Book[], { keyword?: string }>({
-      query: ({ keyword }) => ({
+    getBooks: builder.query<BookQueryResult, {keyword?: string}>({
+      query: ({keyword}) => ({
         url: `${BOOKS_URL}`,
         method: "GET",
-        params: { keyword },
-      }),
+        params: keyword ? {keyword} : {}
+      })
     }),
   }),
 });
@@ -49,4 +49,5 @@ export const {
   useGetTopSalesBooksQuery,
   useGetNewBooksQuery,
   useGetAllGenresQuery,
+  useGetBooksQuery
 } = bookApiSlice;

@@ -9,7 +9,6 @@ import {
   DollarSign,
 } from "lucide-react";
 import {
-  useGetAllCategoriesQuery,
   useGetBooksQuery,
   useGetBookBaseOnCategoryQuery,
 } from "@/redux/API/book-api-slice";
@@ -19,31 +18,77 @@ import type { Book } from "@/types/books-type";
 import BookItems from "@/components/books-items";
 
 const Shop = () => {
-  const { data: categories, error, isLoading } = useGetAllCategoriesQuery();
   const [searchTerm, setSearchTerm] = useState("");
-  const [allCategories, setAllCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
+  const [allCategories, setAllCategories] = useState<
+    { categoryName: string; categorySlug: string }[]
+  >([]);
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"relevant" | "low" | "high">("relevant");
   const {
     data,
     isLoading: bookLoading,
     error: bookError,
   } = useGetBooksQuery({ keyword: searchTerm });
+
   const books = data?.books || [];
 
+  // 🎯 Tạo mảng category duy nhất từ book.category (dựa vào slug)
+  useEffect(() => {
+    const uniqueCategories = Array.from(
+      new Map(
+        books
+          .map((book) => book.category)
+          .filter(Boolean)
+          .map((cat) => [cat.categorySlug, cat])
+      ).values()
+    );
+    setAllCategories(uniqueCategories);
+  }, [books]);
+
+  // 🎯 Gọi API khi chọn categorySlug
   const {
     data: filteredBooks,
     isLoading: categoryLoading,
     error: categoryError,
   } = useGetBookBaseOnCategoryQuery(
-    { keyword: selectedCategory || "" },
-    { skip: !selectedCategory }
+    { keyword: selectedCategorySlug || "" },
+    { skip: !selectedCategorySlug }
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    // Reset category khi search
+    if (selectedCategorySlug) {
+      setSelectedCategorySlug(null);
+    }
   };
 
+  const handleCategoryClick = (categorySlug: string) => {
+    setSelectedCategorySlug((prev) =>
+      prev === categorySlug ? null : categorySlug
+    );
+    // Clear search khi chọn category
+    if (searchTerm) {
+      setSearchTerm("");
+    }
+  };
+  const sortBooks = (books: Book[]) => {
+    if (sortBy === "relevant") return books;
+    
+    return [...books].sort((a, b) => {
+      const priceA = a.price || 0;
+      const priceB = b.price || 0;
+      
+      if (sortBy === "low") {
+        return priceA - priceB; // Thấp đến cao
+      } else {
+        return priceB - priceA; // Cao đến thấp
+      }
+    });
+  };
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value as "relevant" | "low" | "high");
+  };
   const GENRE_ICONS: Record<string, React.ReactNode> = {
     "Kinh tế": <DollarSign size={44} />,
     "Tâm lý": <DollarSign size={44} />,
@@ -57,14 +102,8 @@ const Shop = () => {
     "Sách tiếng việt": <BookA size={44} />,
   };
 
-  useEffect(() => {
-    if (Array.isArray(categories)) {
-      setAllCategories(categories);
-    }
-  }, [categories]);
-
-  if (isLoading || bookLoading) return <p>Loading books...</p>;
-  if (error || bookError) return <p>Something went wrong!</p>;
+  if (bookLoading) return <p>Loading books...</p>;
+  if (bookError) return <p>Something went wrong!</p>;
 
   return (
     <section className="mx-auto max-w-[1440px] px-6 lg:px-12 bg-white">
@@ -91,28 +130,24 @@ const Shop = () => {
           </h4>
           <div className="flex items-center justify-center sm:justify-start flex-wrap gap-x-12 gap-y-4">
             {allCategories.map((category) => (
-              <label
-                key={category}
-                onClick={() =>
-                  setSelectedCategory((prev) =>
-                    prev === category ? null : category
-                  )
-                }
+              <div
+                key={category.categorySlug}
+                onClick={() => handleCategoryClick(category.categorySlug)}
+                className={`flex items-center justify-center flex-col gap-2 cursor-pointer ${
+                  selectedCategorySlug === category.categorySlug
+                    ? "text-blue-300"
+                    : ""
+                }`}
               >
-                <input type="checkbox" className="hidden peer" />
-                <div
-                  className={`flex items-center justify-center flex-col gap-2 cursor-pointer peer-checked:text-blue-300 ${
-                    selectedCategory === category ? "text-blue-300" : ""
-                  }`}
-                >
-                  <div className="flex items-center justify-center rounded-full bg-zinc-50 h-20 w-20">
-                    <span className="object-cover h-10 w-10">
-                      {GENRE_ICONS[category] ?? <DollarSign />}
-                    </span>
-                  </div>
-                  <span className="text-[14px] font-[500]">{category}</span>
+                <div className="flex items-center justify-center rounded-full bg-zinc-50 h-20 w-20">
+                  <span className="object-cover h-10 w-10">
+                    {GENRE_ICONS[category.categoryName] ?? <DollarSign />}
+                  </span>
                 </div>
-              </label>
+                <span className="text-[14px] font-[500]">
+                  {category.categoryName}
+                </span>
+              </div>
             ))}
           </div>
         </div>
@@ -129,7 +164,7 @@ const Shop = () => {
             <span className="hidden sm:flex text-[16px] font-[500]">
               Sort by:
             </span>
-            <select className="text-sm p-2.5 outline-none bg-zinc-50 text-gray-800 rounded">
+            <select value={sortBy} onChange={handleSortChange} className="text-sm p-2.5 outline-none bg-zinc-50 text-gray-800 rounded">
               <option value="relevant">Relevant</option>
               <option value="low">Low</option>
               <option value="high">High</option>
@@ -139,10 +174,14 @@ const Shop = () => {
 
         {/* Book Grid */}
         {categoryLoading && <p>Loading category books...</p>}
-        {categoryError && <p>Failed to load category books.</p>}
+        {categoryError && (
+          <p className="text-red-500 text-sm">
+            Failed to load category books.
+          </p>
+        )}
 
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-          {(selectedCategory ? filteredBooks || [] : books).map(
+         {sortBooks(selectedCategorySlug ? filteredBooks || [] : books).map(
             (book: Book) => (
               <BookItems book={book} key={book._id} />
             )

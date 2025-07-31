@@ -198,11 +198,11 @@ const getBooksByCategory = asyncHandler(async (req, res) => {
   res.json(books);
 });
 const getAllCategories = asyncHandler(async(req, res) => {
-  const books = await Book.find({}, "category.categoryName");
-  const categoryNames = books.map(book => book.category?.categoryName).filter(Boolean);
+  const books = await Book.find({}, "category.categorySlug");
+  const categorySlugs = books.map(book => book.category?.categorySlug).filter(Boolean);
 
   // Remove duplicates using Set
-  const uniqueCategories = [...new Set(categoryNames)];
+  const uniqueCategories = [...new Set(categorySlugs)];
 
   res.json(uniqueCategories);
 

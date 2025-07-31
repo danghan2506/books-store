@@ -43,9 +43,8 @@ const bookApiSlice = apiSlice.injectEndpoints({
     }),
     getBookBaseOnCategory: builder.query<Book[], {keyword?: string}>({
       query: ({keyword}) => ({
-        url: `${BOOKS_URL}/category/${keyword}`,
+        url: `${BOOKS_URL}/${keyword}`,
         method: "GET",
-        params: keyword ? {keyword} : {}
       })
     })
   }),

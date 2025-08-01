@@ -1,12 +1,14 @@
 import React from "react";
 import type { Book } from "@/types/books-type";
-import { ShoppingBag } from "lucide-react";
+import { Heart } from "lucide-react";
+import { Link } from "react-router";
 interface BookItemsProps {
   book: Book;
 }
 const BookItems = ({ book }: BookItemsProps) => {
   return (
-    <div>
+    <Link to={`/shop/${book._id}`}>
+     <div>
       <div className="flex items-center justify-center bg-zinc-50 p-6 rounded-3xl overflow-hidden relative group">
         <img
           src={book.images[0].url}
@@ -20,7 +22,7 @@ const BookItems = ({ book }: BookItemsProps) => {
             {book.name}
           </h4>
           <span className="flex items-center justify-center h-8 w-8 rounded cursor-pointer hover:bg-neutral-200">
-            <ShoppingBag className="text-lg" />
+            <Heart className="text-lg" />
           </span>
         </div>
         <div className="flex items-center justify-between pt-1">
@@ -30,6 +32,8 @@ const BookItems = ({ book }: BookItemsProps) => {
         <p className="line-clamp-2 py-1">{book.description}</p>
       </div>
     </div>
+    </Link>
+   
   );
 };
 

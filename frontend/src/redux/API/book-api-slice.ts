@@ -21,6 +21,12 @@ const bookApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getBookDetails: builder.query<Book[], void>({
+      query: (id) => ({
+        url: `${BOOKS_URL}/${id}`,
+        method: "GET",
+      })
+    }), 
     createBook: builder.mutation<Book[], void>({
       query: (data) => ({
         url: `${BOOKS_URL}/`,
@@ -59,5 +65,6 @@ export const {
   useGetNewBooksQuery,
   useGetAllCategoriesQuery, 
   useGetBooksQuery,
-  useGetBookBaseOnCategoryQuery
+  useGetBookBaseOnCategoryQuery,
+  useGetBookDetailsQuery
 } = bookApiSlice;

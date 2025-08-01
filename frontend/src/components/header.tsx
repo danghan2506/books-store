@@ -82,15 +82,15 @@ const Header = () => {
         <div className="flex items-center justify-end gap-x-4 sm:gap-x-6 flex-1">
           <CgMenuLeft
             onClick={toggleMenu}
-            className="text-2xl xl:hidden cursor-pointer hover:text-blue-500 transition-colors"
+            className="text-2xl xl:hidden cursor-pointer hover:text-red-500 transition-colors"
           />
 
           {/* Shopping Cart */}
           <Link to={"/cart"} className="flex relative group">
-            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all duration-200 shadow-md group-hover:shadow-lg">
+            <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-200 shadow-md group-hover:shadow-lg">
               <ShoppingCart className="w-6 h-6 text-white" />
             </div>
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 border-white min-w-[24px]">
+            <span className="absolute -top-2 -right-2 bg-neutral-200 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 border-white min-w-[24px]">
               2
             </span>
           </Link>

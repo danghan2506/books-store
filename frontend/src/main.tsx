@@ -10,6 +10,8 @@ import { Toaster } from 'sonner';
 import Cart from './pages/shop/cart.tsx';
 import Shop from './pages/shop/shop.tsx';
 import Home from './pages/shop/home.tsx';
+import BookDetails from './pages/shop/book-details.tsx';
+import Favourite from './pages/shop/favourites.tsx';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -18,7 +20,9 @@ const router = createBrowserRouter(
         <Route index element={<Home/>}/>
         <Route path='/cart' element={<Cart/>}/>
         <Route path='/shop' element={<Shop/>}/>
-      </Route>
+        <Route path='/favourite' element={<Favourite/>}></Route>
+        <Route path='shop/:id' element={<BookDetails/>}/>
+      </Route >
     </>
     
    

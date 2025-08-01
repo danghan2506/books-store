@@ -131,8 +131,8 @@ const deleteBook = asyncHandler(async (req, res) => {
   }
 });
 const getBookDetails = asyncHandler(async (req, res) => {
-  const { bookSlug } = req.params;
-  const bookDetails = await Book.findOne({ slug: bookSlug });
+  const { id } = req.params;
+  const bookDetails = await Book.findById(id);
   if (!bookDetails) {
     throw new Error("Book not found!");
   } else {
@@ -180,7 +180,7 @@ const getTopSalesBooks = asyncHandler(async (req, res) => {
   try {
     const topSalesBooks = await Book.find({})
       .sort({ salesCount: -1 })
-      .limit(12);
+      .limit(10);
     res.json(topSalesBooks);
   } catch (error) {
     console.log(error);

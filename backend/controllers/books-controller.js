@@ -153,13 +153,14 @@ const getBooks = asyncHandler(async (req, res) => {
     const keyword = req.query.keyword
       ? { name: { $regex: req.query.keyword, $options: "i" } }
       : {};
+    const page = Number(req.query.page) || 1
     const count = await Book.countDocuments({ ...keyword });
-    const books = await Book.find({ ...keyword }).limit(pageSize);
+    const books = await Book.find({ ...keyword }).limit(pageSize).skip(pageSize * (page -1));
     res.json({
       books,
-      page: 1,
+      page,
       pages: Math.ceil(count / pageSize),
-      hasMore: false,
+      hasMore: page < Math.ceil(count / pageSize),
     });
   } catch (error) {
     console.error(error);

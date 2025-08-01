@@ -16,20 +16,26 @@ import { useEffect, useState } from "react";
 import Title from "@/components/title";
 import type { Book } from "@/types/books-type";
 import BookItems from "@/components/books-items";
+
 const Shop = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [allCategories, setAllCategories] = useState<{categoryName: string; categorySlug: string }[]>([]);
   const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"relevant" | "low" | "high">("relevant");
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1);
 
+  // Cập nhật query để bao gồm currentPage
   const {
     data,
     isLoading: bookLoading,
     error: bookError,
-  } = useGetBooksQuery({ keyword: searchTerm });
-  console.log(data.pages)
+  } = useGetBooksQuery({ 
+    keyword: searchTerm,
+    page: currentPage 
+  });
+  
   const books = data?.books || [];
+
   useEffect(() => {
     const uniqueCategories = Array.from(
       new Map(
@@ -41,6 +47,7 @@ const Shop = () => {
     );
     setAllCategories(uniqueCategories);
   }, [books]);
+
   const {
     data: filteredBooks,
     isLoading: categoryLoading,
@@ -49,22 +56,27 @@ const Shop = () => {
     { keyword: selectedCategorySlug || "" },
     { skip: !selectedCategorySlug }
   );
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset về trang 1 khi search
     // Reset category khi search
     if (selectedCategorySlug) {
       setSelectedCategorySlug(null);
     }
   };
+
   const handleCategoryClick = (categorySlug: string) => {
     setSelectedCategorySlug((prev) =>
       prev === categorySlug ? null : categorySlug
     );
+    setCurrentPage(1); // Reset về trang 1 khi chọn category
     // Clear search khi chọn category
     if (searchTerm) {
       setSearchTerm("");
     }
   };
+
   const sortBooks = (books: Book[]) => {
     if (sortBy === "relevant") return books;
 
@@ -79,9 +91,17 @@ const Shop = () => {
       }
     });
   };
+
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(e.target.value as "relevant" | "low" | "high");
   };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top khi chuyển trang
+    // window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const GENRE_ICONS: Record<string, React.ReactNode> = {
     "Kinh tế": <DollarSign size={44} />,
     "Tâm lý": <DollarSign size={44} />,
@@ -97,6 +117,8 @@ const Shop = () => {
 
   if (bookLoading) return <p>Loading books...</p>;
   if (bookError) return <p>Something went wrong!</p>;
+
+  const totalPages = data?.pages || 1;
 
   return (
     <section className="mx-auto max-w-[1440px] px-6 lg:px-12 bg-white">
@@ -183,17 +205,42 @@ const Shop = () => {
           )}
         </div>
       </div>
-      {/* pagination */}
+
+      {/* Pagination */}
       <div className="flex items-center justify-center mt-14 mb-10 gap-4">
-        <button disabled={currentPage === 1} 
-        onClick={() => setCurrentPage((prev) => prev - 1)} className={`bg-white text-tertiary ring-1 ring-white px-7 py-2.5 rounded-full bg-zinc-200 ring-1 ring-zinc-200 text-white px-7 py-2.5 rounded-full !py-1 !px-3 ${currentPage ===1 && "opacity-50 cursor-not-allowed"}`}>Previous</button>
-        {/* Pages numbers */}
-        {Array.from({length: data?.pages}, (_, index) => (
-          <button key={index + 1} onClick={() => setCurrentPage(index + 1)} className={`bg-white text-tertiary ring-1 ring-white px-7 py-2.5 rounded-full bg-zinc-200 ring-1 ring-white px-7 py-2.5 rounded-full hover:bg-white transition-all duration-300 !py-1 !px-3 ${currentPage === index + 1 && "!bg-blue-300"}`}>{index + 1}</button>
+        <button 
+          disabled={currentPage === 1} 
+          onClick={() => handlePageChange(currentPage - 1)} 
+          className={`bg-zinc-200 ring-1 ring-zinc-200 text-gray-700 px-3 py-1 rounded-full transition-all duration-300 hover:bg-zinc-300 ${
+            currentPage === 1 && "opacity-50 cursor-not-allowed"
+          }`}
+        >
+          Previous
+        </button>
+
+        {/* Page numbers */}
+        {Array.from({length: totalPages}, (_, index) => (
+          <button 
+            key={index + 1} 
+            onClick={() => handlePageChange(index + 1)} 
+            className={`bg-zinc-200 ring-1 ring-zinc-200 text-gray-700 px-3 py-1 rounded-full hover:bg-zinc-300 transition-all duration-300 ${
+              currentPage === index + 1 && "!bg-blue-300 !text-white"
+            }`}
+          >
+            {index + 1}
+          </button>
         ))}
-        {/* next button */}
-         <button disabled={currentPage === data?.pages} 
-         onClick={() => setCurrentPage((prev) => prev + 1)} className={`bg-white text-tertiary ring-1 ring-white px-7 py-2.5 rounded-full bg-zinc-200 ring-1 ring-zinc-200 text-white px-7 py-2.5 rounded-full !py-1 !px-3 ${currentPage ===data?.pages && "opacity-50 cursor-not-allowed"}`}>Next</button>
+
+        {/* Next button */}
+        <button 
+          disabled={currentPage === totalPages} 
+          onClick={() => handlePageChange(currentPage + 1)} 
+          className={`bg-zinc-200 ring-1 ring-zinc-200 text-gray-700 px-3 py-1 rounded-full transition-all duration-300 hover:bg-zinc-300 ${
+            currentPage === totalPages && "opacity-50 cursor-not-allowed"
+          }`}
+        >
+          Next
+        </button>
       </div>
     </section>
   );

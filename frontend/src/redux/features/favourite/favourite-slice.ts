@@ -4,12 +4,12 @@ const favouriteSlice = createSlice({
     initialState: [],
     reducers: {
         addToFavourite: (state, action) => {
-            if(!state.some(item => item.id === action.payload.id)){
+            if(!state.some(item => item._id === action.payload.id)){
                 state.push(action.payload)
             }
         },
         removeFromFavourites: (state, action) => {
-            return state.filter(item => item.id !== action.payload);
+            return state.filter(item => item._id !== action.payload);
         },
         setFavourites: (state, action) => {
             return action.payload

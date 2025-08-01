@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Plus, Minus, ShoppingCart } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Heart } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import Favourite from "./favourites";
+import FavouriteButton from "@/components/favourite-button";
 
 const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,7 +60,7 @@ const BookDetails = () => {
             </div>
 
             {/* Thumbnail Images */}
-            <div className="flex gap-2 justify-center overflow-x-auto pb-2 max-w-[400px] mx-auto">
+            {/* <div className="flex gap-2 justify-center overflow-x-auto pb-2 max-w-[400px] mx-auto">
               {book.images.map((img, index) => (
                 <div
                   key={index}
@@ -76,7 +78,7 @@ const BookDetails = () => {
                   +{book.images.length - 4}
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Extra Info Card */}
             <Card className="max-w-[400px] mx-auto">
@@ -102,6 +104,9 @@ const BookDetails = () => {
             {/* Product Header */}
             <div className="space-y-3">
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{book.name.trim()}</h1>
+              <span className="flex items-center justify-end">
+  <FavouriteButton book={book}/>
+</span>
               <div className="space-y-1 text-sm text-gray-600">
                 <p><span className="font-medium">Tác giả:</span> {book.author}</p>
                 <p><span className="font-medium">Nhà xuất bản:</span> {book.publishingHouse}</p>

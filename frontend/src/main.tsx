@@ -30,7 +30,9 @@ const router = createBrowserRouter(
 )
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
-    <Toaster/>
+    <Toaster position="top-right"
+        richColors
+        closeButton/>
     <RouterProvider router={router}/>
   </Provider>,
 )

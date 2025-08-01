@@ -1,6 +1,5 @@
-import React from "react";
 import type { Book } from "@/types/books-type";
-import { Heart } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { Link } from "react-router";
 interface BookItemsProps {
   book: Book;
@@ -22,7 +21,7 @@ const BookItems = ({ book }: BookItemsProps) => {
             {book.name}
           </h4>
           <span className="flex items-center justify-center h-8 w-8 rounded cursor-pointer hover:bg-neutral-200">
-            <Heart className="text-lg" />
+            <ShoppingBag className="text-lg"/>
           </span>
         </div>
         <div className="flex items-center justify-between pt-1">

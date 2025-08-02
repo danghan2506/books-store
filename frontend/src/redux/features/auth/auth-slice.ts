@@ -1,8 +1,8 @@
 import {createSlice } from "@reduxjs/toolkit";
+
+const userInfoFromStorage = localStorage.getItem("userInfo")
 const initialState = {
-    userInfo: localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
-    : null
+    userInfo: userInfoFromStorage ? JSON.parse(userInfoFromStorage) : null
 }
 const expirationTime =  new Date().getTime() + 30 * 24 * 60 * 60 * 1000
 const authSlice = createSlice({
@@ -12,11 +12,14 @@ const authSlice = createSlice({
         setCredentials: (state, action) => {
             state.userInfo = action.payload
             localStorage.setItem("userInfo", JSON.stringify(action.payload))
-            localStorage.setItem("expirationTime", expirationTime)
+            localStorage.setItem("expirationTime", expirationTime.toString())
         },
         logout: (state) => {
+            // Don't clear favourites - keep them for when user logs back in
             state.userInfo = null
-            localStorage.clear()
+            // Only clear user authentication data, not favourites
+            localStorage.removeItem("userInfo")
+            localStorage.removeItem("expirationTime")
         }
     }
 })

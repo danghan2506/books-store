@@ -4,7 +4,7 @@ export interface Book {
   _id: string;
   name: string;
   slug: string;
-  images: Images;
+  images: Images[];
   author: string;
   category: BookCategory;
   publishingHouse: string;

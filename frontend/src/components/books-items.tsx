@@ -10,7 +10,7 @@ const BookItems = ({ book }: BookItemsProps) => {
      <div>
       <div className="flex items-center justify-center bg-zinc-50 p-6 rounded-3xl overflow-hidden relative group">
         <img
-          src={book.images[0].url}
+          src={book.images && book.images.length > 0 ? book.images[0].url : '/placeholder-book.jpg'} 
           alt={book.slug}
           className="shadow-xl shadow-slate-900/30 rounded-lg w-full aspect-[3/4] object-cover mx-auto"
         ></img>

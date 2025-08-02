@@ -1,32 +1,38 @@
-import { addToFavourite, removeFromFavourites, setFavourites } from '@/redux/features/favourite/favourite-slice'
-import { useDispatch, useSelector } from 'react-redux'
-import { addFavouritesToLocalStorage, removeFavouritesFromLocalStorage, getFavouritesFromLocalStorage } from '@/utils/local-storage'
+import { addToFavourite, removeFromFavourites } from '@/redux/features/favourite/favourite-slice'
+import { useDispatch } from 'react-redux'
+import { addFavouritesToLocalStorage, removeFavouritesFromLocalStorage } from '@/utils/local-storage'
 import { Heart } from 'lucide-react'
-import type { RootState } from '@/redux/features/store'
 import type { Book } from '@/types/books-type'
-import { useEffect } from 'react'
-import {toast} from "sonner"
+import { useFavourites } from '@/hooks/useFavourites'
+
 interface FavouriteButtonProps {
   book: Book;
 }
+
 const FavouriteButton = ({book} : FavouriteButtonProps) => {
   const dispatch = useDispatch()
-  const favourite = useSelector((state: RootState) => state.favourites)
-  const isFavourite = favourite.some((b: Book) => b._id === book._id)
-  useEffect(() => {
-    const favFromLocalStorage = getFavouritesFromLocalStorage()
-    dispatch(setFavourites(favFromLocalStorage))
-  }, [])
+  const { favourites, userId } = useFavourites()
+  const isFavourite = favourites.some((b: Book) => b._id === book._id)
+
   const toggleFavourite = () => {
+    if (!userId) {
+      // Handle case when user is not logged in
+      alert('Please login to add favourites')
+      return
+    }
+    
     if(isFavourite){
+        console.log('FavouriteButton: Removing from favourites', { bookId: book._id, userId })
         dispatch(removeFromFavourites(book._id))
-        removeFavouritesFromLocalStorage(book._id)
+        removeFavouritesFromLocalStorage(book._id, userId)
     }
     else{
+        console.log('FavouriteButton: Adding to favourites', { bookId: book._id, userId })
         dispatch(addToFavourite(book))
-        addFavouritesToLocalStorage(book)
+        addFavouritesToLocalStorage(book, userId)
     }
   }
+  
   return (
     <div 
       className={`cursor-pointer p-2 rounded-full transition-all duration-300 ${
@@ -43,7 +49,6 @@ const FavouriteButton = ({book} : FavouriteButtonProps) => {
       )}
     </div>
   )
-
 }
 
 export default FavouriteButton

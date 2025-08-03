@@ -116,7 +116,10 @@ const Shop = () => {
   };
 
   if (bookLoading) return <p>Loading books...</p>;
-  if (bookError) return <p>Something went wrong!</p>;
+  if (bookError) {
+    console.error('Book error:', bookError);
+    return <p>Something went wrong! Please check the console for details.</p>;
+  }
 
   const totalPages = data?.pages || 1;
 

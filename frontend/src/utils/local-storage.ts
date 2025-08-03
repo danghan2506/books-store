@@ -1,5 +1,4 @@
 import type { Book } from "@/types/books-type";
-
 const getFavouritesFromLocalStorage = (userId?: string): Book[] => {
     const key = userId ? `favourites_${userId}` : "favourites"
     const favouritesJSON = localStorage.getItem(key)
@@ -27,11 +26,10 @@ const clearFavouritesFromLocalStorage = (userId?: string) : void => {
     localStorage.removeItem(key)
 }
 
-const debugLocalStorage = (userId?: string) : void => {
-    const key = userId ? `favourites_${userId}` : "favourites"
-    console.log(`Debug localStorage for key: ${key}`)
-    console.log('All localStorage keys:', Object.keys(localStorage))
-    console.log('Favourites data:', localStorage.getItem(key))
+const getCartItemsFromLocalStorage = (userId?: string) => {
+    const key = userId ? `cartItems_${userId}` : "cartItems"
+    const cartItemsJSON = localStorage.getItem(key)
+    return cartItemsJSON ? JSON.parse(cartItemsJSON) : {cartItems: [], shippingAddress: {}, paymentMethod: "PayPal"}
 }
 
 export {
@@ -39,5 +37,5 @@ export {
     removeFavouritesFromLocalStorage, 
     getFavouritesFromLocalStorage,
     clearFavouritesFromLocalStorage,
-    debugLocalStorage
+    getCartItemsFromLocalStorage
 }

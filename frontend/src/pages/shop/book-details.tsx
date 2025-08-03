@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetBookDetailsQuery } from "@/redux/API/book-api-slice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,20 +12,28 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import Favourite from "./favourites";
 import FavouriteButton from "@/components/favourite-button";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "@/redux/features/cart/cart-slice";
+import { toast } from "sonner";
 
+import type { RootState } from "@/redux/features/store";
 const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { data: book, isLoading, error } = useGetBookDetailsQuery(id);
   const [quantity, setQuantity] = useState<number>(1);
+  const dispatch = useDispatch()
+  const { userInfo } = useSelector((state: RootState) => state.auth)
 
   if (isLoading) return <div className="flex justify-center items-center min-h-screen pt-20">Loading book...</div>;
   if (error || !book) return <div className="flex justify-center items-center min-h-screen pt-20">Something went wrong.</div>;
-
   const handleQuantityChange = (delta: number) => {
     setQuantity(prev => Math.max(1, Math.min(book.stock, prev + delta)));
   };
+  const addToCartHandler = () => {
+    dispatch(addToCart({...book, userId: userInfo?._id,  quantity}))
+    toast.success("Đã thêm vào giỏ hàng");
+  }
   return (
     <div className="pt-20 bg-gray-50 min-h-screen">
       <div className="mx-auto max-w-[1400px] px-4 lg:px-8 py-8">
@@ -114,7 +122,7 @@ const BookDetails = () => {
                 <p><span className="font-medium">Đã bán:</span> {book.salesCount}</p>
               </div>
               <div className="text-2xl font-bold text-red-600">
-                {book.price.toLocaleString()}₫
+                $ {book.price.toLocaleString()}
               </div>
             </div>
 
@@ -161,6 +169,7 @@ const BookDetails = () => {
               <Button 
                 variant="outline" 
                 className="flex-1 h-11 border-red-300 text-red-600 hover:bg-red-50"
+                onClick={addToCartHandler}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to cart

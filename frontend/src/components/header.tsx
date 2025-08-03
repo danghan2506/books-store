@@ -16,6 +16,7 @@ const Header = () => {
   const [active, setActive] = useState(false);
   const [logoutApiCall] = useLogoutMutation()
   const { userInfo } = useSelector((state: RootState) => state.auth);
+  const { cartItems } = useSelector((state: RootState) => state.cart);
   const toggleMenu = () => {
     setMenuOpenned((prev) => !prev);
   };
@@ -91,7 +92,8 @@ const Header = () => {
               <ShoppingCart className="w-6 h-6 text-white" />
             </div>
             <span className="absolute -top-2 -right-2 bg-neutral-200 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 border-white min-w-[24px]">
-              2
+            
+            {cartItems.length}
             </span>
           </Link>
 

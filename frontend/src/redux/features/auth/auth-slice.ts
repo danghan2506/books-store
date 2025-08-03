@@ -20,6 +20,7 @@ const authSlice = createSlice({
             // Only clear user authentication data, not favourites
             localStorage.removeItem("userInfo")
             localStorage.removeItem("expirationTime")
+
         }
     }
 })

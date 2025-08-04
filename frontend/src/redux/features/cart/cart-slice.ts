@@ -11,6 +11,7 @@ const initialState: CartState = {
     taxPrice: 0,
     totalPrice: "0.00",
     shippingAddress: {
+        username: "", 
         country: "",
         city: "",
         phoneNumber: "",
@@ -56,7 +57,7 @@ const cartSlice = createSlice({
             const cartKey = userId ? `cartItems_${userId}` : "cartItems"
             localStorage.setItem(cartKey, JSON.stringify(state))
         },
-  savePaymentMethod: (state, action) => {
+        savePaymentMethod: (state, action) => {
             const { method, userId } = action.payload
             state.paymentMethod = method
             const cartKey = userId ? `cartItems_${userId}` : "cartItems"

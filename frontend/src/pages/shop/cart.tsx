@@ -21,9 +21,6 @@ const Cart = () => {
     }, [userInfo, dispatch])
 
   const {cartItems} = cart
-  
-  console.log('Cart state:', cart);
-  console.log('Cart items:', cartItems);
   const totalItems = cartItems.reduce((acc: number, item) => acc + item.quantity, 0)
   const totalPrice = cartItems.reduce((acc: number, item) => acc + item.quantity * item.price, 0)
 
@@ -32,7 +29,7 @@ const Cart = () => {
     toast.success("Đã xóa khỏi giỏ hàng");
   }
   const checkoutHandler = () => {
-    navigate("/place-orders")
+    navigate("/shipping-address")
   }
   return (
     <div className="min-h-screen bg-white-50">
@@ -65,7 +62,7 @@ const Cart = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Cart Items - Left side */}
           <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((item: any) => (
+            {cartItems.map((item) => (
               <div
                 key={item._id}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow"

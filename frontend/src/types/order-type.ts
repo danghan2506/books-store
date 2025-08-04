@@ -38,6 +38,7 @@ export interface OrderItems {
     }
 }
 export interface ShippingAddress {
+    username: string
     country: string
     city: string
     phoneNumber: string

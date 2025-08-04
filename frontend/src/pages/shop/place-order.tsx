@@ -13,7 +13,7 @@ const PlaceOrders = () => {
     const dispatch = useDispatch()
     const { userInfo } = useSelector((state: RootState) => state.auth)
     const cart = useSelector((state: RootState) => state.cart)
-    console.log(cart)
+    const {shippingAddress} = cart
     const [createOrder, {isLoading, error}] = useCreateOrderMutation()
       useEffect(() => {
               if (userInfo) {
@@ -123,7 +123,7 @@ const PlaceOrders = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700 leading-relaxed">
-                  {cart.shippingAddress.address}, {cart.shippingAddress.city} {cart.shippingAddress.district}, {cart.shippingAddress.country}
+                  {shippingAddress.username}, {shippingAddress.phoneNumber}, {shippingAddress.city}, {shippingAddress.district}, {shippingAddress.address}, {cart.shippingAddress.country}
                 </p>
               </CardContent>
             </Card>

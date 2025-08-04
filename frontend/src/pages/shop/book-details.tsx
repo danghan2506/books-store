@@ -23,8 +23,8 @@ const BookDetails = () => {
   const { data: book, isLoading, error } = useGetBookDetailsQuery(id);
   const [quantity, setQuantity] = useState<number>(1);
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { userInfo } = useSelector((state: RootState) => state.auth)
-
   if (isLoading) return <div className="flex justify-center items-center min-h-screen pt-20">Loading book...</div>;
   if (error || !book) return <div className="flex justify-center items-center min-h-screen pt-20">Something went wrong.</div>;
   const handleQuantityChange = (delta: number) => {
@@ -33,6 +33,10 @@ const BookDetails = () => {
   const addToCartHandler = () => {
     dispatch(addToCart({...book, userId: userInfo?._id,  quantity}))
     toast.success("Đã thêm vào giỏ hàng");
+  }
+  const submitHandler = () => {
+    dispatch(addToCart({...book, userId: userInfo?._id,  quantity}))
+    navigate("/cart")
   }
   return (
     <div className="pt-20 bg-gray-50 min-h-screen">
@@ -168,13 +172,13 @@ const BookDetails = () => {
             <div className="flex gap-3">
               <Button 
                 variant="outline" 
-                className="flex-1 h-11 border-red-300 text-red-600 hover:bg-red-50"
+                className="flex-1 h-11 border-red-300 text-red-600 cursor-pointer hover:bg-red-50"
                 onClick={addToCartHandler}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to cart
               </Button>
-              <Button className="flex-1 h-11 bg-red-600 hover:bg-red-700">
+              <Button onClick={submitHandler} className="flex-1 h-11 bg-red-600 hover:bg-red-700 cursor-pointer">
                 Buy now
               </Button>
             </div>

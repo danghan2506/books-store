@@ -80,21 +80,21 @@ const calculateTotalSales = asyncHandler(async(req, res) => {
         res.status(500).json("Server error!")
     }
 })
-// const getOrderById = asyncHandler(async(req, res) => {
-//     try {
-//         const {orderId} = req.params
-//         const orders = await Order.findById(orderId).populate("user", "username email")
-//         if(!orders){
-//             res.status(404).json("No order found!")
-//         }
-//         else{
-//             res.json(orders)
-//         }
-//     } catch (error) {
-//         console.error(error)
-//         res.status(500).json("Server error!")
-//     }
-// })
+const getOrderById = asyncHandler(async(req, res) => {
+    try {
+        const {orderId} = req.params
+        const orders = await Order.findById(orderId).populate("user", "username email")
+        if(!orders){
+            res.status(404).json("No order found!")
+        }
+        else{
+            res.json(orders)
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json("Server error!")
+    }
+})
 const calcualteTotalSalesByDate = async (req, res) => {
   try {
     const salesByDate = await Order.aggregate([
@@ -161,4 +161,4 @@ const markOrderAsDelivered = asyncHandler(async(req, res) => {
         res.status(500).json("Server error!")
     }
 })
-export {createOrder, getAllOrders, getUserOrders, countTotalOrders, calculateTotalSales, calcualteTotalSalesByDate, markOrderAsDelivered, markOrderAsPaid}
+export {createOrder, getAllOrders, getOrderById, getUserOrders, countTotalOrders, calculateTotalSales, calcualteTotalSalesByDate, markOrderAsDelivered, markOrderAsPaid}

@@ -1,10 +1,13 @@
 import express from "express";
 import {authenticate, authorizedAdmin} from "../middlewares/auth-middleware.js"
-import { countTotalOrders, createOrder, getAllOrders, getUserOrders, calculateTotalSales, calcualteTotalSalesByDate } from "../controllers/orders-controller.js";
+import { createOrder, getAllOrders, getUserOrders, getOrderById,  countTotalOrders, calculateTotalSales, calcualteTotalSalesByDate, markOrderAsDelivered, markOrderAsPaid } from "../controllers/orders-controller.js";
 const router = express.Router()
 router.route("/").post(authenticate, createOrder).get(authenticate, authorizedAdmin, getAllOrders)
 router.route("/my-orders").get(authenticate,getUserOrders)
 router.route("/total-orders").get(authenticate, countTotalOrders)
 router.route("/total-sales").get(authenticate, authorizedAdmin, calculateTotalSales)
 router.route("/total-sales/by-date").get(authenticate, authenticate, calcualteTotalSalesByDate)
+router.route("/:orderId").get(authenticate, getOrderById)
+router.route("/:orderId/payment").put(authenticate, markOrderAsPaid)
+router.route("/:orderId/delivery").put(authenticate, markOrderAsDelivered)
 export default router

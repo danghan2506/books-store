@@ -8,21 +8,22 @@ const orderSchema = mongoose.Schema(
         images: [
           {
             url: { type: String, required: true },
-            public_id: { type: String, required: true },
+            public_id: { type: String},
           },
         ],
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
-        product: {
+        book: {
           type: mongoose.Schema.ObjectId,
           required: true,
-          ref: "Product",
+          ref: "Book",
         },
       },
     ],
     shippingAddress: {
+      phoneNumber: {type: String, required: true},
+      district: {type: String, requierd: true},
       address: { type: String, required: true },
-      postalCode: { type: String, required: true },
       city: { type: String, required: true },
       country: { type: String, required: true },
     },

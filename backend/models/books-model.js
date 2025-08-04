@@ -19,7 +19,7 @@ const bookSchema = new mongoose.Schema(
     images: [
       {
         url: { type: String, required: true },
-        public_id: { type: String, required: true },
+        public_id: { type: String},
       },
     ],
     author: { type: String, required: true },

@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import { connectCloudinary } from "./utils/cloudinary.js";
 import userRoute from "./routes/users-routes.js"
 import bookRoute from "./routes/books-routes.js"
+import orderRoute from "./routes/orders-routes.js"
 import connectDatabase from "./config/connect-database.js";
 const app = express()
 dotenv.config()
@@ -16,6 +17,7 @@ connectDatabase(database)
 connectCloudinary()
 app.use("/api/users", userRoute)
 app.use("/api/books", bookRoute)
+app.use("/api/orders", orderRoute)
 app.listen(port, (req, res) => {
     console.log(`Server is running on port: ${port}`)
 })

@@ -12,6 +12,7 @@ import Shop from './pages/shop/shop.tsx';
 import Home from './pages/shop/home.tsx';
 import BookDetails from './pages/shop/book-details.tsx';
 import Favourite from './pages/shop/favourites.tsx';
+import PlaceOrders from './pages/shop/place-order.tsx';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -23,6 +24,7 @@ const router = createBrowserRouter(
         <Route path='/favourite' element={<Favourite/>}></Route>
         <Route path='shop/:id' element={<BookDetails/>}/>
         <Route path="/cart" element={<Cart/>}/>
+        <Route path="/place-orders" element ={<PlaceOrders/>}/>
       </Route >
     </>
     

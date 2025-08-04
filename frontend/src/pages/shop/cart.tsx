@@ -7,8 +7,8 @@ import { useEffect } from "react"
 import type { RootState } from "@/redux/features/store"
 import { toast } from "sonner";
 const Cart = () => {
-  const navigate = useNavigate()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { userInfo } = useSelector((state: RootState) => state.auth)
   const cart = useSelector((state: RootState) => state.cart)
   useEffect(() => {
@@ -24,12 +24,15 @@ const Cart = () => {
   
   console.log('Cart state:', cart);
   console.log('Cart items:', cartItems);
-  const totalItems = cartItems.reduce((acc: number, item: any) => acc + item.quantity, 0)
-  const totalPrice = cartItems.reduce((acc: number, item: any) => acc + item.quantity * item.price, 0)
+  const totalItems = cartItems.reduce((acc: number, item) => acc + item.quantity, 0)
+  const totalPrice = cartItems.reduce((acc: number, item) => acc + item.quantity * item.price, 0)
 
   const removeFromCartHandler = (itemId: string) => {
     dispatch(removeFromCart({ itemId, userId: userInfo?._id }))
     toast.success("Đã xóa khỏi giỏ hàng");
+  }
+  const checkoutHandler = () => {
+    navigate("/place-orders")
   }
   return (
     <div className="min-h-screen bg-white-50">
@@ -153,7 +156,7 @@ const Cart = () => {
               </div>
 
               <Button
-                // onClick={checkoutHandler}
+                onClick={checkoutHandler}
                 disabled={cartItems.length === 0}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
                 size="lg"

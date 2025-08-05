@@ -37,7 +37,6 @@ const ShippingForm = () => {
       saveShippingAddress({address: shippingData, userId})
     );
     dispatch(savePaymentMethod({ method: paymentMethod, userId }));
-    console.log(cart.cartItems)
     navigate("/place-orders");
   };
   return (

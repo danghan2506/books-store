@@ -1,32 +1,58 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/features/store";
-import { loadUserCart } from "@/redux/features/cart/cart-slice";
+import type { RootState } from "@/redux/features/store";
+import { clearCartItems, loadUserCart } from "@/redux/features/cart/cart-slice";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCreateOrderMutation } from "@/redux/API/order-api-slice";
 const PlaceOrders = () => {
-    const dispatch = useDispatch()
-    const { userInfo } = useSelector((state: RootState) => state.auth)
-    const cart = useSelector((state: RootState) => state.cart)
-    const {shippingAddress} = cart
-    const [createOrder, {isLoading, error}] = useCreateOrderMutation()
-      useEffect(() => {
-              if (userInfo) {
-                  dispatch(loadUserCart(userInfo._id))
-              } else {
-                  // Load guest cart if no user
-                  dispatch(loadUserCart(undefined))
-              }
-          }, [userInfo, dispatch])
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { userInfo } = useSelector((state: RootState) => state.auth);
+  const cart = useSelector((state: RootState) => state.cart);
+  const { shippingAddress } = cart;
+  const [createOrder, { isLoading, error }] = useCreateOrderMutation();
+  useEffect(() => {
+    if (userInfo) {
+      dispatch(loadUserCart(userInfo._id));
+    } else {
+      // Load guest cart if no user
+      dispatch(loadUserCart(undefined));
+    }
+  }, [userInfo, dispatch]);
+  const placeOrderHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      const res = await createOrder({
+        orderItems: cart.cartItems,
+        shippingAddress: cart.shippingAddress,
+        paymentMethod: cart.paymentMethod,
+        itemsPrice: cart.itemsPrice,
+        shippingPrice: cart.shippingPrice,
+        taxPrice: cart.taxPrice,
+        totalPrice: cart.totalPrice,
+      }).unwrap();
+      dispatch(clearCartItems(userInfo?._id));
+      navigate(`/order/${res._id}`);
+    } catch (error: unknown) {
+      console.log(error);
+    }
+  };
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Place Order</h1>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items Section */}
         <div className="lg:col-span-2">
@@ -60,7 +86,7 @@ const PlaceOrders = () => {
                           />
                         </TableCell>
                         <TableCell>
-                          <Link 
+                          <Link
                             to={`/shop/${item._id}`}
                             className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                           >
@@ -123,7 +149,9 @@ const PlaceOrders = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700 leading-relaxed">
-                  {shippingAddress.username}, {shippingAddress.phoneNumber}, {shippingAddress.city}, {shippingAddress.district}, {shippingAddress.address}, {cart.shippingAddress.country}
+                  {shippingAddress.username}, {shippingAddress.phoneNumber},{" "}
+                  {shippingAddress.city}, {shippingAddress.district},{" "}
+                  {shippingAddress.address}, {cart.shippingAddress.country}
                 </p>
               </CardContent>
             </Card>
@@ -134,23 +162,26 @@ const PlaceOrders = () => {
                 <CardTitle className="text-lg">Payment Method</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 font-medium">{cart.paymentMethod}</p>
+                <p className="text-gray-700 font-medium">
+                  {cart.paymentMethod}
+                </p>
               </CardContent>
             </Card>
 
             {/* Error Message */}
             {error && (
+              
               <Alert variant="destructive">
                 <AlertDescription>
-                  {error.data?.message || "An error occurred"}
+                  {error?.message}
                 </AlertDescription>
               </Alert>
             )}
 
             {/* Place Order Button */}
             <Button
-            //   onClick={placeOrderHandler}
-            //   disabled={cart.cartItems.length === 0 || isLoading}
+                onClick={placeOrderHandler}
+                disabled={cart.cartItems.length === 0 || isLoading}
               className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
             >
               {isLoading ? (
@@ -166,7 +197,7 @@ const PlaceOrders = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PlaceOrders
+export default PlaceOrders;

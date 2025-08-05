@@ -5,7 +5,7 @@ const orderApiSlice = apiSlice.injectEndpoints({
     createOrder: builder.mutation({
       query: (data) => ({
         url: `${ORDERS_URL}/`,
-        method: "GET",
+        method: "POST",
         body: data,
       }),
     }),
@@ -46,14 +46,14 @@ const orderApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    payOrder: builder.query({
+    payOrder: builder.mutation({
       query: ({ orderId, details }) => ({
         url: `${ORDERS_URL}/${orderId}/payment`,
         method: "PUT",
         body: details,
       }),
     }),
-    deliverOrder: builder.query({
+    deliverOrder: builder.mutation({
       query: ({ orderId, details }) => ({
         url: `${ORDERS_URL}/${orderId}/delivery`,
         method: "PUT",
@@ -67,4 +67,4 @@ const orderApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
-export const { useCreateOrderMutation, useGetAllOrdersQuery, useGetMyOrdersQuery, useCalculateTotalSalesQuery, useCalculateTotalSalesByDateQuery, useCountTotalOrdersQuery, useDeliverOrderQuery, useGetOrderDetailsQuery, useGetPaypalClientIdQuery, usePayOrderQuery } = orderApiSlice;
+export const { useCreateOrderMutation, useGetAllOrdersQuery, useGetMyOrdersQuery, useCalculateTotalSalesQuery, useCalculateTotalSalesByDateQuery, useCountTotalOrdersQuery, useDeliverOrderMutation, useGetOrderDetailsQuery, useGetPaypalClientIdQuery, usePayOrderMutation } = orderApiSlice;

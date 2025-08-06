@@ -50,7 +50,7 @@ const PlaceOrders = () => {
     }
   };
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-4 py-8 pt-24 max-w-7xl">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Place Order</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -170,7 +170,6 @@ const PlaceOrders = () => {
 
             {/* Error Message */}
             {error && (
-              
               <Alert variant="destructive">
                 <AlertDescription>
                   {error?.message}
@@ -180,8 +179,8 @@ const PlaceOrders = () => {
 
             {/* Place Order Button */}
             <Button
-                onClick={placeOrderHandler}
-                disabled={cart.cartItems.length === 0 || isLoading}
+              onClick={placeOrderHandler}
+              disabled={cart.cartItems.length === 0 || isLoading}
               className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
             >
               {isLoading ? (

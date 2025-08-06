@@ -1,10 +1,15 @@
-import { useDeliverOrderMutation, useGetOrderDetailsQuery, useGetPaypalClientIdQuery, usePayOrderMutation } from '@/redux/API/order-api-slice'
-import type { RootState } from '@/redux/features/store'
+import {
+  useDeliverOrderMutation,
+  useGetOrderDetailsQuery,
+  useGetPaypalClientIdQuery,
+  usePayOrderMutation,
+} from "@/redux/API/order-api-slice";
+import type { RootState } from "@/redux/features/store";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux'
-import { useParams } from 'react-router'
-import { CreditCard, Truck } from "lucide-react";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router";
+import { Loader2, Truck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,48 +20,64 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { Book } from "@/types/books-type";
 const OrderSummary = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const {userInfo} = useSelector((state: RootState) => state.auth)
-  const {data: order, refetch, isLoading, error} = useGetOrderDetailsQuery(orderId)
-  const {orderItems} = order.orderItems
-  const [payOrder, {isLoading: loadingPay}] = usePayOrderMutation()
-  const [deliverOrder, {isLoading: loadingDeliver}] = useDeliverOrderMutation()
-  const [{isPending}, paypalDispatch] = usePayPalScriptReducer()
-  const {data: paypal, isLoading: paypalLoading, error: paypalError} = useGetPaypalClientIdQuery()
+  const { userInfo } = useSelector((state: RootState) => state.auth);
+  const {
+    data: order,
+    refetch,
+    isLoading,
+    error,
+  } = useGetOrderDetailsQuery(orderId);
+  console.log(order);
+  const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
+  const [deliverOrder, { isLoading: loadingDeliver }] =
+    useDeliverOrderMutation();
+  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
+  const {
+    data: paypal,
+    isLoading: paypalLoading,
+    error: paypalError,
+  } = useGetPaypalClientIdQuery();
   useEffect(() => {
-    const loadPayPaylScript = async() => {
-        if(paypal?.clientId){
-            paypalDispatch({
-                type: "resetOptions",
-                value: {
-                    "client-id" : paypal.clientId,
-                    currency: "USD",
-                }
-            })
-            paypalDispatch({type: "setLoadingStatus", value: "pending"})
-        }
+    const loadPayPaylScript = async () => {
+      if (paypal?.clientId) {
+        paypalDispatch({
+          type: "resetOptions",
+          value: {
+            "client-id": paypal.clientId,
+            currency: "USD",
+          },
+        });
+        paypalDispatch({ type: "setLoadingStatus", value: "pending" });
+      }
+    };
+    if (paypal && !order?.isPaid) {
+      loadPayPaylScript();
     }
-    if(paypal && !order?.isPaid){
-        loadPayPaylScript()
-    }
-  }, [paypal, order, paypalDispatch])
+  }, [paypal, order, paypalDispatch]);
   const createOrder = (data, actions) => {
-    return actions.order.create({
-        purchase_units: [{ amount: { 
-          value: order.totalPrice.toFixed(2),
-          currency_code: "USD"
-        } }],
+    return actions.order
+      .create({
+        purchase_units: [
+          {
+            amount: {
+              value: order.totalPrice.toFixed(2),
+              currency_code: "USD",
+            },
+          },
+        ],
       })
       .then((orderID) => {
         return orderID;
       });
-  }
-    const onApprove = (data, actions) => {
+  };
+  const onApprove = (data, actions) => {
     return actions.order.capture().then(async function (details) {
       try {
         await payOrder({ orderId, details });
@@ -68,15 +89,38 @@ const OrderSummary = () => {
       }
     });
   };
-    const onError = (error) => {
+  const onError = (error) => {
     toast.error(error);
   };
-    const deliverHandler = async () => {
-    await deliverOrder({orderId});
+  const deliverHandler = async () => {
+    await deliverOrder({ orderId });
     refetch();
   };
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading order details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertDescription>
+            {error?.data?.message || error?.message || "Failed to load order details"}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 pt-24">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order Items Table - Left Column (2/3 width on desktop) */}
         <div className="lg:col-span-2">
@@ -85,7 +129,7 @@ const OrderSummary = () => {
               <CardTitle className="text-xl font-bold">Order Items</CardTitle>
             </CardHeader>
             <CardContent>
-              {!orderItems || orderItems.length === 0 ? (
+              {!order.orderItems || order.orderItems.length === 0 ? (
                 <Alert>
                   <AlertDescription>Order is empty</AlertDescription>
                 </Alert>
@@ -101,18 +145,18 @@ const OrderSummary = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {order.orderItems.map((item: any, index: number) => (
+                    {order.orderItems.map((item, index: number) => (
                       <TableRow key={index}>
                         <TableCell>
                           <img
-                            src={item.image}
+                            src={item.images[0].url}
                             alt={item.name}
                             className="w-16 h-16 object-cover rounded-md"
                           />
                         </TableCell>
                         <TableCell>
                           <a
-                            href={`/product/${item.product}`}
+                            href={`/shop/${item._id}`}
                             className="text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium"
                           >
                             {item.name}
@@ -154,27 +198,33 @@ const OrderSummary = () => {
 
               <div>
                 <span className="font-semibold text-rose-500">Name: </span>
-                <span className="text-gray-700">{order.user?.username || 'N/A'}</span>
+                <span className="text-gray-700">
+                  {order.user?.username || "N/A"}
+                </span>
               </div>
 
               <div>
                 <span className="font-semibold text-rose-500">Email: </span>
-                <span className="text-gray-700">{order.user?.email || 'N/A'}</span>
+                <span className="text-gray-700">
+                  {order.user?.email || "N/A"}
+                </span>
               </div>
 
               <div>
                 <span className="font-semibold text-rose-500">Address: </span>
                 <span className="text-gray-700">
-                  {order.shippingAddress?.address || ''},{" "}
-                  {order.shippingAddress?.city || ''}{" "}
-                  {order.shippingAddress?.postalCode || ''},{" "}
-                  {order.shippingAddress?.country || ''}
+                  {order.shippingAddress?.address || ""},{" "}
+                  {order.shippingAddress?.city || ""}{" "}
+                  {order.shippingAddress?.postalCode || ""},{" "}
+                  {order.shippingAddress?.country || ""}
                 </span>
               </div>
 
               <div>
                 <span className="font-semibold text-rose-500">Method: </span>
-                <span className="text-gray-700">{order.paymentMethod || 'N/A'}</span>
+                <span className="text-gray-700">
+                  {order.paymentMethod || "N/A"}
+                </span>
               </div>
 
               <div>
@@ -192,9 +242,7 @@ const OrderSummary = () => {
           {/* Order Summary */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl font-bold">
-                Order Summary
-              </CardTitle>
+              <CardTitle className="text-xl font-bold">Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between">
@@ -244,7 +292,7 @@ const OrderSummary = () => {
                   />
                 ) : (
                   <div className="text-center text-gray-500">
-                    {paypalLoading ? 'Loading PayPal...' : 'PayPal unavailable'}
+                    {paypalLoading ? "Loading PayPal..." : "PayPal unavailable"}
                   </div>
                 )}
               </CardContent>
@@ -252,23 +300,26 @@ const OrderSummary = () => {
           )}
 
           {/* Admin Delivery Button */}
-          {userInfo && userInfo.role === "admin" && order.isPaid && !order.isDelivered && (
-            <Card>
-              <CardContent className="pt-6">
-                <Button
-                  onClick={deliverHandler}
-                  disabled={loadingDeliver}
-                  className="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold cursor-pointer"
-                >
-                  {loadingDeliver ? 'Processing...' : 'Mark As Delivered'}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+          {userInfo &&
+            userInfo.role === "admin" &&
+            order.isPaid &&
+            !order.isDelivered && (
+              <Card>
+                <CardContent className="pt-6">
+                  <Button
+                    onClick={deliverHandler}
+                    disabled={loadingDeliver}
+                    className="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold cursor-pointer"
+                  >
+                    {loadingDeliver ? "Processing..." : "Mark As Delivered"}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default OrderSummary
+export default OrderSummary;

@@ -21,7 +21,7 @@ const bookApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    getBookDetails: builder.query<Book[], void>({
+    getBookDetails: builder.query<Book, string>({
       query: (id) => ({
         url: `${BOOKS_URL}/${id}`,
         method: "GET",

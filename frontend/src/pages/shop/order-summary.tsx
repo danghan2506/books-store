@@ -25,9 +25,12 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Book } from "@/types/books-type";
+import { useDispatch } from "react-redux";
+import { clearCartItems } from "@/redux/features/cart/cart-slice";
 const OrderSummary = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { userInfo } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch()
   const {
     data: order,
     refetch,
@@ -83,7 +86,7 @@ const OrderSummary = () => {
         await payOrder({ orderId, details });
         refetch();
         toast.success("Order is paid");
-        console.log("PayPal payment details:", details);
+        dispatch(clearCartItems(userInfo?._id))
       } catch (error) {
         toast.error(error);
       }
@@ -156,7 +159,7 @@ const OrderSummary = () => {
                         </TableCell>
                         <TableCell>
                           <a
-                            href={`/shop/${item._id}`}
+                            href={`/shop/${item.book}`}
                             className="text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium"
                           >
                             {item.name}

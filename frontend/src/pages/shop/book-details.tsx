@@ -9,8 +9,11 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Plus, Minus, ShoppingCart, Heart } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+// @ts-ignore
 import "swiper/css";
+// @ts-ignore
 import "swiper/css/navigation";
+// @ts-ignore
 import "swiper/css/pagination";
 import FavouriteButton from "@/components/favourite-button";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,17 +21,26 @@ import { addToCart } from "@/redux/features/cart/cart-slice";
 import { toast } from "sonner";
 
 import type { RootState } from "@/redux/features/store";
+import type { Book } from "@/types/books-type";
 const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: book, isLoading, error } = useGetBookDetailsQuery(id);
+  const { data: book, isLoading, error } = useGetBookDetailsQuery(id ?? "");
   const [quantity, setQuantity] = useState<number>(1);
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { userInfo } = useSelector((state: RootState) => state.auth)
   if (isLoading) return <div className="flex justify-center items-center min-h-screen pt-20">Loading book...</div>;
   if (error || !book) return <div className="flex justify-center items-center min-h-screen pt-20">Something went wrong.</div>;
-  const handleQuantityChange = (delta: number) => {
-    setQuantity(prev => Math.max(1, Math.min(book.stock, prev + delta)));
+  const adjustQuantity = (action: 'increase' | 'decrease') => {
+    setQuantity((prev) => {
+      if (action === 'decrease') {
+        return prev > 1 ? prev - 1 : prev;
+      }
+      if (action === 'increase') {
+        return prev < book.stock ? prev + 1 : prev;
+      }
+      return prev;
+    });
   };
   const addToCartHandler = () => {
     dispatch(addToCart({...book, userId: userInfo?._id,  quantity}))
@@ -57,7 +69,7 @@ const BookDetails = () => {
                 loop={true}
                 className="aspect-[3/4] rounded-lg overflow-hidden bg-white border shadow-sm"
               >
-                {book.images.map((img, index) => (
+                {book && book.images.map((img: { url: string }, index: number) => (
                   <SwiperSlide key={index}>
                     <div className="w-full h-full flex items-center justify-center p-4">
                       <img
@@ -138,7 +150,7 @@ const BookDetails = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleQuantityChange(-1)}
+                    onClick={() => adjustQuantity('decrease')}
                     disabled={quantity <= 1}
                     className="h-10 w-10 p-0"
                   >
@@ -147,15 +159,14 @@ const BookDetails = () => {
                   <Input
                     type="number"
                     value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, Math.min(book.stock, Number(e.target.value))))}
-                    className="w-16 text-center border-0 border-x border-gray-300 rounded-none focus-visible:ring-0"
+                    className="number-to-text w-16 text-center border-0 border-x border-gray-300 rounded-none focus-visible:ring-0"
                     min={1}
                     max={book.stock}
                   />
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleQuantityChange(1)}
+                    onClick={() => adjustQuantity('increase')}
                     disabled={quantity >= book.stock}
                     className="h-10 w-10 p-0"
                   >

@@ -176,6 +176,27 @@ const getNewBooks = asyncHandler(async (req, res) => {
     console.log(error);
   }
 });
+const addReviews = asyncHandler(async (req, res) => {
+  const {bookId} = req.params
+  try {
+    const {rating, comment} = req.body
+    const book = await Book.findById(bookId)
+    const review = {
+      name: req.user.username,
+      rating: Number(rating),
+      comment,
+      user:req.user._id,
+    }
+    book.reviews.push(review)
+    book.rating = book.reviews.reduce((acc, item) => item.rating + acc, 0) / book.reviews.length
+    await book.save()
+    res.status(201).json({message: "Review added"})  
+  }
+  catch (error) {
+    console.error(error)
+    res.status(500).json("Server error!")
+  }
+})
 const getTopSalesBooks = asyncHandler(async (req, res) => {
   try {
     const topSalesBooks = await Book.find({})
@@ -209,4 +230,4 @@ const getAllCategories = asyncHandler(async(req, res) => {
 
 })
 
-export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks, getBooksByCategory, getAllCategories};
+export {addBook,deleteBook,getAllBooks,getBookDetails,updateBook,getNewBooks, getBooks, getTopSalesBooks, getBooksByCategory, getAllCategories, addReviews};

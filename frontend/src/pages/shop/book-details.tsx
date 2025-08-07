@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetBookDetailsQuery } from "@/redux/API/book-api-slice";
 import { Button } from "@/components/ui/button";
@@ -6,22 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Plus, Minus, ShoppingCart, Heart } from "lucide-react";
+import { Plus, Minus, ShoppingCart  } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-// @ts-ignore
+// @ts-expect-error  // swiper
 import "swiper/css";
-// @ts-ignore
+// @ts-expect-error //navigation
 import "swiper/css/navigation";
-// @ts-ignore
+// @ts-expect-error // pagination
 import "swiper/css/pagination";
 import FavouriteButton from "@/components/favourite-button";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "@/redux/features/cart/cart-slice";
 import { toast } from "sonner";
-
 import type { RootState } from "@/redux/features/store";
-import type { Book } from "@/types/books-type";
 const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { data: book, isLoading, error } = useGetBookDetailsQuery(id ?? "");

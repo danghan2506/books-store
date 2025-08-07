@@ -34,6 +34,19 @@ const bookApiSlice = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
+    deleteBook: builder.mutation({
+      query: (bookId) => ({
+        url: `${BOOKS_URL}/${bookId}`,
+        method: "DELETE"
+      })
+    }), 
+    updateBook: builder.mutation({
+      query: ({bookId, data}) => ({
+        url: `${BOOKS_URL}/${bookId}`,
+        method: "PUT",
+        body: data
+      })
+    }), 
     getAllCategories: builder.query<Book[], void>({
       query: () => ({
         url: `${BOOKS_URL}/all-categories`,
@@ -52,7 +65,7 @@ const bookApiSlice = apiSlice.injectEndpoints({
     }),
     getBookBaseOnCategory: builder.query<Book[], {keyword?: string}>({
       query: ({keyword}) => ({
-        url: `${BOOKS_URL}/${keyword}`,
+        url: `${BOOKS_URL}/category/${keyword}`,
         method: "GET",
       })
     })

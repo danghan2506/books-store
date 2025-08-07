@@ -1,5 +1,6 @@
 import apiSlice from "./api-slice";
 import { USERS_URL } from "../features/constants";
+
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -22,6 +23,32 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getAllUsers: builder.query({
+      query: () => ({
+        url: `${USERS_URL}/all-users`,
+        method: "GET",
+      }),
+    }),
+    getUserProfile: builder.query({
+      query: (userId) => ({
+        url: `${USERS_URL}/${userId}`,
+        method: "GET",
+      }),
+    }),
+    deleteUser: builder.mutation({
+      query: (userId) => ({
+        url: `${USERS_URL}/${userId}`,
+        method: "DELETE",
+      }),
+    }),
+    updateUserProfile: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/${data.userId}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
   }),
 });
-export const {useLoginMutation, useLogoutMutation, useSignupMutation} = userApiSlice
+export const {
+  useLoginMutation,useLogoutMutation,useSignupMutation,useGetAllUsersQuery,useGetUserProfileQuery, useDeleteUserMutation, useUpdateUserProfileMutation} = userApiSlice;

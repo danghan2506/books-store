@@ -24,10 +24,12 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import AdminDashBoard from "./pages/admin/admin-dashboard.tsx";
 import UsersList from "./pages/admin/users-list.tsx";
 import AdminLayout from "./AdminLayout.tsx";
+import SignupForm from "./pages/auth/signup-form.tsx";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignupForm/>}/>
       <Route path="/" element={<App />}>
         {/* User routes */}
         <Route path="" element={<PrivateRoutes />}>

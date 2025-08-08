@@ -15,11 +15,41 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { setCredentials } from "@/redux/features/auth/auth-slice";
 import {toast} from "sonner"
-const RegisterForm = () => {
+import { useSignupMutation } from "@/redux/API/user-api-slice";
+import type { RootState } from "@/redux/features/store";
+const SignupForm= () => {
     const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [signup] = useSignupMutation()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const {userInfo} = useSelector((state: RootState) => state.auth)
+  const {search} = useLocation()
+  const sp = new URLSearchParams(search)
+  const redirect = sp.get("redirect") || "/";
+  useEffect(() => {
+    if (userInfo) {
+      navigate(redirect);
+    }
+  }, [navigate, redirect, userInfo]);
+  const submiHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast.error("Password do not match!");
+      return
+    }
+    try {
+      const res = await signup({ username, email, password }).unwrap();
+      dispatch(setCredentials({ ...res }));
+      navigate(redirect);
+      toast.success("Signup successfully!");
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.data.message);
+    }
+  };
   return (
    <div className="relative h-screen w-screen mx-5 my-5">
       <Card className="w-full max-w-md flex justify-center">
@@ -97,4 +127,4 @@ const RegisterForm = () => {
   )
 }
 
-export default RegisterForm
+export default SignupForm

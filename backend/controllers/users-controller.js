@@ -106,7 +106,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         user.role = req.body.role;
       } else {
         res.status(400);
-        throw new Error("Role must be 'user' or 'admin'");
+        throw new Error(VALIDATION_MESSAGES.INVALID_ROLE);
       }
     }
     const updatedUser = await user.save();
@@ -119,7 +119,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(404);
-    throw new Error("User not found!");
+    throw new Error(VALIDATION_MESSAGES.USER_NOT_FOUND);
   }
 });
 const deleteUserProfile = asyncHandler(async(req, res) => {
@@ -131,7 +131,7 @@ const deleteUserProfile = asyncHandler(async(req, res) => {
     }
     else{
         await User.deleteOne({ _id: user._id });
-        res.json({ message: "User removed successfully!" });
+        res.json(VALIDATION_MESSAGES.USER_DELETED);
     }
 })
 const getUserById = asyncHandler(async(req, res) => {
@@ -141,7 +141,7 @@ const getUserById = asyncHandler(async(req, res) => {
     res.json(user);
   } else {
     res.status(404);
-    throw new Error("User not found!");
+    throw new Error(VALIDATION_MESSAGES.USER_NOT_FOUND);
   }
 })
 export {createUser, login, logoutCurrentUser, getAllUsers, getCurrentUserProfile, updateUserProfile, getUserById ,deleteUserProfile}

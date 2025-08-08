@@ -27,6 +27,7 @@ export const VALIDATION_MESSAGES = {
   USERNAME_TAKEN: "Username is already taken",
   INVALID_CREDENTIALS: "Invalid email or password",
   USER_NOT_FOUND: "User not found",
+  INVALID_ROLE: "Role must be user or admin",
   UNAUTHORIZED: "You are not authorized to perform this action",
   
   // Server errors
@@ -39,5 +40,6 @@ export const VALIDATION_MESSAGES = {
   LOGIN_SUCCESS: "Login successful",
   LOGOUT_SUCCESS: "Logged out successfully",
   PROFILE_UPDATED: "Profile updated successfully",
+  USER_DELETED: "Deleted user's profile successfully", 
   PASSWORD_UPDATED: "Password updated successfully"
 };

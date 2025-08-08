@@ -1,4 +1,4 @@
-import { useGetAllBooksQuery } from "@/redux/API/book-api-slice"
+import { useGetBooksQuery } from "@/redux/API/book-api-slice"
 import moment from "moment"
 import { Link } from "react-router-dom"
 import { Edit, Trash2, Eye } from "lucide-react"
@@ -10,20 +10,96 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 const BooksList = () => {
-    const {data: books, isLoading, error} = useGetAllBooksQuery()
+    const [currentPage, setCurrentPage] = useState(1)
+  const [keyword, setKeyword] = useState("")
+   const { data, isLoading, error } = useGetBooksQuery({
+    page: currentPage,
+    keyword: keyword
+  })
+  const books = data?.books || []
+  const totalPages = data?.pages || 1
+  const hasMore = data?.hasMore || false
     if (isLoading) {
     return <div>Loading...</div>;
   }
   if (error) {
     return <div>Error loading products</div>;
   }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setCurrentPage(1) // Reset to first page when searching
+  }
+  const getPageNumbers = () => {
+    const pages = []
+    const maxVisiblePages = 5
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i)
+        }
+        pages.push('...')
+        pages.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1)
+        pages.push('...')
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        pages.push(1)
+        pages.push('...')
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i)
+        }
+        pages.push('...')
+        pages.push(totalPages)
+      }
+    }
+    return pages
+  }
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-7xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Books Management</h1>
-        <p className="text-gray-600">Total Books: {books?.length || 0}</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="text-gray-600">
+            Showing {books.length} books (Page {currentPage} of {totalPages})
+          </p>
+          
+          {/* Search Form */}
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Search books..."
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <Button type="submit" size="sm">
+              Search
+            </Button>
+          </form>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -101,7 +177,7 @@ const BooksList = () => {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDeleteBook(book._id)}
+                    //   onClick={() => handleDeleteBook(book._id)}
                       className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0"
                     >
                       <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -120,6 +196,45 @@ const BooksList = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {getPageNumbers().map((page, index) => (
+                <PaginationItem key={index}>
+                  {page === '...' ? (
+                    <span className="flex h-9 w-9 items-center justify-center">...</span>
+                  ) : (
+                    <PaginationLink
+                      onClick={() => handlePageChange(page as number)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => hasMore && handlePageChange(currentPage + 1)}
+                  className={!hasMore ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   )
 }

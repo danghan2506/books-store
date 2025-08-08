@@ -10,16 +10,17 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import {  useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLoginMutation } from "@/redux/API/user-api-slice";
 import { setCredentials } from "@/redux/features/auth/auth-slice";
 import { toast } from "sonner"
 import type { RootState } from "@/redux/features/store";
+import {useForm} from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoginFormData, loginSchema } from "@/validation/auth-schema";
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [login] = useLoginMutation();
@@ -27,10 +28,18 @@ export default function Login() {
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const sp = new URLSearchParams(search);
   const redirect = sp.get("redirect") || "/";
-  const submitHandler = async (e : React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+   const {
+      register,
+      handleSubmit,
+      formState: { errors },
+    } = useForm<LoginFormData>({
+      resolver: zodResolver(loginSchema),
+    });
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      const res = await login({ email, password }).unwrap();
+      const res = await login({ 
+        email: data.email, 
+        password: data.password }).unwrap();
       dispatch(setCredentials({ ...res }));
       toast.success("Login successfully!")
       navigate(redirect)
@@ -52,7 +61,7 @@ export default function Login() {
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
-        <form onSubmit={submitHandler}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
@@ -60,11 +69,12 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="m@example.com"
-                  required
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-red-500">{errors.email.message}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -74,9 +84,11 @@ export default function Login() {
                   id="password"
                   type="password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password")}
                 />
+                {errors.password && (
+                  <p className="text-red-500">{errors.password.message}</p>
+                )}
                 <a
                   href="#"
                   className="ml-auto inline-block text-sm underline-offset-4 hover:underline"

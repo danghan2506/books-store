@@ -27,7 +27,7 @@ const bookApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       })
     }), 
-    createBook: builder.mutation<Book[], void>({
+    createBook: builder.mutation<Book, FormData>({
       query: (data) => ({
         url: `${BOOKS_URL}/`,
         body: data,

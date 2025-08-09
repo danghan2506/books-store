@@ -12,7 +12,7 @@ interface BookItemsProps {
 const BookItems = ({ book }: BookItemsProps) => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const [isFavourite, setIsFavourite] = useState(false);
-
+  
   // Check if book is in favourites on component mount
   useEffect(() => {
     const favourites = getFavouritesFromLocalStorage(userInfo?._id);

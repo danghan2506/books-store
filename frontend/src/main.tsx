@@ -26,6 +26,7 @@ import UsersList from "./pages/admin/users-list.tsx";
 import AdminLayout from "./AdminLayout.tsx";
 import SignupForm from "./pages/auth/signup-form.tsx";
 import BooksList from "./pages/admin/books-list.tsx";
+import BooksForm from "./pages/admin/books-form.tsx";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -48,6 +49,7 @@ const router = createBrowserRouter(
           <Route index element={<AdminDashBoard />} /> {/* /admin */}
           <Route path="users-list" element={<UsersList />} />
           <Route path="books-list" element={<BooksList/>}/>
+          <Route path="create-books" element={<BooksForm/>}/>
           {/* /admin/users-list */}
         </Route>
       </Route>

@@ -42,14 +42,24 @@ export default function Login() {
         password: data.password }).unwrap();
       dispatch(setCredentials({ ...res }));
       toast.success("Login successfully!")
-      navigate(redirect)
+      
+      // Redirect based on user role
+      if (res.role === "admin") {
+        navigate('/admin/dashboard');
+      } else {
+        navigate(redirect);
+      }
     } catch (error: any) {
       toast.error(error?.data?.message || error.message);
     }
   };
   useEffect(() => {
     if (userInfo) {
-      navigate(redirect, {replace: true});
+      if (userInfo.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate(redirect, { replace: true });
+      }
     }
   }, [navigate, redirect, userInfo]);
   return (

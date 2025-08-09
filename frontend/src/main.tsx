@@ -27,6 +27,9 @@ import AdminLayout from "./AdminLayout.tsx";
 import SignupForm from "./pages/auth/signup-form.tsx";
 import BooksList from "./pages/admin/books-list.tsx";
 import BooksForm from "./pages/admin/books-form.tsx";
+import AdminRoute from "./pages/admin/admin-route.tsx";
+import UpdateBooks from "./pages/admin/update-books.tsx";
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -45,14 +48,20 @@ const router = createBrowserRouter(
         <Route path="/shop" element={<Shop />} />
         <Route path="shop/:id" element={<BookDetails />} />
         {/* Admin routes */}
-        <Route path="admin" element={<AdminLayout/>}>
-          <Route index element={<AdminDashBoard />} /> {/* /admin */}
-          <Route path="users-list" element={<UsersList />} />
-          <Route path="books-list" element={<BooksList/>}/>
-          <Route path="create-books" element={<BooksForm/>}/>
+        <Route element={<AdminRoute />}>
+          <Route path="admin" element={<AdminLayout/>}>
+            <Route index element={<AdminDashBoard />} /> {/* /admin */}
+            <Route path="users-list" element={<UsersList />} />
+            <Route path="books-list" element={<BooksList />} />
+            <Route path="books-form" element={<BooksForm />} />
+            <Route path="books-list" element={<BooksList/>}/>
+            <Route path="create-books" element={<BooksForm/>}/>
+            <Route path="update-books/:id" element={<UpdateBooks/>}/>
+          </Route>
+        </Route>
+          
           {/* /admin/users-list */}
         </Route>
-      </Route>
     </>
   )
 );

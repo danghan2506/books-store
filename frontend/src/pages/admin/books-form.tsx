@@ -19,11 +19,9 @@ const BooksForm = () => {
   const [images, setImages] = useState<File[]>([])
   const navigate = useNavigate();
   const [createBook, { isLoading }] = useCreateBookMutation();
-
   const onFilesChange = useCallback((files: File[]) => {
     setImages(files)
   }, [])
-
   const handleSubmit = useCallback(async () => {
     try {
       const formData = new FormData()
@@ -48,118 +46,154 @@ const BooksForm = () => {
     }
   }, [name, author, category, publishingHouse, publishYear, language, description, price, stock, pageNumber, images, createBook, navigate])
   return (
-      <div className="container xl:mx-[9rem] sm:mx-[0]">
-      <div className="flex flex-col md:flex-row">
-        <div className="md:w-3/4 p-3">
-          <div className="mb-3">
-            <Label className="py-2">Images</Label>
+      <div className="container mx-auto px-4 py-6 pt-24 max-w-4xl">
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Book</h1>
+        
+        <div className="space-y-6">
+          {/* Image Upload */}
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">Book Images</Label>
             <FileUpload multiple accept="image/*" maxFiles={5} maxSize={10 * 1024 * 1024} onChange={onFilesChange} />
           </div>
 
-          <div className="p-3">
-  <div className="flex flex-wrap gap-6 mb-4">
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="name" className="py-2">Name</Label>
-      <Input
-        type="text"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-    </div>
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="price" className="py-2">Price</Label>
-      <Input
-        type="number"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-      />
-    </div>
-  </div>
-  <div className="flex flex-wrap gap-6 mb-4">
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="author" className="py-2">Author</Label>
-      <Input
-        type="text"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={author}
-        onChange={(e) => setAuthor(e.target.value)}
-      />
-    </div>
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="publishingHouse" className="py-2">Publishing House</Label>
-      <Input
-        type="text"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={publishingHouse}
-        onChange={(e) => setPublishingHouse(e.target.value)}
-      />
-    </div>
-  </div>
-  <div className="flex flex-wrap gap-6 mb-4">
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="stock" className="py-2">Stock</Label>
-      <Input
-        type="number"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={stock}
-        onChange={(e) => setStock(e.target.value)}
-      />
-    </div>
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="publishYear" className="py-2">Publish Year</Label>
-      <Input
-        type="number"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={publishYear}
-        onChange={(e) => setPublishYear(e.target.value)}
-      />
-    </div>
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="language" className="py-2">Language</Label>
-      <Input
-        type="text"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={language}
-        onChange={(e) => setLanguage(e.target.value)}
-      />
-    </div>
-    <div className="flex-1 min-w-[220px]">
-      <Label htmlFor="pageNumber" className="py-2">Page Number</Label>
-      <Input
-        type="number"
-        className="p-4 mb-3 w-full border rounded-lg"
-        value={pageNumber}
-        onChange={(e) => setPageNumber(e.target.value)}
-      />
-    </div>
-  </div>
-  <div className="mb-4">
-    <Label htmlFor="category" className="py-2">Category</Label>
-    <Input
-      placeholder="e.g. Fiction"
-      className="p-4 mb-3 w-full border rounded-lg"
-      value={category}
-      onChange={(e) => setCategory(e.target.value)}
-    />
-  </div>
-  <div className="mb-4">
-    <Label htmlFor="description" className="py-2">Description</Label>
-    <textarea
-      className="p-2 mb-3 border rounded-lg w-full"
-      value={description}
-      onChange={(e) => setDescription(e.target.value)}
-    ></textarea>
-  </div>
-  <button
-    type="button"
-    onClick={handleSubmit}
-    className="py-4 px-10 mt-5 rounded-md text-md font-light bg-slate-700 cursor-pointer flex-col items-center."
-  >
-    {isLoading ? "Submitting..." : "Submit"}
-  </button>
-</div>
+          {/* Book Name & Author - Top Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1 block">Book Name</Label>
+              <Input
+                id="name"
+                type="text"
+                className="h-10"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter book name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author" className="text-sm font-medium text-gray-700 mb-1 block">Author</Label>
+              <Input
+                id="author"
+                type="text"
+                className="h-10"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Enter author name"
+              />
+            </div>
+          </div>
+
+          {/* Publishing House, Year & Language */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="publishingHouse" className="text-sm font-medium text-gray-700 mb-1 block">Publishing House</Label>
+              <Input
+                id="publishingHouse"
+                type="text"
+                className="h-10"
+                value={publishingHouse}
+                onChange={(e) => setPublishingHouse(e.target.value)}
+                placeholder="Enter publisher"
+              />
+            </div>
+            <div>
+              <Label htmlFor="publishYear" className="text-sm font-medium text-gray-700 mb-1 block">Publish Year</Label>
+              <Input
+                id="publishYear"
+                type="number"
+                className="h-10"
+                value={publishYear}
+                onChange={(e) => setPublishYear(e.target.value)}
+                placeholder="2024"
+              />
+            </div>
+            <div>
+              <Label htmlFor="language" className="text-sm font-medium text-gray-700 mb-1 block">Language</Label>
+              <Input
+                id="language"
+                type="text"
+                className="h-10"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                placeholder="English"
+              />
+            </div>
+          </div>
+
+          {/* Price, Stock & Page Number */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1 block">Price ($)</Label>
+              <Input
+                id="price"
+                type="number"
+                className="h-10"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div>
+              <Label htmlFor="stock" className="text-sm font-medium text-gray-700 mb-1 block">Stock Quantity</Label>
+              <Input
+                id="stock"
+                type="number"
+                className="h-10"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pageNumber" className="text-sm font-medium text-gray-700 mb-1 block">Page Count</Label>
+              <Input
+                id="pageNumber"
+                type="number"
+                className="h-10"
+                value={pageNumber}
+                onChange={(e) => setPageNumber(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          {/* Category */}
+          <div>
+            <Label htmlFor="category" className="text-sm font-medium text-gray-700 mb-1 block">Category</Label>
+            <Input
+              id="category"
+              type="text"
+              className="h-10"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="e.g. Fiction, Non-fiction, Science"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <Label htmlFor="description" className="text-sm font-medium text-gray-700 mb-1 block">Description</Label>
+            <textarea
+              id="description"
+              className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter book description..."
+            />
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="px-8 py-3 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              {isLoading ? "Adding  Book to database..." : "Create Book"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

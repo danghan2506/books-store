@@ -81,8 +81,8 @@ const addBook = asyncHandler(async (req, res) => {
 });
 const updateBook = asyncHandler(async (req, res) => {
   try {
-    const { bookId } = req.params;
-    const book = await Book.findOne({ _id: bookId });
+    const { id } = req.params;
+    const book = await Book.findOne({ _id: id });
     if (!book) {
       res.status(404).json("No book found!");
     } else {

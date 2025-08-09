@@ -79,5 +79,7 @@ export const {
   useGetAllCategoriesQuery, 
   useGetBooksQuery,
   useGetBookBaseOnCategoryQuery,
-  useGetBookDetailsQuery
+  useGetBookDetailsQuery,
+  useUpdateBookMutation,
+  useDeleteBookMutation,
 } = bookApiSlice;

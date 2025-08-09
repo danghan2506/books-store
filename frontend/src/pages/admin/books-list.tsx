@@ -170,7 +170,7 @@ const BooksList = () => {
                       asChild
                       className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0"
                     >
-                      <Link to={`/admin/product/update/${book._id}`}>
+                      <Link to={`/admin/update-books/${book._id}`}>
                         <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Link>
                     </Button>

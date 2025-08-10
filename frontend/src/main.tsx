@@ -52,11 +52,10 @@ const router = createBrowserRouter(
           <Route path="admin" element={<AdminLayout/>}>
             <Route index element={<AdminDashBoard />} /> {/* /admin */}
             <Route path="users-list" element={<UsersList />} />
-            <Route path="books-list" element={<BooksList />} />
             <Route path="books-form" element={<BooksForm />} />
             <Route path="books-list" element={<BooksList/>}/>
             <Route path="create-books" element={<BooksForm/>}/>
-            <Route path="update-books/:id" element={<UpdateBooks/>}/>
+            <Route path="update-books/:bookId" element={<UpdateBooks/>}/>
           </Route>
         </Route>
           

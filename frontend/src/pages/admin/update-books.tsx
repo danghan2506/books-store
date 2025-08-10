@@ -9,10 +9,9 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 const UpdateBooks = () => {
-  const { id } = useParams<{ id: string }>();
-  const params = useParams();
+  const { bookId } = useParams<{ bookId: string }>();
+  const { data: bookData } = useGetBookDetailsQuery(bookId ?? "");
   const navigate = useNavigate();
-  const { data: bookData } = useGetBookDetailsQuery(id ?? "");
   console.log(bookData)
   const [name, setName] = useState(bookData?.name || "");
   const [author, setAuthor] = useState(bookData?.author || "");
@@ -53,7 +52,7 @@ const UpdateBooks = () => {
         formData.append("price", price)
         formData.append("stock", stock)
         formData.append("pageNumber", pageNumber)
-        const data = await updateBook({bookId: params._id, data: formData}).unwrap()
+        const data = await updateBook({bookId: bookId, data: formData}).unwrap()
         toast.success("Book updated successfully")
         navigate("/admin/books-list", {replace: true})
     }

@@ -81,24 +81,24 @@ const addBook = asyncHandler(async (req, res) => {
 });
 const updateBook = asyncHandler(async (req, res) => {
   try {
-    const { id } = req.params;
-    const book = await Book.findOne({ _id: id });
+    const { bookId } = req.params;
+    const book = await Book.findById(bookId);
     if (!book) {
       res.status(404).json("No book found!");
     } else {
-      book.name = req.body.name || book.name;
-      book.author = req.body.author || book.author;
+      book.name = req.fields.name || book.name;
+      book.author = req.fields.author || book.author;
       book.category = {
-        categoryName: req.body.category,
-        categorySlugSlug: generateSlug(req.body.category),
+        categoryName: req.fields.category || book.category.categoryName,
+        categorySlugSlug: generateSlug(req.fields.category),
       };
-      book.publishingHouse = req.body.publishingHouse || book.publishingHouse;
-      book.publishYear = req.body.publishYear || book.publishYear;
-      book.language = req.body.language || book.language;
-      book.pageNumber = req.body.pageNumber || book.pageNumber;
-      book.description = req.body.description || book.description;
-      book.price = req.body.price || book.price;
-      book.stock = req.body.stock || book.stock;
+      book.publishingHouse = req.fields.publishingHouse || book.publishingHouse;
+      book.publishYear = req.fields.publishYear || book.publishYear;
+      book.language = req.fields.language || book.language;
+      book.pageNumber = req.fields.pageNumber || book.pageNumber;
+      book.description = req.fields.description || book.description;
+      book.price = req.fields.price || book.price;
+      book.stock = req.fields.stock || book.stock;
       const updateBook = await book.save();
       res.json(updateBook);
     }
@@ -131,8 +131,8 @@ const deleteBook = asyncHandler(async (req, res) => {
   }
 });
 const getBookDetails = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const bookDetails = await Book.findById(id);
+  const { bookId } = req.params;
+  const bookDetails = await Book.findById(bookId);
   if (!bookDetails) {
     throw new Error("Book not found!");
   } else {

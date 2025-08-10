@@ -1,6 +1,6 @@
-import { useGetBooksQuery } from "@/redux/API/book-api-slice"
+import { useDeleteBookMutation, useGetBooksQuery } from "@/redux/API/book-api-slice"
 import moment from "moment"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Edit, Trash2, Eye } from "lucide-react"
 import {
   Table,
@@ -20,13 +20,16 @@ import {
 } from "@/components/ui/pagination"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import {toast} from "sonner"
 const BooksList = () => {
     const [currentPage, setCurrentPage] = useState(1)
   const [keyword, setKeyword] = useState("")
-   const { data, isLoading, error } = useGetBooksQuery({
+   const { data, isLoading, error, refetch } = useGetBooksQuery({
     page: currentPage,
     keyword: keyword
   })
+  const [deleteBook] = useDeleteBookMutation()
+  const navigate = useNavigate()
   const books = data?.books || []
   const totalPages = data?.pages || 1
   const hasMore = data?.hasMore || false
@@ -43,6 +46,18 @@ const BooksList = () => {
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setCurrentPage(1) // Reset to first page when searching
+  }
+  const handleDeleteBook = async (bookId: string) => {
+    try {
+      let confirm = window.confirm("Are you sure you want to delete this book?")
+      if (!confirm) return;
+      const { data } = await deleteBook(bookId);
+      toast.success(`"${data.deletedBook?.name}" is deleted`, {});
+      refetch(); // Refetch the books list after deletion
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err?.data?.message || err.message);
+    }
   }
   const getPageNumbers = () => {
     const pages = []
@@ -177,7 +192,7 @@ const BooksList = () => {
                     <Button
                       variant="destructive"
                       size="sm"
-                    //   onClick={() => handleDeleteBook(book._id)}
+                      onClick={() => handleDeleteBook(book._id)}
                       className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0"
                     >
                       <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />

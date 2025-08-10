@@ -1,13 +1,17 @@
 import { Outlet } from 'react-router-dom';
+import AdminSidebar from './components/admin-sidebar';
+import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
+import type React from 'react';
 const AdminLayout = () => {
   return (
-     <div>
-      {/* Navbar hoặc sidebar admin chung */}
-      <nav>Admin Navigation</nav>
+     <SidebarProvider>
+      <AdminSidebar/>
       <main>
-        <Outlet /> {/* Nội dung của route con sẽ render ở đây */}
+        <SidebarTrigger/>
+        <Outlet /> 
       </main>
-    </div>
+      
+    </SidebarProvider>
   )
 }
 

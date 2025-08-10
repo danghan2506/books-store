@@ -94,7 +94,7 @@ const UsersList = () => {
       );
     }
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 pl-5 lg:ml-[160px] xl:ml-[60px]">
       <div className="max-w-6xl mx-auto">
         <Card className="border-gray-200 shadow-lg">
           <CardHeader className="bg-white border-b border-gray-200">

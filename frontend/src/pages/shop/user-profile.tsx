@@ -4,18 +4,71 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { RootState } from "@/redux/features/store"
-import { useSelector } from "react-redux"
-import { Loader2, User, Lock, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux"
+import { User, Lock, Mail, Phone, MapPin, Globe } from "lucide-react";
+import React from "react"
+import { useUpdateUserProfileMutation } from "@/redux/API/user-api-slice"
+import { setCredentials } from "@/redux/features/auth/auth-slice"
+import { toast } from "sonner"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UpdateProfileFormData, updateProfileSchema } from "@/validation/auth-schema"
+
 const UserProfile = () => {
-  const {userInfo} = useSelector((state: RootState) => state.auth)
-  console.log(userInfo)
+  const { userInfo } = useSelector((state: RootState) => state.auth)
+  const dispatch = useDispatch()
+  const [updateProfile] = useUpdateUserProfileMutation()
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UpdateProfileFormData>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {
+      username: userInfo?.username || "",
+      email: userInfo?.email || "",
+      phoneNumber: userInfo?.phoneNumber || "",
+      addressBook: {
+        city: userInfo?.addressBook?.city || "",
+        district: userInfo?.addressBook?.district || "",
+        country: userInfo?.addressBook?.country || "",
+        address: userInfo?.addressBook?.address || "",
+      },
+    },
+  })
+
+  const handleUpdateProfile = async (data: UpdateProfileFormData) => {
+    try {
+      const res = await updateProfile({
+        userId: userInfo?._id,
+        username: data.username,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        addressBook: {
+          city: data.addressBook.city,
+          district: data.addressBook.district,
+          country: data.addressBook.country,
+          address: data.addressBook.address,
+        }
+      }).unwrap()
+
+      dispatch(setCredentials({ ...res }))
+      toast.success("Profile updated successfully")
+    } catch (error) {
+      // @ts-ignore
+      const message = error?.data?.message || "Failed to update profile"
+      toast.error(message)
+    }
+  }
+
   return (
-     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-blue-600" />
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+              <User className="w-8 h-8 text-gray-600" size={48} />
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">User Profile</h1>
@@ -37,17 +90,17 @@ const UserProfile = () => {
           </div>
 
           <TabsContent value="account" className="space-y-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
+            <Card className="shadow-lg border-0 mx-auto">
+              <CardHeader className="rounded-t-lg">
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <User className="w-5 h-5 text-blue-600" />
+                  <User className="w-5 h-5 text-gray-600" />
                   Account Information
                 </CardTitle>
                 <CardDescription className="text-gray-600">
                   Update your personal information and contact details. All fields are required.
                 </CardDescription>
               </CardHeader>
-              <form >
+              <form onSubmit={handleSubmit(handleUpdateProfile)}>
                 <CardContent className="p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name */}
@@ -58,14 +111,13 @@ const UserProfile = () => {
                       <Input
                         id="name"
                         type="text"
-                        // value={accountData.name}
-                        // onChange={(e) => updateAccountField('name', e.target.value)}
-                        // className={`h-11 ${ ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        {...register("username")}
+                        className="h-11 focus-visible:ring-blue-500"
                         placeholder="Enter your full name"
                       />
-                      {/* {accountErrors.name && (
-                        <p className="text-sm text-red-600">{accountErrors.name}</p>
-                      )} */}
+                      {errors.username && (
+                        <p className="text-sm text-red-600">{errors.username.message}</p>
+                      )}
                     </div>
 
                     {/* Email */}
@@ -77,14 +129,13 @@ const UserProfile = () => {
                       <Input
                         id="email"
                         type="email"
-                        // value={accountData.email}
-                        // onChange={(e) => updateAccountField('email', e.target.value)}
-                        // className={`h-11 ${accountErrors.email ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        {...register("email")}
+                        className="h-11 focus-visible:ring-blue-500"
                         placeholder="Enter your email address"
                       />
-                      {/* {accountErrors.email && (
-                        <p className="text-sm text-red-600">{accountErrors.email}</p>
-                      )} */}
+                      {errors.email && (
+                        <p className="text-sm text-red-600">{errors.email.message}</p>
+                      )}
                     </div>
 
                     {/* Phone Number */}
@@ -96,14 +147,13 @@ const UserProfile = () => {
                       <Input
                         id="phoneNumber"
                         type="tel"
-                        // value={accountData.phoneNumber}
-                        // onChange={(e) => updateAccountField('phoneNumber', e.target.value)}
-                        // className={`h-11 ${accountErrors.phoneNumber ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        {...register("phoneNumber")}
+                        className="h-11 focus-visible:ring-blue-500"
                         placeholder="Enter your phone number"
                       />
-                      {/* {accountErrors.phoneNumber && (
-                        <p className="text-sm text-red-600">{accountErrors.phoneNumber}</p>
-                      )} */}
+                      {errors.phoneNumber && (
+                        <p className="text-sm text-red-600">{errors.phoneNumber.message}</p>
+                      )}
                     </div>
 
                     {/* City */}
@@ -115,14 +165,13 @@ const UserProfile = () => {
                       <Input
                         id="city"
                         type="text"
-                        // value={accountData.city}
-                        // onChange={(e) => updateAccountField('city', e.target.value)}
-                        // className={`h-11 ${accountErrors.city ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        {...register("addressBook.city")}
+                        className="h-11 focus-visible:ring-blue-500"
                         placeholder="Enter your city"
                       />
-                      {/* {accountErrors.city && (
-                        <p className="text-sm text-red-600">{accountErrors.city}</p>
-                      )} */}
+                      {errors.addressBook?.city && (
+                        <p className="text-sm text-red-600">{errors.addressBook.city.message}</p>
+                      )}
                     </div>
 
                     {/* District */}
@@ -133,11 +182,13 @@ const UserProfile = () => {
                       <Input
                         id="district"
                         type="text"
-                        // value={accountData.district}
-                        // onChange={(e) => updateAccountField('district', e.target.value)}
+                        {...register("addressBook.district")}
                         className="h-11 focus-visible:ring-blue-500"
                         placeholder="Enter your district (optional)"
                       />
+                      {errors.addressBook?.district && (
+                        <p className="text-sm text-red-600">{errors.addressBook.district.message}</p>
+                      )}
                     </div>
 
                     {/* Country */}
@@ -149,14 +200,13 @@ const UserProfile = () => {
                       <Input
                         id="country"
                         type="text"
-                        // value={accountData.country}
-                        // onChange={(e) => updateAccountField('country', e.target.value)}
-                        // className={`h-11 ${accountErrors.country ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        {...register("addressBook.country")}
+                        className="h-11 focus-visible:ring-blue-500"
                         placeholder="Enter your country"
                       />
-                      {/* {accountErrors.country && (
-                        <p className="text-sm text-red-600">{accountErrors.country}</p>
-                      )} */}
+                      {errors.addressBook?.country && (
+                        <p className="text-sm text-red-600">{errors.addressBook.country.message}</p>
+                      )}
                     </div>
 
                     {/* Address */}
@@ -167,42 +217,34 @@ const UserProfile = () => {
                       <Input
                         id="address"
                         type="text"
-                        // value={accountData.address}
-                        // onChange={(e) => updateAccountField('address', e.target.value)}
-                        // className={`h-11 ${accountErrors.address ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        {...register("addressBook.address")}
+                        className="h-11 focus-visible:ring-blue-500"
                         placeholder="Enter your full address"
                       />
-                      {/* {accountErrors.address && (
-                        <p className="text-sm text-red-600">{accountErrors.address}</p>
-                      )} */}
+                      {errors.addressBook?.address && (
+                        <p className="text-sm text-red-600">{errors.addressBook.address.message}</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="bg-gray-50 rounded-b-lg p-6">
+                <CardFooter className="bg-gray-50 rounded-b-lg p-6 flex justify-center">
                   <Button 
-                    type="submit" 
-                    // disabled={isAccountLoading}
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 h-11 px-8 font-semibold"
+                    type="submit"
+                    className="w-full sm:w-auto mx-auto bg-blue-600 hover:bg-blue-700 h-11 px-8 font-semibold"
                   >
-                    {/* {isAccountLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving Changes...
-                      </>
-                    ) : (
-                      'Save Account Changes'
-                    )} */}
+                    Update
                   </Button>
                 </CardFooter>
               </form>
             </Card>
           </TabsContent>
 
+          {/* Password Tab (giữ nguyên như cũ) */}
           <TabsContent value="password" className="space-y-6">
             <Card className="shadow-lg border-0">
-              <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50 rounded-t-lg">
+              <CardHeader className="rounded-t-lg">
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <Lock className="w-5 h-5 text-red-600" />
+                  <Lock className="w-5 h-5 text-gray-600" />
                   Change Password
                 </CardTitle>
                 <CardDescription className="text-gray-600">
@@ -222,7 +264,7 @@ const UserProfile = () => {
                         type="password"
                         // value={passwordData.currentPassword}
                         // onChange={(e) => updatePasswordField('currentPassword', e.target.value)}
-                        // className={`h-11 ${passwordErrors.currentPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        // className={h-11 ${passwordErrors.currentPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}}
                         placeholder="Enter your current password"
                       />
                       {/* {passwordErrors.currentPassword && (
@@ -240,7 +282,7 @@ const UserProfile = () => {
                         type="password"
                         // value={passwordData.newPassword}
                         // onChange={(e) => updatePasswordField('newPassword', e.target.value)}
-                        // className={`h-11 ${passwordErrors.newPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        // className={h-11 ${passwordErrors.newPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}}
                         placeholder="Enter your new password"
                       />
                       {/* {passwordErrors.newPassword && (
@@ -259,7 +301,7 @@ const UserProfile = () => {
                         type="password"
                         // value={passwordData.confirmPassword}
                         // onChange={(e) => updatePasswordField('confirmPassword', e.target.value)}
-                        // className={`h-11 ${passwordErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                        // className={h-11 ${passwordErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}}
                         placeholder="Confirm your new password"
                       />
                       {/* {passwordErrors.confirmPassword && (
@@ -273,7 +315,7 @@ const UserProfile = () => {
                     <Button 
                       type="submit" 
                       // disabled={isPasswordLoading}
-                      className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 h-11 px-8 font-semibold"
+                      className="flex-1 sm:flex-none bg-gray-700 hover:bg-gray-800 h-11 px-8 font-semibold"
                     >
                       {/* {isPasswordLoading ? (
                         <>
@@ -295,7 +337,6 @@ const UserProfile = () => {
         </Tabs>
       </div>
     </div>
-  );
+  )
 }
-
 export default UserProfile

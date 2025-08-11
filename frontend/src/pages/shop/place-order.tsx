@@ -12,7 +12,7 @@ import {
 import { Loader2, ShoppingCart } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/redux/features/store";
-import { clearCartItems, loadUserCart } from "@/redux/features/cart/cart-slice";
+import { loadUserCart } from "@/redux/features/cart/cart-slice";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCreateOrderMutation } from "@/redux/API/order-api-slice";
@@ -52,7 +52,6 @@ const PlaceOrders = () => {
   return (
     <div className="container mx-auto px-4 py-8 pt-24 max-w-7xl">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Place Order</h1>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items Section */}
         <div className="lg:col-span-2">

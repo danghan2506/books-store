@@ -28,6 +28,13 @@ const createUser = asyncHandler(async(req, res) => {
             email: newUser.email,
             password: newUser.hashedPassword,
             role: newUser.role,
+            phoneNumber: newUser.phoneNumber,
+            addressBook: {
+                city: newUser.addressBook.city,
+                district: newUser.addressBook.district,
+                country: newUser.addressBook.country,
+                address: newUser.addressBook.address
+            },
         })
     }
     catch(error){
@@ -90,37 +97,87 @@ const getCurrentUserProfile = asyncHandler(async(req, res) => {
   }
 })
 const updateUserProfile = asyncHandler(async (req, res) => {
-    const userId = req.params.userId
-  const user = await User.findById(userId);
-  if (user) {
-    user.username = req.body.username || user.username;
-    user.email = req.body.email || user.email;
-    user.phoneNumber = req.body.phoneNumber || user.phoneNumber
-    if (req.body.password) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(req.body.password, salt);
-      user.password = hashedPassword;
+    const userId = req.params.userId;
+    const { username, email, phoneNumber, password, role, addressBook } = req.body;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+        res.status(404);
+        throw new Error(VALIDATION_MESSAGES.USER_NOT_FOUND);
     }
-    if (req.body.role) {
-      if (req.body.role === "user" || req.body.role === "admin") {
-        user.role = req.body.role;
-      } else {
-        res.status(400);
-        throw new Error(VALIDATION_MESSAGES.INVALID_ROLE);
-      }
+
+    // CRITICAL validations only (security & data integrity)
+    
+    // 1. Email uniqueness (MUST validate - data integrity)
+    if (email && email !== user.email) {
+        const emailExists = await User.findOne({ email, _id: { $ne: userId } });
+        if (emailExists) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email already exists'
+            });
+        }
     }
-    const updatedUser = await user.save();
-    res.json({
-      _id: updatedUser._id,
-      username: updatedUser.username,
-      email: updatedUser.email,
-      phoneNumber: updatedUser.phoneNumber,
-      role: updatedUser.role,
-    });
-  } else {
-    res.status(404);
-    throw new Error(VALIDATION_MESSAGES.USER_NOT_FOUND);
-  }
+
+    // 2. Role validation (MUST validate - security)
+    if (role && !['user', 'admin'].includes(role)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid role'
+        });
+    }
+
+    // 3. Password hashing (MUST do - security)
+    if (password) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        user.password = hashedPassword;
+    }
+
+    try {
+        // Update fields (let Mongoose schema handle basic validation)
+        if (username) user.username = username;
+        if (email) user.email = email;
+        if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+        if (role) user.role = role;
+
+        // Update addressBook
+        if (addressBook) {
+            Object.keys(addressBook).forEach(key => {
+                if (addressBook[key] !== undefined) {
+                    user.addressBook[key] = addressBook[key];
+                }
+            });
+            user.markModified('addressBook');
+        }
+
+        const updatedUser = await user.save();
+        
+        res.json({
+            _id: updatedUser._id,
+            username: updatedUser.username,
+            email: updatedUser.email,
+            phoneNumber: updatedUser.phoneNumber,
+            role: updatedUser.role,
+            addressBook: updatedUser.addressBook,
+            updatedAt: updatedUser.updatedAt
+        });
+
+    } catch (error) {
+        // Handle Mongoose validation errors
+        if (error.name === 'ValidationError') {
+            res.status(400);
+            throw new Error('Invalid data provided');
+        }
+        
+        if (error.code === 11000) {
+            res.status(400);
+            throw new Error('Email already exists');
+        }
+        
+        res.status(500);
+        throw new Error('Server error');
+    }
 });
 const deleteUserProfile = asyncHandler(async(req, res) => {
     const userId = req.params.userId

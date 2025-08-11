@@ -30,6 +30,7 @@ import BooksForm from "./pages/admin/books-form.tsx";
 import AdminRoute from "./pages/admin/admin-route.tsx";
 import UpdateBooks from "./pages/admin/update-books.tsx";
 import UserOrders from "./pages/shop/user-orders.tsx";
+import UserProfile from "./pages/shop/user-profile.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -47,6 +48,7 @@ const router = createBrowserRouter(
           <Route path="/order/:orderId" element={<OrderSummary />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="my-orders" element={<UserOrders/>}/>
+          <Route path="my-profile" element={<UserProfile/>}/>
         </Route>
         <Route path="shop/:id" element={<BookDetails />} />
         {/* Admin routes */}

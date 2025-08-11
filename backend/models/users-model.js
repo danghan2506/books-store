@@ -4,6 +4,12 @@ const userSchema = new mongoose.Schema({
     email: {type: String, required: true, unique: true},
     password: {type: String, required: true},
     phoneNumber: {type: String, default: ""},
+    addressBook: {
+        city: {type: String, default: ""},
+        district: {type: String, default: ""},
+        country: {type: String, default: ""},
+        address: {type: String, default: ""},
+    },
     role: {type: String, default: "user"}
 }, {timeStamp: true})
 

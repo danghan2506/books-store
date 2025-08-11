@@ -6,18 +6,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { RootState } from "@/redux/features/store"
 import { useDispatch, useSelector } from "react-redux"
 import { User, Lock, Mail, Phone, MapPin, Globe } from "lucide-react";
-import React from "react"
-import { useUpdateUserProfileMutation } from "@/redux/API/user-api-slice"
-import { setCredentials } from "@/redux/features/auth/auth-slice"
+import { useLogoutMutation, useUpdateUserProfileMutation } from "@/redux/API/user-api-slice"
+import { logout, setCredentials } from "@/redux/features/auth/auth-slice"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UpdateProfileFormData, updateProfileSchema } from "@/validation/auth-schema"
+import { updatePasswordSchema, updateProfileSchema, type UpdatePasswordSchema, type UpdateProfileFormData } from "@/validation/auth-schema"
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch()
   const [updateProfile] = useUpdateUserProfileMutation()
+  const [triggerLogout] = useLogoutMutation()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -37,7 +39,40 @@ const UserProfile = () => {
       },
     },
   })
+  const {
+    register: updatePassword,
+    handleSubmit: handleSubmitPassword,
+    formState: {errors: passwordErrors}
+  } = useForm<UpdatePasswordSchema>({
+    resolver: zodResolver(updatePasswordSchema)
+  })
+  const handleUpdatePassword = async (data: UpdatePasswordSchema) => {
+    try {
+      const res = await updateProfile({
+        userId: userInfo?._id,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
+      }).unwrap()
 
+      // If backend signals logout after password change
+      if ((res as any)?.loggedOut) {
+        toast.success("Password changed. Please log in again.")
+        await triggerLogout().unwrap()
+        dispatch(logout())
+        navigate("/login")
+        return
+      }
+
+      // Fallback: if backend returns user info (shouldn't for password change)
+      dispatch(setCredentials({ ...res }))
+      toast.success("Profile updated successfully")
+    } catch (error) {
+      // @ts-ignore
+      const message = error?.data?.message || "Failed to update password"
+      toast.error(message)
+    }
+  }
   const handleUpdateProfile = async (data: UpdateProfileFormData) => {
     try {
       const res = await updateProfile({
@@ -52,7 +87,6 @@ const UserProfile = () => {
           address: data.addressBook.address,
         }
       }).unwrap()
-
       dispatch(setCredentials({ ...res }))
       toast.success("Profile updated successfully")
     } catch (error) {
@@ -251,7 +285,7 @@ const UserProfile = () => {
                   Update your password to keep your account secure. You'll be logged out after saving.
                 </CardDescription>
               </CardHeader>
-              <form>
+              <form onSubmit={handleSubmitPassword(handleUpdatePassword)}>
                 <CardContent className="p-8">
                   <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
                     {/* Current Password */}
@@ -262,14 +296,12 @@ const UserProfile = () => {
                       <Input
                         id="currentPassword"
                         type="password"
-                        // value={passwordData.currentPassword}
-                        // onChange={(e) => updatePasswordField('currentPassword', e.target.value)}
-                        // className={h-11 ${passwordErrors.currentPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}}
+                        {...updatePassword("currentPassword")}
                         placeholder="Enter your current password"
                       />
-                      {/* {passwordErrors.currentPassword && (
-                        <p className="text-sm text-red-600">{passwordErrors.currentPassword}</p>
-                      )} */}
+                      {passwordErrors.currentPassword && (
+                        <p className="text-sm text-red-600">{passwordErrors.currentPassword.message}</p>
+                      )}
                     </div>
 
                     {/* New Password */}
@@ -280,14 +312,12 @@ const UserProfile = () => {
                       <Input
                         id="newPassword"
                         type="password"
-                        // value={passwordData.newPassword}
-                        // onChange={(e) => updatePasswordField('newPassword', e.target.value)}
-                        // className={h-11 ${passwordErrors.newPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}}
+                        {...updatePassword("newPassword")}
                         placeholder="Enter your new password"
                       />
-                      {/* {passwordErrors.newPassword && (
-                        <p className="text-sm text-red-600">{passwordErrors.newPassword}</p>
-                      )} */}
+                      {passwordErrors.newPassword && (
+                        <p className="text-sm text-red-600">{passwordErrors.newPassword.message}</p>
+                      )}
                       <p className="text-xs text-gray-500">Password must be at least 8 characters long</p>
                     </div>
 
@@ -299,33 +329,23 @@ const UserProfile = () => {
                       <Input
                         id="confirmPassword"
                         type="password"
-                        // value={passwordData.confirmPassword}
-                        // onChange={(e) => updatePasswordField('confirmPassword', e.target.value)}
-                        // className={h-11 ${passwordErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}}
+                        {...updatePassword("confirmPassword")}
                         placeholder="Confirm your new password"
                       />
-                      {/* {passwordErrors.confirmPassword && (
-                        <p className="text-sm text-red-600">{passwordErrors.confirmPassword}</p>
-                      )} */}
+                      {passwordErrors.confirmPassword && (
+                        <p className="text-sm text-red-600">{passwordErrors.confirmPassword.message}</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="bg-gray-50 rounded-b-lg p-6">
                   <div className="w-full flex flex-col sm:flex-row gap-3">
-                    <Button 
-                      type="submit" 
-                      // disabled={isPasswordLoading}
-                      className="flex-1 sm:flex-none bg-gray-700 hover:bg-gray-800 h-11 px-8 font-semibold"
-                    >
-                      {/* {isPasswordLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Updating Password...
-                        </>
-                      ) : (
-                        'Update Password'
-                      )} */}
-                    </Button>
+                   <Button 
+                    type="submit"
+                    className="w-full sm:w-auto mx-auto bg-blue-600 hover:bg-blue-700 h-11 px-8 font-semibold"
+                  >
+                    Update
+                  </Button>
                     <p className="text-xs text-gray-500 flex items-center">
                       You will be logged out after changing your password
                     </p>

@@ -111,9 +111,16 @@ const getCurrentUserProfile = asyncHandler(async (req, res) => {
 });
 const updateUserProfile = asyncHandler(async (req, res) => {
   const userId = req.params.userId;
-  const { username, email, phoneNumber, password, role, addressBook } =
-    req.body;
-
+  const {
+    username,
+    email,
+    phoneNumber,
+    role,
+    addressBook,
+    currentPassword,
+    newPassword,
+    confirmPassword,
+  } = req.body;
   const user = await User.findById(userId);
   if (!user) {
     res.status(404);
@@ -141,13 +148,43 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     });
   }
 
-  // 3. Password hashing (MUST do - security)
-  if (password) {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    user.password = hashedPassword;
-  }
+  // 3. Password update flow (MUST validate + hash)
+  let passwordChanged = false;
+  const isPasswordUpdateRequested =
+    currentPassword !== undefined || newPassword !== undefined || confirmPassword !== undefined;
 
+  if (isPasswordUpdateRequested) {
+    // Ensure all required fields are present
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      res.status(400);
+      throw new Error(VALIDATION_MESSAGES.PASSWORD_REQUIRED);
+    }
+
+    // Validate current password correctness
+    const isCurrentPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordCorrect) {
+      res.status(401);
+      throw new Error(VALIDATION_MESSAGES.INVALID_CREDENTIALS);
+    }
+
+    // Validate new password confirmation
+    if (newPassword !== confirmPassword) {
+      res.status(400);
+      throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
+    }
+
+    // Ensure new password is different from current
+    const isNewSameAsOld = await bcrypt.compare(newPassword, user.password);
+    if (isNewSameAsOld) {
+      res.status(400);
+      throw new Error("New password must be different from current password");
+    }
+
+    // Hash and set new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    passwordChanged = true;
+  }
   try {
     // Update fields (let Mongoose schema handle basic validation)
     if (username) user.username = username;
@@ -166,6 +203,16 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 
     const updatedUser = await user.save();
+
+    // If password changed, log user out by clearing auth cookie
+    if (passwordChanged) {
+      res.cookie("jwt", "", {
+        httpOnly: true,
+        expires: new Date(0),
+      });
+      return res.status(200).json({ message: VALIDATION_MESSAGES.PASSWORD_UPDATED, loggedOut: true });
+    }
+
     res.json({
       _id: updatedUser._id,
       username: updatedUser.username,

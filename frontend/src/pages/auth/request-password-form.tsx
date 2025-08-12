@@ -15,7 +15,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type EmailOnlyFormData, emailOnlySchema } from "@/validation/auth-schema";
 import { useRequestPasswordResetMutation } from "@/redux/API/auth-api-slice";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 const ResetPasswordForm = () => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -29,10 +31,14 @@ const ResetPasswordForm = () => {
       // Đúng: gửi chỉ email string
       await sendEmail({email: data.email}).unwrap();
       toast.success("OTP has been sent to your email");
-    } catch (err: any) {
-      console.log(err);
+      // if success, redirect to verify OTP page 
+      localStorage.setItem("resetEmail", data.email);
+      navigate(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+    } catch (err: unknown) {
       // Thêm toast error để user biết
-      toast.error(err?.data?.message || "Failed to send OTP");
+      const apiErr = err as { data?: { message?: string }; message?: string };
+      const message = apiErr?.data?.message || apiErr?.message || "Failed to send OTP";
+      toast.error(message);
     }
   };
   return (
@@ -60,11 +66,7 @@ const ResetPasswordForm = () => {
                 )}
               </div>
 
-              {error && (
-                <p className="text-red-500">
-                  {error?.data?.message || "Something went wrong"}
-                </p>
-              )}
+              {error && <p className="text-red-500">Something went wrong</p>}
             </div>
           </CardContent>
 

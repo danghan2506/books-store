@@ -32,6 +32,8 @@ import UpdateBooks from "./pages/admin/update-books.tsx";
 import UserOrders from "./pages/shop/user-orders.tsx";
 import UserProfile from "./pages/shop/user-profile.tsx";
 import ResetPasswordForm from "./pages/auth/request-password-form.tsx";
+import VerifyOtp from "./pages/auth/verify-otp.tsx";
+import ResetPassword from "./pages/auth/reset-password";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -39,6 +41,8 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignupForm/>}/>
       <Route path="/request-reset-password" element={<ResetPasswordForm/>}/>
+      <Route path="/verify-otp" element={<VerifyOtp/>}/>
+      <Route path="/reset-password" element={<ResetPassword/>}/>
       <Route path="/" element={<App />}>
         {/* User routes */}
         <Route path="" element={<PrivateRoutes />}>

@@ -259,6 +259,7 @@ const getUserById = asyncHandler(async (req, res) => {
     throw new Error(VALIDATION_MESSAGES.USER_NOT_FOUND);
   }
 });
+
 export {
   createUser,
   login,

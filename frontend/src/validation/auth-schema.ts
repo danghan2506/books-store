@@ -165,6 +165,10 @@ export const updateProfileSchema = z.object({
       ),
   }),
 });
+export const emailOnlySchema = z.object({
+  email: z.string().email('Please enter a valid email address')
+});
+export type EmailOnlyFormData = z.infer<typeof emailOnlySchema>
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>
 export type LoginFormData = z.infer<typeof loginSchema>
 export type SignupFormData = z.infer<typeof signupSchema>;

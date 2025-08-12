@@ -31,12 +31,14 @@ import AdminRoute from "./pages/admin/admin-route.tsx";
 import UpdateBooks from "./pages/admin/update-books.tsx";
 import UserOrders from "./pages/shop/user-orders.tsx";
 import UserProfile from "./pages/shop/user-profile.tsx";
+import ResetPasswordForm from "./pages/auth/request-password-form.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignupForm/>}/>
+      <Route path="/request-reset-password" element={<ResetPasswordForm/>}/>
       <Route path="/" element={<App />}>
         {/* User routes */}
         <Route path="" element={<PrivateRoutes />}>

@@ -28,7 +28,7 @@ const requestPasswordReset = async (req, res) => {
     res.json({message: "OTP has been send to your email."})
   }
   catch (error) {
-    res.status(500).json({ message: VALIDATION_MESSAGES.INVALID_CREDENTIALS });
+    res.status(500).json({ message: error.message });
 }
 }
 const verifyOtp = async (req, res) => {
@@ -52,6 +52,9 @@ const verifyOtp = async (req, res) => {
 }
 const resetPassword = async (req, res) => {
     const user = await User.findOne({email: req.body.email})
+    if(!user){
+        res.status(404).json({message: VALIDATION_MESSAGES.EMAIL_INVALID})
+    }
     try {
         const { email, newPassword, confirmPassword } = req.body;
 

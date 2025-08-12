@@ -100,7 +100,7 @@ export default function Login() {
                   <p className="text-red-500">{errors.password.message}</p>
                 )}
                 <a
-                  href="#"
+                  href="/request-reset-password"
                   className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                 >
                   Forgot your password?

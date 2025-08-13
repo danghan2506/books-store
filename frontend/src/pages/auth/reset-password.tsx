@@ -5,14 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useResetPasswordMutation } from "@/redux/API/auth-api-slice";
-
 const ResetPassword = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+// Lay email tu query hoac localStorage
   const email = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return params.get("email") || localStorage.getItem("resetEmail") || "";

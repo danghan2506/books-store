@@ -35,7 +35,6 @@ export interface BookCategory {
   categorySlug: string;
 }
 
-
 export interface BookQueryResult {
   books: Book[];
   page: number;

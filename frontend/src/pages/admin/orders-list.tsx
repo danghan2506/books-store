@@ -6,11 +6,61 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Package, Eye } from "lucide-react";
+import { useState } from "react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 const OrdersList = () => {
-  const { data: allOrders, isLoading, error } = useGetAllOrdersQuery();
+  const [currentPage, setCurrentPage] = useState(1)
+  const { data: allOrders, isLoading, error } = useGetAllOrdersQuery({page: currentPage});
   const formatDate = (dateString) => {
     return new Date(dateString).toISOString().substring(0, 10);
   };
+  const orders = allOrders?.orders || []
+  const totalPages = allOrders?.pages || 1
+  const hasMore = allOrders?.hasMore || false
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const getPageNumbers = () => {
+    const pages = []
+    const maxVisiblePages = 5
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i)
+        }
+        pages.push('...')
+        pages.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1)
+        pages.push('...')
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        pages.push(1)
+        pages.push('...')
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i)
+        }
+        pages.push('...')
+        pages.push(totalPages)
+      }
+    }
+    return pages
+  }
   const StatusBadge = ({ status }) => {
     const variant = status ? "default" : "destructive";
     const className = status
@@ -48,6 +98,7 @@ const OrdersList = () => {
       </div>
     );
   }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
@@ -55,7 +106,7 @@ const OrdersList = () => {
         <h1 className="text-3xl font-bold">All Orders</h1>
       </div>
 
-      {allOrders.length === 0 ? (
+      {orders.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mb-4" />
@@ -86,11 +137,11 @@ const OrdersList = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {allOrders.map((order, index) => (
+                      {orders.map((order, index) => (
                         <tr
                           key={order._id}
                           className={`border-b transition-colors hover:bg-muted/30 ${
-                            index === allOrders.length - 1 ? "border-b-0" : ""
+                            index === orders.length - 1 ? "border-b-0" : ""
                           }`}
                         >
                           <td className="p-4">
@@ -153,10 +204,46 @@ const OrdersList = () => {
               </CardContent>
             </Card>
           </div>
-
+          {totalPages > 1 && (
+            <div className="mt-8">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {getPageNumbers().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === '...' ? (
+                      <span className="flex h-9 w-9 items-center justify-center">...</span>
+                    ) : (
+                      <PaginationLink
+                        onClick={() => handlePageChange(page as number)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => hasMore && handlePageChange(currentPage + 1)}
+                    className={!hasMore ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+          )}
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
-            {allOrders.map((order) => (
+            {orders.map((order) => (
               <Card key={order._id} className="overflow-hidden">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">

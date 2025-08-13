@@ -51,3 +51,9 @@ export interface PaymentResult {
     update_time: Date
     email_address: string
 }
+export interface OrdersQueryResult {
+    orders: Order[],
+    page: number;
+    pages: number;
+    hasMore: boolean;
+}

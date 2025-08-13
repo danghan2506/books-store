@@ -1,6 +1,6 @@
 import { useDeleteBookMutation, useGetBooksQuery } from "@/redux/API/book-api-slice"
 import moment from "moment"
-import { Link, useNavigate } from "react-router-dom"
+import { Link  } from "react-router-dom"
 import { Edit, Trash2, Eye } from "lucide-react"
 import {
   Table,
@@ -29,7 +29,6 @@ const BooksList = () => {
     keyword: keyword
   })
   const [deleteBook] = useDeleteBookMutation()
-  const navigate = useNavigate()
   const books = data?.books || []
   const totalPages = data?.pages || 1
   const hasMore = data?.hasMore || false

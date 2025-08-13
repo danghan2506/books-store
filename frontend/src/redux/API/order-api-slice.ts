@@ -1,5 +1,6 @@
 import apiSlice from "./api-slice";
 import { ORDERS_URL, PAYPAL_URL } from "../features/constants";
+import type { OrdersQueryResult } from "@/types/order-type";
 const orderApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createOrder: builder.mutation({
@@ -9,11 +10,15 @@ const orderApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    getAllOrders: builder.query({
-      query: () => ({
+    getAllOrders: builder.query<OrdersQueryResult, {page?: number}>({
+      query: ({page}) => ({
         url: `${ORDERS_URL}`,
         method: "GET",
+        params: {
+          ...(page && {page})
+        }
       }),
+      keepUnusedDataFor: 5,
     }),
     getMyOrders: builder.query({
       query: () => ({

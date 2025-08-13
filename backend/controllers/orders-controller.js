@@ -39,8 +39,19 @@ const createOrder = asyncHandler(async(req, res) => {
 })
 const getAllOrders = asyncHandler(async(req, res) => {
     try {
-        const orders = await Order.find({}).populate("user", "id username")
-        res.json(orders)
+        const pageSize = 10
+        const page = Number(req.query.page) || 1
+        const count = await Order.countDocuments({});
+        const orders = await Order.find({})
+        .populate("user", "id username")
+        .limit(pageSize)
+        .skip(pageSize * (page - 1))
+        res.json({
+            orders,
+            page,
+            pages: Math.ceil(count / pageSize),
+            hasMore: page < Math.ceil(count / pageSize),
+        })
     } catch (error) {
         console.error(error)
         res.status(500).json("Server error!")

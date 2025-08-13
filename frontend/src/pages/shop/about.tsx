@@ -1,5 +1,5 @@
 import Title from "@/components/title";
-import { ShoppingCart } from "lucide-react";
+import { BookOpen, ShoppingCart, Star, Truck } from "lucide-react";
 import about from "../../assets/about.jpg"
 const About = () => {
   return (
@@ -19,34 +19,37 @@ const About = () => {
               </div>
               <div>
                 <h4 className="text-[18px] font-[500]">Secure Payment Options</h4>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ut perspiciatis necessitatibus amet aperiam, quos id maxime sint consequatur molestias qui corrupti distinctio ducimus voluptate. Ipsa, sapiente aliquam? Ea, nisi! Iste.</p>
+                <p>Multiple safe and conveinent payment methods to ensure your transactions are always secure and protected</p>
               </div>
             </div>
             <div className="flex justify-center items-center gap-x-4">
               <div className="h-16 w-16 min-w-16 bg-zinc-100 flex items-center justify-center rounded-md">
-                <ShoppingCart className="text-2xl " />
+                <BookOpen className="text-2xl " />
               </div>
                <div>
-                <h4 className="text-[18px] font-[500]">Secure Payment Options</h4>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ut perspiciatis necessitatibus amet aperiam, quos id maxime sint consequatur molestias qui corrupti distinctio ducimus voluptate. Ipsa, sapiente aliquam? Ea, nisi! Iste.</p>
+                <h4 className="text-[18px] font-[500]">Vast Collection of Books</h4>
+                <p>Thousands of titles across literature, science, business, and self-growth,
+                  catering to every reading taste and passion.</p>
               </div>
             </div>
             <div className="flex justify-center items-center gap-x-4">
               <div className="h-16 w-16 min-w-16 bg-zinc-100 flex items-center justify-center rounded-md">
-                <ShoppingCart className="text-2xl " />
+                <Truck className="text-2xl " />
               </div>
                <div>
-                <h4 className="text-[18px] font-[500]">Secure Payment Options</h4>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ut perspiciatis necessitatibus amet aperiam, quos id maxime sint consequatur molestias qui corrupti distinctio ducimus voluptate. Ipsa, sapiente aliquam? Ea, nisi! Iste.</p>
+                <h4 className="text-[18px] font-[500]">Fast & Reliable Delivery</h4>
+                <p>Carefully packaged books delivered to your doorstep quickly,
+                  so you can enjoy your favorite stories without delay.</p>
               </div>
             </div>
             <div className="flex justify-center items-center gap-x-4">
               <div className="h-16 w-16 min-w-16 bg-zinc-100 flex items-center justify-center rounded-md">
-                <ShoppingCart className="text-2xl " />
+                <Star className="text-2xl " />
               </div>
                <div>
-                <h4 className="text-[18px] font-[500]">Secure Payment Options</h4>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ut perspiciatis necessitatibus amet aperiam, quos id maxime sint consequatur molestias qui corrupti distinctio ducimus voluptate. Ipsa, sapiente aliquam? Ea, nisi! Iste.</p>
+                <h4 className="text-[18px] font-[500]">Trusted by Thousands of Readers</h4>
+                <p>Loved by a growing community of book lovers who appreciate our
+                  quality service, curated selection, and reader-first approach.</p>
               </div>
             </div>
           </div>

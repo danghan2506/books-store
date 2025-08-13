@@ -1,12 +1,12 @@
 import {
-  BookA,
+  Brain,
   BookOpen,
-  Flame,
-  Medal,
+  BookOpenText,
+  BookType,
   Search,
   Settings,
-  Smile,
   DollarSign,
+  Smile,
 } from "lucide-react";
 import {
   useGetBooksQuery,
@@ -64,7 +64,7 @@ const Shop = () => {
     },
     { skip: !selectedCategoryName }
   );
-
+  console.log({ categorySlug: selectedCategoryName ? slugify(selectedCategoryName) : null, categoryBooks, categoryError })
   // Xác định books để hiển thị
   const books = selectedCategoryName 
     ? categoryBooks
@@ -118,16 +118,12 @@ const Shop = () => {
   };
 
   const GENRE_ICONS: Record<string, React.ReactNode> = {
-    "Kinh tế": <DollarSign size={44} />,
-    "Tâm lý": <DollarSign size={44} />,
-    "Tình cảm": <DollarSign size={44} />,
-    "Hành động": <Flame size={44} />,
-    "Bóng đá": <Medal size={44} />,
-    "Thiếu nhi": <Smile size={44} />,
-    "Vui nhộn": <Smile size={44} />,
-    "Truyện ngắn": <BookA size={44} />,
-    "Truyện tranh": <BookOpen size={44} />,
-    "Sách tiếng việt": <BookA size={44} />,
+  "Văn học": <BookOpen size={44} />,
+  "Truyện tranh": <Smile size={44} />,
+  "Kinh tế": <DollarSign size={44} />,
+  "Tâm lý-Kỹ năng sống": <Brain size={44} />,
+  "Tiểu sử hồi ký": <BookOpenText size={44} />,
+  "Sách học ngoại ngữ": <BookType size={44} />
   };
 
   // Loading states

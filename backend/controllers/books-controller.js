@@ -90,7 +90,10 @@ const updateBook = asyncHandler(async (req, res) => {
       book.author = req.fields.author || book.author;
       book.category = {
         categoryName: req.fields.category || book.category.categoryName,
-        categorySlugSlug: generateSlug(req.fields.category),
+        categorySlug:
+          req.fields.category
+            ? generateSlug(req.fields.category)
+            : book.category.categorySlug,
       };
       book.publishingHouse = req.fields.publishingHouse || book.publishingHouse;
       book.publishYear = req.fields.publishYear || book.publishYear;

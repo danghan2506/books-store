@@ -172,5 +172,5 @@ export type EmailOnlyFormData = z.infer<typeof emailOnlySchema>
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>
 export type LoginFormData = z.infer<typeof loginSchema>
 export type SignupFormData = z.infer<typeof signupSchema>;
-export type UpdatePasswordSchema = z.infer<typeof updatePasswordSchema>
+export type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>
 

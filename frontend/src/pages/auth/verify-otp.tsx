@@ -45,11 +45,11 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="flex flex-row relative h-screen w-screen mx-5 my-5">
-      <Card className="w-full max-w-md flex justify-center">
-        <CardHeader>
-          <CardTitle>Verify OTP</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-red-50 p-4">
+      <Card className="w-full max-w-lg shadow-xl border border-blue-100 bg-white/95 backdrop-blur-sm">
+        <CardHeader className="space-y-2 text-center pb-4">
+          <CardTitle className="text-3xl font-bold tracking-tight text-gray-800">Verify OTP</CardTitle>
+          <CardDescription className="text-base text-gray-600">
             {email ? `Enter the 6-digit code sent to ${email}` : "Enter the 6-digit code"}
           </CardDescription>
         </CardHeader>
@@ -64,11 +64,11 @@ const VerifyOtp = () => {
             </InputOTP>
           </div>
         </CardContent>
-        <CardFooter className="flex gap-2">
+        <CardFooter className="flex flex-col space-y-4 pt-6">
           <Button className="w-full" onClick={onSubmit} disabled={isLoading}>
             {isLoading ? "Verifying..." : "Verify"}
           </Button>
-          <Button variant="outline" onClick={resend}>Resend</Button>
+          <Button className="w-full" variant="outline" onClick={resend}>Resend</Button>
         </CardFooter>
       </Card>
     </div>

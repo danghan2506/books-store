@@ -2,9 +2,9 @@ import { useCalculateTotalSalesQuery, useCalculateTotalSalesByDateQuery, useCoun
 import { useGetAllUsersQuery } from "@/redux/API/user-api-slice"
 import {CardHeader,  Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import OrdersList from "./orders-list";
 const AdminDashBoard = () => {
     const {data: sales, isLoading: loadingSales} = useCalculateTotalSalesQuery()
@@ -14,7 +14,6 @@ const AdminDashBoard = () => {
     console.log(salesDetails)
    const chartData = useMemo(() => {
         if (!salesDetails) return [];
-        
         return salesDetails.map((item) => ({
             date: item._id,
             sales: item.totalSales,

@@ -42,24 +42,25 @@ const ResetPasswordForm = () => {
     }
   };
   return (
-<div className="flex flex-row relative h-screen w-screen mx-5 my-5">
-      <Card className="w-full max-w-md flex justify-center">
-        <CardHeader>
-          <CardTitle>Reset your password</CardTitle>
-          <CardDescription>
+<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-red-50 p-4">
+      <Card className="w-full max-w-lg shadow-xl border border-blue-100 bg-white/95 backdrop-blur-sm">
+        <CardHeader className="space-y-3 text-center pb-8">
+          <CardTitle className="text-3xl font-bold tracking-tight text-gray-800">Reset your password</CardTitle>
+          <CardDescription className="text-base text-gray-600">
             Enter your email to receive an OTP for password reset
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent>
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="email">Email</Label>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  {...register("email")} // Bỏ validation thừa vì đã có zod
+                  {...register("email")} 
+                  className="h-12 text-base border-gray-200 focus:border-blue-300 focus:ring-blue-200"
                 />
                 {errors.email && (
                   <p className="text-red-500">{errors.email.message}</p>
@@ -70,9 +71,16 @@ const ResetPasswordForm = () => {
             </div>
           </CardContent>
 
-          <CardFooter className="flex-col gap-2">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send OTP"}
+          <CardFooter className="flex flex-col space-y-4 pt-6">
+            <Button type="submit" className="w-full hover:shadow-lg hover:scale-[1.02] transition-all duration-200" disabled={isLoading} >
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Sending OTP to your email....</span>
+                </div>
+              ) : (
+                "Send OTP"
+              )}
             </Button>
           </CardFooter>
         </form>

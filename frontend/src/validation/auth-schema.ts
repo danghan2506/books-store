@@ -39,6 +39,21 @@ export const loginSchema = z.object({
     email: z.string().email("Invalid email!"),
     password: z.string().min(8, "Password must contain at least 8 character!")
 })
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Passsword must contain at least 8 characters!")
+      .regex(/[A-Z]/, "Password must contain at least 1 uppercase letter!")
+      .regex(/[a-z]/, "Password must contain at least 1 lowercase letter!")
+      .regex(/[0-9]/, "Password must contain at least 1 number!")
+      .regex(/[@$!%*?&]/, "Password must contain at least 1 special character"),
+    confirmPassword: z.string().min(8, "Password do not match!"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Password do not match!",
+  })
 export const updatePasswordSchema = z
   .object({
     currentPassword: z.string().min(8, "Current password must be at least 8 characters"),
@@ -173,4 +188,5 @@ export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>
 export type LoginFormData = z.infer<typeof loginSchema>
 export type SignupFormData = z.infer<typeof signupSchema>;
 export type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
 

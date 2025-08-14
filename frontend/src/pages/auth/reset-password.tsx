@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useResetPasswordMutation } from "@/redux/API/auth-api-slice";
 import {
-  type UpdatePasswordFormData,
-  updatePasswordSchema,
+  type ResetPasswordFormData,
+  resetPasswordSchema,
 } from "@/validation/auth-schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,8 +30,8 @@ const ResetPassword = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<UpdatePasswordFormData>({
-    resolver: zodResolver(updatePasswordSchema),
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
   });
   // Lay email tu query hoac localStorage
   const email = useMemo(() => {
@@ -39,7 +39,7 @@ const ResetPassword = () => {
     return params.get("email") || localStorage.getItem("resetEmail") || "";
   }, [location.search]);
 
-  const onSubmit = async (data: UpdatePasswordFormData) => {
+  const onSubmit = async (data: ResetPasswordFormData) => {
     if (!email) {
       toast.error("Missing email. Please request OTP again.");
       navigate("/request-reset-password", { replace: true });
@@ -84,7 +84,7 @@ const ResetPassword = () => {
 <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label
-              htmlFor="pasword"
+              htmlFor="newPassword"
               className="text-sm font-medium text-gray-700"
             >
               Password
@@ -92,7 +92,7 @@ const ResetPassword = () => {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
-                id="password"
+                id="newPassword"
                 type={showPassword ? "text" : "password"}
                 placeholder="New password"
                 {...register("newPassword")}

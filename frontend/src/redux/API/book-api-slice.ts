@@ -63,6 +63,14 @@ const bookApiSlice = apiSlice.injectEndpoints({
     }
       })
     }),
+    createReviews: builder.mutation({
+      query: (data) => ({
+        url: `${BOOKS_URL}/${data.bookId}/reviews`,
+        method: "POST",
+        body: data
+      })
+    }
+    ), 
     getBookBaseOnCategory: builder.query<Book[], { keyword?: string }>({
       query: ({ keyword }) => ({
         url: `${BOOKS_URL}/category/${keyword}`,
@@ -82,4 +90,5 @@ export const {
   useGetBookDetailsQuery,
   useUpdateBookMutation,
   useDeleteBookMutation,
+  useCreateReviewsMutation
 } = bookApiSlice;

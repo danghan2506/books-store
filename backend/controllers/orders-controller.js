@@ -132,23 +132,40 @@ const markOrderAsPaid = asyncHandler(async(req, res) => {
     const {orderId} = req.params
     try {
         const order = await Order.findById(orderId)
-        if (order) {
+        if (!order) {
+            res.status(404);
+            throw new Error("Order not found");
+        }
+
+        // Prevent double processing if already paid
+        if (order.isPaid) {
+            return res.status(200).json(order)
+        }
+
         order.isPaid = true;
         order.paidAt = Date.now();
         order.paymentResult = {
-        id: req.body.id,
-        status: req.body.status,
-        update_time: req.body.update_time,
-        email_address: req.body.payer.email_address,
-      };
-    const updateOrder = await order.save()
-    console.log(updateOrder)
-    res.status(201).json(updateOrder)
-    }
-    else{
-        res.status(404);
-        throw new Error("Order not found");
-    }
+            id: req.body.id,
+            status: req.body.status,
+            update_time: req.body.update_time,
+            email_address: req.body.payer?.email_address,
+        };
+
+        const updatedOrder = await order.save()
+
+        // Increment salesCount for each purchased book by the quantity bought
+        if (Array.isArray(order.orderItems) && order.orderItems.length > 0) {
+            await Promise.all(
+                order.orderItems.map((item) =>
+                    Book.updateOne(
+                        { _id: item.book },
+                        { $inc: { salesCount: item.quantity ?? 1 } }
+                    )
+                )
+            )
+        }
+
+        return res.status(201).json(updatedOrder)
     } catch (error) {
         console.error(error)
         res.status(500).json("Server error!")

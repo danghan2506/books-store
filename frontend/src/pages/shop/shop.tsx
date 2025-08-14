@@ -24,7 +24,7 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState<"relevant" | "low" | "high">("relevant");
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Lấy tất cả categories
+  
   const {
     data: allCategories = [],
     isLoading: categoriesLoading,
@@ -40,7 +40,7 @@ const Shop = () => {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
   
-  // Lấy books theo từ khóa tìm kiếm (khi không có category được chọn)
+  
   const {
     data,
     isLoading: bookLoading,
@@ -50,10 +50,10 @@ const Shop = () => {
       keyword: searchTerm,
       page: currentPage 
     },
-    { skip: !!selectedCategoryName } // Skip khi có category được chọn
+    { skip: !!selectedCategoryName } 
   );
   
-  // Lấy books theo category (khi có category được chọn)
+ 
   const {
     data: categoryBooks = [],
     isLoading: categoryLoading,
@@ -102,9 +102,9 @@ const Shop = () => {
       const priceB = b.price || 0;
 
       if (sortBy === "low") {
-        return priceA - priceB; // Thấp đến cao
+        return priceA - priceB; 
       } else {
-        return priceB - priceA; // Cao đến thấp
+        return priceB - priceA; 
       }
     });
   };

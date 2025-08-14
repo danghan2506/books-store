@@ -13,6 +13,7 @@ export interface Book {
   pageNumber: number;
   description: string;
   salesCount: number;
+  reviews: Review[]
   price: number;
   stock: number;
   isActive: boolean;

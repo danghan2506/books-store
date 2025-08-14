@@ -25,6 +25,7 @@ export interface Order {
     paidAt: Date
 }
 export interface OrderItems {
+    _id: string
     name: string
     book: string // book id reference
     images: Images[]

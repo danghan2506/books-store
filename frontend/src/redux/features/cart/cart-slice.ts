@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { updateCart } from "@/utils/cart";
 import { getCartItemsFromLocalStorage } from "@/utils/local-storage";
-import type { CartState } from "@/types/order-type";
+import type { CartState, OrderItems } from "@/types/order-type";
 
 const initialState: CartState = {
     cartItems: [],
@@ -35,44 +35,50 @@ const cartSlice = createSlice({
             state.shippingAddress = cartData.shippingAddress
             state.paymentMethod = cartData.paymentMethod
         },
-        addToCart: (state , action ) => {
-            const {user, rating, reviewCount, review, userId , ...items} = action.payload
-            const existItem = state.cartItems.find((x: any) => x._id === items._id)
-            if(existItem){
-                state.cartItems = state.cartItems.map((x: any) => x._id === existItem._id ? {...x, quantity: x.quantity + 1} : x)
-            }
-            else{
+        addToCart: (state , action: PayloadAction<OrderItems & { userId?: string }>) => {
+            const { userId , ...items } = action.payload
+            const existItem = state.cartItems.find((x: OrderItems) => x._id === items._id)
+            if (existItem) {
+                state.cartItems = state.cartItems.map((x: OrderItems) => x._id === existItem._id ? { ...x, quantity: x.quantity + 1 } : x)
+            } else {
                 state.cartItems = [...state.cartItems, items]
             }
             updateCart(state, userId)
         },
-        removeFromCart: (state, action) => {
-            const { itemId, userId } = action.payload
-            state.cartItems = state.cartItems.filter((x: any) => x._id !== itemId)
+        updateItemQuantity: (state, action: PayloadAction<{ itemId: string, quantity: number, userId?: string }>) => {
+            const { itemId, quantity, userId } = action.payload
+            state.cartItems = state.cartItems.map((x: OrderItems) =>
+                x._id === itemId ? { ...x, quantity } : x
+            )
             updateCart(state, userId)
         },
-        saveShippingAddress: (state, action) => {
+        removeFromCart: (state, action: PayloadAction<{ itemId: string, userId?: string }>) => {
+            const { itemId, userId } = action.payload
+            state.cartItems = state.cartItems.filter((x: OrderItems) => x._id !== itemId)
+            updateCart(state, userId)
+        },
+        saveShippingAddress: (state, action: PayloadAction<{ address: CartState["shippingAddress"], userId?: string }>) => {
             const { address, userId } = action.payload
             state.shippingAddress = address
             const cartKey = userId ? `cartItems_${userId}` : "cartItems"
             localStorage.setItem(cartKey, JSON.stringify(state))
         },
-        savePaymentMethod: (state, action) => {
+        savePaymentMethod: (state, action: PayloadAction<{ method: string, userId?: string }>) => {
             const { method, userId } = action.payload
             state.paymentMethod = method
             const cartKey = userId ? `cartItems_${userId}` : "cartItems"
             localStorage.setItem(cartKey, JSON.stringify(state))
         },
-          clearCartItems: (state, action) => {
+          clearCartItems: (state, action: PayloadAction<string | undefined>) => {
             const userId = action.payload
             state.cartItems = []
             const cartKey = userId ? `cartItems_${userId}` : "cartItems"
             localStorage.setItem(cartKey, JSON.stringify(state))
         },
-        resetCart: (state) => {
-            state = initialState
+        resetCart: () => {
+            return initialState
         }
     }
 })
-export const { addToCart, removeFromCart, saveShippingAddress, savePaymentMethod, clearCartItems, loadUserCart } = cartSlice.actions
+export const { addToCart, updateItemQuantity, removeFromCart, saveShippingAddress, savePaymentMethod, clearCartItems, loadUserCart } = cartSlice.actions
 export default cartSlice.reducer

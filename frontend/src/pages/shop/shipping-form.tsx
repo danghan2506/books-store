@@ -18,12 +18,13 @@ const ShippingForm = () => {
   const {userInfo} = useSelector((state: RootState) => state.auth)
   const userId = userInfo?._id
   const { shippingAddress } = cart;
+  console.log(userInfo)
   const [paymentMethod, setPaymentMethod] = useState("PayPal");
-  const [address, setAddress] = useState(shippingAddress.address || "");
-  const [district, setDistrict] = useState(shippingAddress.district || "");
-  const [city, setCity] = useState(shippingAddress.city || "");
-  const [country, setCountry] = useState(shippingAddress.country || "");
-  const [phoneNumber, setPhoneNumber] = useState(shippingAddress.phoneNumber || "");
+  const [address, setAddress] = useState(userInfo?.addressBook?.address || "");
+  const [district, setDistrict] = useState(userInfo?.addressBook?.district || "");
+  const [city, setCity] = useState(userInfo?.addressBook?.city || "");
+  const [country, setCountry] = useState(userInfo?.addressBook?.country || "");
+  const [phoneNumber, setPhoneNumber] = useState(userInfo?.phoneNumber || "");
   const [username, setUsername] = useState(userInfo?.username || "")
   useEffect(() => {
     if (!shippingAddress.address) {
@@ -210,8 +211,8 @@ const ShippingForm = () => {
                         type="radio"
                         id="credit-card"
                         name="paymentMethod"
-                        value="Credit Card"
-                        checked={paymentMethod === "Credit Card"}
+                        value="Cash on Delivery"
+                        checked={paymentMethod === "Cash on Delivery"}
                         onChange={(e) => setPaymentMethod(e.target.value)}
                         className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                       />
@@ -220,10 +221,10 @@ const ShippingForm = () => {
                         className="flex-1 cursor-pointer"
                       >
                         <div className="font-medium text-gray-900">
-                          Credit Card
+                          Cash on Delivery
                         </div>
                         <div className="text-sm text-gray-600">
-                          Pay with Visa, Mastercard, or American Express
+                          Pay with cash upon delivery
                         </div>
                       </label>
                     </div>

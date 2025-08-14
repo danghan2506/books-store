@@ -9,7 +9,7 @@ import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router";
-import { Loader2, Truck } from "lucide-react";
+import { Loader2, Truck, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -24,7 +24,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { Book } from "@/types/books-type";
 import { useDispatch } from "react-redux";
 import { clearCartItems } from "@/redux/features/cart/cart-slice";
 const OrderSummary = () => {
@@ -37,7 +36,6 @@ const OrderSummary = () => {
     isLoading,
     error,
   } = useGetOrderDetailsQuery(orderId);
-  console.log(order);
   const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
   const [deliverOrder, { isLoading: loadingDeliver }] =
     useDeliverOrderMutation();
@@ -60,7 +58,7 @@ const OrderSummary = () => {
         paypalDispatch({ type: "setLoadingStatus", value: "pending" });
       }
     };
-    if (paypal && !order?.isPaid) {
+   if (paypal && !order?.isPaid && order?.paymentMethod === "PayPal") {
       loadPayPaylScript();
     }
   }, [paypal, order, paypalDispatch]);
@@ -281,21 +279,54 @@ const OrderSummary = () => {
           </Card>
 
           {/* Payment Section */}
-          {!order.isPaid && (
-            <Card>
+          {!order.isPaid &&  (
+             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-bold">Payment</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {!paypalLoading && !paypalError && paypal?.clientId ? (
-                  <PayPalButtons
-                    createOrder={createOrder}
-                    onApprove={onApprove}
-                    onError={onError}
-                  />
+                {order.paymentMethod === "PayPal" ? (
+                  // Hiển thị PayPal Buttons nếu payment method là PayPal
+                  <>
+                    {!paypalLoading && !paypalError && paypal?.clientId ? (
+                      <PayPalButtons
+                        createOrder={createOrder}
+                        onApprove={onApprove}
+                        onError={onError}
+                      />
+                    ) : (
+                      <div className="text-center text-gray-500">
+                        {paypalLoading ? "Loading PayPal..." : "PayPal unavailable"}
+                      </div>
+                    )}
+                  </>
+                ) : order.paymentMethod === "Cash on Delivery" ? (
+                  // Hiển thị thông báo thành công nếu payment method là Cash on Delivery
+                  <div className="text-center space-y-4">
+                    <div className="flex justify-center">
+                      <CheckCircle className="w-16 h-16 text-green-500" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold text-green-600">
+                        Order Placed Successfully!
+                      </h3>
+                      <p className="text-gray-600">
+                        Your order has been placed successfully. You will pay when the order is delivered.
+                      </p>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <p className="text-sm text-green-700">
+                          <strong>Payment Method:</strong> Cash on Delivery
+                        </p>
+                        <p className="text-sm text-green-700 mt-1">
+                          <strong>Total Amount:</strong> ${order.totalPrice.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
+                  // Fallback cho các payment method khác
                   <div className="text-center text-gray-500">
-                    {paypalLoading ? "Loading PayPal..." : "PayPal unavailable"}
+                    Payment method: {order.paymentMethod}
                   </div>
                 )}
               </CardContent>

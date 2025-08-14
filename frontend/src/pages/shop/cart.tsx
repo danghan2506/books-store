@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux"
 import {Link,  useNavigate } from "react-router-dom"
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag} from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import {loadUserCart, removeFromCart} from "../../redux/features/cart/cart-slice"
+import {loadUserCart, removeFromCart, updateItemQuantity} from "../../redux/features/cart/cart-slice"
 import { useEffect } from "react"
 import type { RootState } from "@/redux/features/store"
 import { toast } from "sonner";
@@ -23,13 +23,18 @@ const Cart = () => {
   const {cartItems} = cart
   const totalItems = cartItems.reduce((acc: number, item) => acc + item.quantity, 0)
   const totalPrice = cartItems.reduce((acc: number, item) => acc + item.quantity * item.price, 0)
-
   const removeFromCartHandler = (itemId: string) => {
     dispatch(removeFromCart({ itemId, userId: userInfo?._id }))
     toast.success("Đã xóa khỏi giỏ hàng");
   }
   const checkoutHandler = () => {
     navigate("/shipping-address")
+  }
+  const adjustQuantity = (type: 'increase' | 'decrease', itemId: string, currentQty: number, stock?: number) => {
+    if(type === 'decrease' && currentQty <= 1) return
+    if(type === 'increase' && stock !== undefined && currentQty >= stock) return
+    const newQty = type === 'increase' ? currentQty + 1 : currentQty - 1
+    dispatch(updateItemQuantity({ itemId, quantity: newQty, userId: userInfo?._id }))
   }
   return (
     <div className="min-h-screen bg-white-50">
@@ -91,22 +96,24 @@ const Cart = () => {
 
                   {/* Quantity Controls + Remove */}
                   <div className="flex flex-col sm:flex-row items-center gap-3 mx-auto sm:mx-0">
-                    <div className="flex items-center border border-gray-300 rounded-lg">
+                     <div className="flex items-center border border-gray-300 rounded-lg">
                       <button
-                        // onClick={() => updateQuantity(item, 'decrease')}
+                        onClick={() => adjustQuantity('decrease', item._id, item.quantity)}
                         className="p-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
                         disabled={item.quantity <= 1}
-                      >
+                       aria-label="Decrease quantity"
+                       >
                         <Minus className="w-4 h-4" />
                       </button>
                       <span className="px-3 py-2 font-medium min-w-[3rem] text-center">
                         {item.quantity}
                       </span>
-                      <button
-                        // onClick={() => updateQuantity(item, 'increase')}
+                       <button
+                        onClick={() => adjustQuantity('increase', item._id, item.quantity, item.stock)}
                         className="p-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                        disabled={item.quantity >= item.stock}
-                      >
+                        disabled={item.stock !== undefined ? item.quantity >= item.stock : false}
+                        aria-label="Increase quantity"
+                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
@@ -121,7 +128,7 @@ const Cart = () => {
                 </div>
 
                 {/* Stock warning */}
-                {item.stock <= 5 && (
+                {item.stock !== undefined && item.stock <= 5 && (
                   <div className="mt-4 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-center sm:text-left">
                     Only {item.stock} left in stock
                   </div>

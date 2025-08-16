@@ -37,7 +37,7 @@ const Cart = () => {
     dispatch(updateItemQuantity({ itemId, quantity: newQty, userId: userInfo?._id }))
   }
   return (
-    <div className="min-h-screen bg-white-50">
+    <div className="pt-16 bg-gray-50 min-h-screen">
   <div className="px-4 py-6 md:px-6 lg:px-8">
     <div className="max-w-screen-xl mx-auto">
       {/* Header */}

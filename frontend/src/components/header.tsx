@@ -2,23 +2,37 @@ import { Link } from "react-router";
 import logo from "../assets/logo.png";
 import { CgMenuLeft } from "react-icons/cg";
 import Navbar from "./navbar";
-import { ShoppingCart, User } from "lucide-react";
+import { ShoppingCart, User, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { RootState } from "@/redux/features/store";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/API/user-api-slice";
 import { logout } from "@/redux/features/auth/auth-slice";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 const Header = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [menuOpenned, setMenuOpenned] = useState(false);
   const [active, setActive] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoutApiCall] = useLogoutMutation()
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const { cartItems } = useSelector((state: RootState) => state.cart);
   const toggleMenu = () => {
     setMenuOpenned((prev) => !prev);
+  };
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
   const logoutHandler = async() => {
     try {
@@ -29,24 +43,32 @@ const Header = () => {
       console.log(error)
     }
   }
+  const truncateUsername = (username: string, maxLength: number) => {
+    return username.length > maxLength 
+      ? `${username.substring(0, maxLength)}...` 
+      : username;
+  };
+  const getUserInitials = (username: string) => {
+    return username
+      .split(' ')
+      .map(name => name.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 0) {
-        // close menu it opnened when scrolling occured
-        if (menuOpenned) {
-          setMenuOpenned(false);
-        }
+      setIsScrolled(window.scrollY > 20);
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
       }
-      setActive(window.scrollY > 30);
     };
+
     window.addEventListener("scroll", handleScroll);
-    // clean up the event listener
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [menuOpenned]);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isMobileMenuOpen]);
   return (
-    <header className="fixed top-0 w-full left-0 right-0 z-50 bg-white shadow-sm">
+   <header className="fixed top-0 w-full left-0 right-0 z-50 bg-white shadow-sm">
       <div
         className={`${
           active ? "bg-white py-2.5" : "bg-zinc-50 py-3"
@@ -99,31 +121,64 @@ const Header = () => {
 
           {/* Login Button */}
           <div className="relative group">
-            {userInfo ? (
-              <button className="text-sm font-medium bg-white border border-gray-200 px-6 py-2.5 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-x-2 shadow-sm hover:shadow-md cursor-pointer">
-                Hi, {userInfo.username}
-              </button>
-            ) : (
-              <Link to="/login">
-                <button className="text-sm font-medium bg-white border border-gray-200 px-6 py-2.5 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-x-2 shadow-sm hover:shadow-md cursor-pointer">
-                  Login <User className="w-4 h-4" />
-                </button>
-              </Link>
-            )}
             {userInfo && (
-              <>
-                <ul className="bg-white p-1 w-32 ring-1 ring-slate-900/5 rounded absolute right-0 top-10 hidden group-hover:flex flex-col text-[14px] font-[400] shadow-md">
-                  <li className="p-2 text-gray-300 rounded-md hover:bg-neutral-100 cursor-pointer">
-                    Orders
-                  </li>
-                  <li
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="user bg-user border-user-border hover:bg-user-hover transition-smooth focus:ring-2 focus:ring-primary/20"
+                  >
+                    {/* Mobile: Show only initials */}
+                    <div className="sm:hidden w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                      {getUserInitials(userInfo.username)}
+                    </div>
+                    
+                    {/* Tablet: Show truncated username */}
+                    <div className="hidden sm:flex md:hidden items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span className="text-sm">
+                        {truncateUsername(userInfo.username, 8)}
+                      </span>
+                    </div>
+                    
+                    {/* Desktop: Show full username (with max width) */}
+                    <div className="hidden md:flex items-center space-x-2 max-w-[200px]">
+                      <User className="h-4 w-4 flex-shrink-0" />
+                      <span className="text-sm font-medium truncate">
+                        Hi, {userInfo.username}
+                      </span>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-56 bg-popover border shadow-elegant"
+                >
+                  <div className="px-3 py-2">
+                    <p className="text-sm font-medium">{userInfo.username}</p>
+                    <p className="text-xs text-muted-foreground">{userInfo.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Link to ="/my-orders">
+                    <span> My Orders</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Link to ="/my-profile">
+                    <span> My Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="cursor-pointer text-destructive focus:text-destructive"
                     onClick={logoutHandler}
-                    className="p-2 text-gray-300 rounded-md hover:bg-neutral-100 cursor-pointer"
                   >
                     Logout
-                  </li>
-                </ul>
-              </>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>

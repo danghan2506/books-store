@@ -23,6 +23,8 @@ export interface Order {
     deliveredAt: Date
     isPaid: boolean
     paidAt: Date
+    createdAt: Date
+    updatedAt: Date
 }
 export interface OrderItems {
     _id: string
@@ -53,7 +55,7 @@ export interface PaymentResult {
     email_address: string
 }
 export interface OrdersQueryResult {
-    orders: Order[],
+    orderItems: Order[],
     page: number;
     pages: number;
     hasMore: boolean;

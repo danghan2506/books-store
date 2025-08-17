@@ -5,7 +5,8 @@ import {
   usePayOrderMutation,
 } from "@/redux/API/order-api-slice";
 import type { RootState } from "@/redux/features/store";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { DISPATCH_ACTION, PayPalButtons, SCRIPT_LOADING_STATE, usePayPalScriptReducer} from "@paypal/react-paypal-js";
+import { type CreateOrderActions , type  CreateOrderData} from "@paypal/paypal-js/types/components/buttons"
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router";
@@ -44,18 +45,18 @@ const OrderSummary = () => {
     data: paypal,
     isLoading: paypalLoading,
     error: paypalError,
-  } = useGetPaypalClientIdQuery();
+  } = useGetPaypalClientIdQuery({});
   useEffect(() => {
     const loadPayPaylScript = async () => {
       if (paypal?.clientId) {
         paypalDispatch({
-          type: "resetOptions",
+          type: DISPATCH_ACTION.RESET_OPTIONS,
           value: {
-            "client-id": paypal.clientId,
+            "clientId": paypal.clientId,
             currency: "USD",
           },
         });
-        paypalDispatch({ type: "setLoadingStatus", value: "pending" });
+        paypalDispatch({ type: DISPATCH_ACTION.LOADING_STATUS, value: SCRIPT_LOADING_STATE.PENDING });
       }
     };
    if (paypal && !order?.isPaid && order?.paymentMethod === "PayPal") {
@@ -74,7 +75,7 @@ const OrderSummary = () => {
           },
         ],
       })
-      .then((orderID) => {
+      .then((orderID: string) => {
         return orderID;
       });
   };
@@ -85,19 +86,54 @@ const OrderSummary = () => {
         refetch();
         toast.success("Order is paid");
         dispatch(clearCartItems(userInfo?._id))
-      } catch (error) {
-        toast.error(error);
+      } catch (err: unknown) {
+      if (typeof err === "object" && err !== null && "data" in err) {
+        const errorData = (err as { data?: { message?: string } }).data;
+        toast.error(errorData?.message || "Failed to pay orders");
+      } else {
+        toast.error("Failed to pay orders");
       }
+    }
     });
   };
-  const onError = (error) => {
-    toast.error(error);
+  const onError = (error: unknown) => {
+    if (typeof error === "object" && error !== null && "data" in err) {
+        const errorData = (error as { data?: { message?: string } }).data;
+        toast.error(errorData?.message || "Unknown error occurred during payment");
+      } else {
+        toast.error("Unknown error occurred during payment");
+      }
   };
   const deliverHandler = async () => {
     await deliverOrder({ orderId });
     refetch();
   };
   if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading order details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+   if (loadingPay) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading order details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (isPending) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -285,10 +321,10 @@ const OrderSummary = () => {
                 <CardTitle className="text-xl font-bold">Payment</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {order.paymentMethod === "PayPal" ? (
+                {order.paymentMethod === "PayPal"  ? (
                   // Hiển thị PayPal Buttons nếu payment method là PayPal
                   <>
-                    {!paypalLoading && !paypalError && paypal?.clientId ? (
+                    {!paypalLoading && !paypalError && paypal?.clientId  && userInfo?.role === "user" ? (
                       <PayPalButtons
                         createOrder={createOrder}
                         onApprove={onApprove}

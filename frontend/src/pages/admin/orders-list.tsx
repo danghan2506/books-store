@@ -28,7 +28,7 @@ const OrdersList = () => {
   const formatDate = (dateString: Date) => {
     return new Date(dateString).toISOString().substring(0, 10);
   };
-  const orders = allOrders?.orders || [];
+  const orders = allOrders?.orderItems || [];
   const totalPages = allOrders?.pages || 1;
   const hasMore = allOrders?.hasMore || false;
   const handlePageChange = (page: number) => {
@@ -151,10 +151,7 @@ const OrdersList = () => {
                           <td className="p-4">
                             <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
                               <img
-                                src={
-                                  order.orderItems.images[0]?.url ||
-                                  "/api/placeholder/64/64"
-                                }
+                                src={order.orderItems[0].images[0]?.url || "/api/placeholder/64/64"}
                                 alt="Product"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -181,7 +178,7 @@ const OrdersList = () => {
                             </code>
                           </td>
                           <td className="p-4 text-muted-foreground">
-                            {formatDate(order.paidAt)}
+                            {formatDate(order.createdAt)}
                           </td>
                           <td className="p-4 font-semibold">
                             ${order.totalPrice.toFixed(2)}
@@ -275,7 +272,7 @@ const OrdersList = () => {
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
                       <img
                         src={
-                          order.orderItems.images[0]?.url ||
+                          order.orderItems[0].images[0]?.url ||
                           "/api/placeholder/64/64"
                         }
                         alt="Product"
@@ -304,7 +301,7 @@ const OrdersList = () => {
                           {order._id.slice(-8)}
                         </code>
                         <span className="text-sm text-muted-foreground">
-                          {formatDate(order.paidAt)}
+                          {formatDate(order.createdAt)}
                         </span>
                       </div>
 

@@ -12,7 +12,7 @@ dotenv.config()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
-const port = process.env.port
+const port = process.env.PORT
 const database = process.env.DATABASE_URI
 connectDatabase(database)
 connectCloudinary()

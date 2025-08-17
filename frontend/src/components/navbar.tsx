@@ -1,7 +1,12 @@
 import { CircleX, Heart, Home, Library} from 'lucide-react'
 import { NavLink } from 'react-router'
 import { Link } from 'react-router-dom'
-const Navbar = ({containerStyles, toggleMenu, menuOpenned}) => {
+interface NavbarProps {
+  containerStyles?: string
+  toggleMenu?: () => void
+  menuOpenned?: boolean
+}
+const Navbar = ({containerStyles, toggleMenu, menuOpenned}: NavbarProps) => {
   const navItems = [
     {to: '/', label: "Home", icon: <Home/>},
     {to: '/shop' , label: "Shop", icon: <Library/>},

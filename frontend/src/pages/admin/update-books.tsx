@@ -46,19 +46,26 @@ const UpdateBooks = () => {
         formData.append("author", author)
         formData.append("category", category)
         formData.append("publishingHouse", publishingHouse)
-        formData.append("publishYear", publishYear)
+        formData.append("publishYear", publishYear.toString())
         formData.append("language", language)
         formData.append("description", description)
-        formData.append("price", price)
-        formData.append("stock", stock)
-        formData.append("pageNumber", pageNumber)
-        const data = await updateBook({bookId: bookId, data: formData}).unwrap()
+        formData.append("price", price.toString())
+        formData.append("stock", stock.toString())
+        formData.append("pageNumber", pageNumber.toString())
         toast.success("Book updated successfully")
         navigate("/admin/books-list", {replace: true})
     }
-    catch(err: any){
-        console.error(err)
-        toast.error(err?.data || "Failed to update book")
+    catch (err: unknown) {
+      console.error(err)
+            let message = "Failed to update book"
+            if (typeof err === "object" && err !== null) {
+              const anyErr = err as { data?: unknown; message?: string }
+              const dataMessage = typeof anyErr.data === "string" ? anyErr.data : undefined
+              message = dataMessage ?? anyErr.message ?? message
+            } else if (typeof err === "string") {
+              message = err
+            }
+            toast.error(message)
     }
   }
   return (

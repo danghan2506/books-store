@@ -48,14 +48,22 @@ const BooksList = () => {
   }
   const handleDeleteBook = async (bookId: string) => {
     try {
-      let confirm = window.confirm("Are you sure you want to delete this book?")
+      const confirm = window.confirm("Are you sure you want to delete this book?")
       if (!confirm) return;
       const { data } = await deleteBook(bookId);
       toast.success(`"${data.deletedBook?.name}" is deleted`, {});
       refetch(); // Refetch the books list after deletion
-    } catch (err: any) {
-      console.log(err);
-      toast.error(err?.data?.message || err.message);
+    } catch (err: unknown) {
+      console.error(err)
+            let message = "Failed to delete book"
+            if (typeof err === "object" && err !== null) {
+              const anyErr = err as { data?: unknown; message?: string }
+              const dataMessage = typeof anyErr.data === "string" ? anyErr.data : undefined
+              message = dataMessage ?? anyErr.message ?? message
+            } else if (typeof err === "string") {
+              message = err
+            }
+            toast.error(message)
     }
   }
   const getPageNumbers = () => {

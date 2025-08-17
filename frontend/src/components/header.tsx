@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import logo from "../assets/logo.png";
 import { CgMenuLeft } from "react-icons/cg";
 import Navbar from "./navbar";
-import { ShoppingCart, User, Menu, X } from "lucide-react";
+import { ShoppingCart, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { RootState } from "@/redux/features/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 const Header = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -30,9 +29,6 @@ const Header = () => {
   const { cartItems } = useSelector((state: RootState) => state.cart);
   const toggleMenu = () => {
     setMenuOpenned((prev) => !prev);
-  };
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
   const logoutHandler = async() => {
     try {
@@ -58,15 +54,15 @@ const Header = () => {
   };
   useEffect(() => {
     const handleScroll = () => {
+      setActive(true)
       setIsScrolled(window.scrollY > 20);
       if (isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isMobileMenuOpen]);
+  }, [isScrolled, isMobileMenuOpen]);
   return (
    <header className="fixed top-0 w-full left-0 right-0 z-50 bg-white shadow-sm">
       <div

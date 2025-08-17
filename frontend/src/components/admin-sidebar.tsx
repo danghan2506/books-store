@@ -1,28 +1,8 @@
-import {
-  ChevronsUpDown,
-  User2,
-  Settings,
-  ShoppingBag,
-  LayoutDashboard,
-  BookA,
-  Users
+import {ChevronsUpDown,User2,Settings,LayoutDashboard,BookA,Users
 } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
+import {Sidebar,SidebarContent,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarFooter,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";

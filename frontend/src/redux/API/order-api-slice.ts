@@ -33,19 +33,19 @@ const orderApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    countTotalOrders: builder.query({
+    countTotalOrders: builder.query<number, void>({
       query: () => ({
         url: `${ORDERS_URL}/total-orders`,
         method: "GET",
       }),
     }),
-    calculateTotalSales: builder.query({
+    calculateTotalSales: builder.query<number, void>({
       query: () => ({
         url: `${ORDERS_URL}/total-sales`,
         method: "GET",
       }),
     }),
-    calculateTotalSalesByDate: builder.query({
+    calculateTotalSalesByDate: builder.query<number, void>({
       query: () => ({
         url: `${ORDERS_URL}/total-sales/by-date`,
         method: "GET",

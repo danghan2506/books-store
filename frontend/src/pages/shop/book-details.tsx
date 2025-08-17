@@ -1,4 +1,4 @@
-import { useState} from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCreateReviewsMutation, useGetBookDetailsQuery } from "@/redux/API/book-api-slice";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ const BookDetails = () => {
   const [comment, setComment] = useState("")
   const [rating, setRating] = useState("")
   const [createReviews] = useCreateReviewsMutation()
-  const addReviews = async (e) => {
+  const addReviews = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     try{
       await createReviews({
@@ -89,19 +89,41 @@ const BookDetails = () => {
     const total = book.reviews.reduce((sum, review) => sum + review.rating, 0);
     return (total / book.reviews.length).toFixed(1);
   };
-  const getRatingDistribution = () => {
-    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    book.reviews?.forEach(review => {
-      distribution[review.rating as keyof typeof distribution]++;
-    });
-    return distribution;
-  };
   const addToCartHandler = () => {
-    dispatch(addToCart({...book, userId: userInfo?._id,  quantity}))
+    dispatch(addToCart({
+        _id: book._id,
+        name: book.name,
+        book: book,  
+        images: book.images,
+        quantity: quantity,
+        price: book.price,
+        userId: userInfo?._id,
+        brand: book.publishingHouse, 
+        stock: book.stock,    
+        category: {
+            categoryName: book.category.categoryName,
+            categorySlug: book.category.categorySlug
+        }
+    }))
     toast.success("Đã thêm vào giỏ hàng");
   }
   const buyNowHandler = () => {
-    dispatch(addToCart({ ...book, userId: userInfo?._id, quantity }));
+    dispatch(addToCart({
+        _id: book._id,
+        name: book.name,
+        book: book,  // Book object đầy đủ
+        images: book.images,
+        quantity: quantity,
+        price: book.price,
+        userId: userInfo?._id,
+        // Optional properties nếu cần
+        brand: book.publishingHouse, // hoặc undefined
+        stock: book.stock,    // hoặc undefined  
+        category: {
+            categoryName: book.category.categoryName,
+            categorySlug: book.category.categorySlug
+        }
+    }));
     navigate("/cart");
   };
   return (

@@ -1,11 +1,10 @@
-import React from "react";
 import { useGetAllOrdersQuery } from "@/redux/API/order-api-slice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Package, Eye } from "lucide-react";
+import { Package, Eye } from "lucide-react";
 import { useState } from "react";
 import {
   Pagination,
@@ -14,59 +13,66 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from "@/components/ui/pagination";
+interface StatusBadgeProps {
+  status: boolean;
+  type?: "payment" | "delivery";
+}
 const OrdersList = () => {
-  const [currentPage, setCurrentPage] = useState(1)
-  const { data: allOrders, isLoading, error } = useGetAllOrdersQuery({page: currentPage});
-  const formatDate = (dateString) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    data: allOrders,
+    isLoading,
+    error,
+  } = useGetAllOrdersQuery({ page: currentPage });
+  const formatDate = (dateString: Date) => {
     return new Date(dateString).toISOString().substring(0, 10);
   };
-  const orders = allOrders?.orders || []
-  const totalPages = allOrders?.pages || 1
-  const hasMore = allOrders?.hasMore || false
+  const orders = allOrders?.orders || [];
+  const totalPages = allOrders?.pages || 1;
+  const hasMore = allOrders?.hasMore || false;
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const getPageNumbers = () => {
-    const pages = []
-    const maxVisiblePages = 5
-    
+    const pages = [];
+    const maxVisiblePages = 5;
+
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
+        pages.push(i);
       }
     } else {
       if (currentPage <= 3) {
         for (let i = 1; i <= 4; i++) {
-          pages.push(i)
+          pages.push(i);
         }
-        pages.push('...')
-        pages.push(totalPages)
+        pages.push("...");
+        pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
-        pages.push(1)
-        pages.push('...')
+        pages.push(1);
+        pages.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i)
+          pages.push(i);
         }
       } else {
-        pages.push(1)
-        pages.push('...')
+        pages.push(1);
+        pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i)
+          pages.push(i);
         }
-        pages.push('...')
-        pages.push(totalPages)
+        pages.push("...");
+        pages.push(totalPages);
       }
     }
-    return pages
-  }
-  const StatusBadge = ({ status }) => {
+    return pages;
+  };
+  const StatusBadge = ({ status }: StatusBadgeProps) => {
     const variant = status ? "default" : "destructive";
     const className = status
       ? "bg-green-100 text-green-800 hover:bg-green-100"
       : "bg-red-100 text-red-800 hover:bg-red-100";
-
     return (
       <Badge variant={variant} className={className}>
         {status ? "Completed" : "Pending"}
@@ -90,9 +96,7 @@ const OrdersList = () => {
         <h1 className="text-3xl font-bold mb-6">All Orders</h1>
         <Alert variant="destructive">
           <AlertDescription>
-            {error?.data?.error ||
-              error?.error ||
-              "An error occurred while loading your orders"}
+            An error occurred while loading your orders
           </AlertDescription>
         </Alert>
       </div>
@@ -148,14 +152,21 @@ const OrdersList = () => {
                             <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
                               <img
                                 src={
-                                  order.orderItems[0]?.images[0].url ||
+                                  order.orderItems.images[0]?.url ||
                                   "/api/placeholder/64/64"
                                 }
                                 alt="Product"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  e.target.style.display = "none";
-                                  e.target.nextSibling.style.display = "flex";
+                                  const target = e.target;
+                                  if (target instanceof HTMLElement) {
+                                    target.style.display = "none";
+
+                                    const nextSibling = target.nextSibling;
+                                    if (nextSibling instanceof HTMLElement) {
+                                      nextSibling.style.display = "flex";
+                                    }
+                                  }
                                 }}
                               />
                               <Package
@@ -170,7 +181,7 @@ const OrdersList = () => {
                             </code>
                           </td>
                           <td className="p-4 text-muted-foreground">
-                            {formatDate(order.createdAt)}
+                            {formatDate(order.paidAt)}
                           </td>
                           <td className="p-4 font-semibold">
                             ${order.totalPrice.toFixed(2)}
@@ -206,40 +217,54 @@ const OrdersList = () => {
           </div>
           {totalPages > 1 && (
             <div className="mt-8">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-                
-                {getPageNumbers().map((page, index) => (
-                  <PaginationItem key={index}>
-                    {page === '...' ? (
-                      <span className="flex h-9 w-9 items-center justify-center">...</span>
-                    ) : (
-                      <PaginationLink
-                        onClick={() => handlePageChange(page as number)}
-                        isActive={currentPage === page}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    )}
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() =>
+                        currentPage > 1 && handlePageChange(currentPage - 1)
+                      }
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
                   </PaginationItem>
-                ))}
-                
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => hasMore && handlePageChange(currentPage + 1)}
-                    className={!hasMore ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+
+                  {getPageNumbers().map((page, index) => (
+                    <PaginationItem key={index}>
+                      {page === "..." ? (
+                        <span className="flex h-9 w-9 items-center justify-center">
+                          ...
+                        </span>
+                      ) : (
+                        <PaginationLink
+                          onClick={() => handlePageChange(page as number)}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      )}
+                    </PaginationItem>
+                  ))}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        hasMore && handlePageChange(currentPage + 1)
+                      }
+                      className={
+                        !hasMore
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           )}
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
@@ -250,13 +275,21 @@ const OrdersList = () => {
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
                       <img
                         src={
-                          order.orderItems[0]?.image || "/api/placeholder/64/64"
+                          order.orderItems.images[0]?.url ||
+                          "/api/placeholder/64/64"
                         }
                         alt="Product"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
+                          const target = e.target;
+                          if (target instanceof HTMLElement) {
+                            target.style.display = "none";
+
+                            const nextSibling = target.nextSibling;
+                            if (nextSibling instanceof HTMLElement) {
+                              nextSibling.style.display = "flex";
+                            }
+                          }
                         }}
                       />
                       <Package
@@ -271,7 +304,7 @@ const OrdersList = () => {
                           {order._id.slice(-8)}
                         </code>
                         <span className="text-sm text-muted-foreground">
-                          {formatDate(order.createdAt)}
+                          {formatDate(order.paidAt)}
                         </span>
                       </div>
 

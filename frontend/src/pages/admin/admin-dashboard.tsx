@@ -11,9 +11,8 @@ const AdminDashBoard = () => {
     const {data: customers, isLoading: loadingCustomers} = useGetAllUsersQuery()
     const { data: orders, isLoading: loadingOrders } = useCountTotalOrdersQuery();
     const {data: salesDetails} = useCalculateTotalSalesByDateQuery()
-    console.log(salesDetails)
    const chartData = useMemo(() => {
-        if (!salesDetails) return [];
+        if (!salesDetails || !Array.isArray(salesDetails)) return [];
         return salesDetails.map((item) => ({
             date: item._id,
             sales: item.totalSales,

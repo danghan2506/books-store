@@ -27,7 +27,7 @@ export interface Order {
 export interface OrderItems {
     _id: string
     name: string
-    book: string // book id reference
+    book: Book 
     images: Images[]
     quantity: number
     price: number

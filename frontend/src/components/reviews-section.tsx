@@ -8,24 +8,13 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { Book } from '@/types/books-type';
+import type { Book, Review } from '@/types/books-type';
 import { Link } from 'react-router-dom';
-
-interface Review {
-  _id: string;
-  name: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  user?: string;
-}
-
 interface ProductRatingStats {
   averageRating: number;
   totalReviews: number;
   distribution: Record<number, number>;
 }
-
 interface ReviewProps {
   loadingProductReviews: boolean;
   userInfo: UserInterface;
@@ -162,9 +151,9 @@ const ReviewsSection = ({
     return book.reviews ? [...book.reviews].sort((a: Review, b: Review) => {
       switch (sortBy) {
         case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt ?? '').getTime() - new Date(a.createdAt ?? '').getTime();
         case 'oldest':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return new Date(a.createdAt ?? '').getTime() - new Date(b.createdAt ?? '').getTime();
         case 'highest':
           return b.rating - a.rating;
         case 'lowest':
@@ -400,13 +389,12 @@ const ReviewsSection = ({
                               {getInitials(review.name)}
                             </AvatarFallback>
                           </Avatar>
-                          
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
                               <div>
                                 <h4 className="font-medium text-gray-900 truncate">{review.name}</h4>
                                 <p className="text-sm text-gray-500">
-                                  {formatDate(review.createdAt)}
+                                  {formatDate(review.createdAt ?? "")}
                                 </p>
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">

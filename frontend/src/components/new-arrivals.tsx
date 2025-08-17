@@ -1,7 +1,10 @@
 import Title from './title'
 import {Swiper, SwiperSlide} from 'swiper/react'
+// @ts-expect-error // Swiper styles
 import 'swiper/css'
+// @ts-expect-error // Swiper styles
 import 'swiper/css/pagination'
+// @ts-expect-error // Swiper styles
 import 'swiper/css/navigation'
 import {Autoplay, Pagination} from "swiper/modules"
 import { useGetNewBooksQuery } from '@/redux/API/book-api-slice'

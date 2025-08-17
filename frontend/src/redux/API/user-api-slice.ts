@@ -1,5 +1,6 @@
 import apiSlice from "./api-slice";
 import { USERS_URL } from "../features/constants";
+import type { UserInterface } from "@/types/user-type";
 
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -23,7 +24,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    getAllUsers: builder.query({
+    getAllUsers: builder.query<UserInterface[], void>({
       query: () => ({
         url: `${USERS_URL}/all-users`,
         method: "GET",

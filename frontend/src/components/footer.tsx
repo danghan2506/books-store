@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import logo from '../assets/logo.png'
 import { FOOTER_CONTACT_INFO, FOOTER_LINKS, SOCIALS } from '../constants/footer-data'
 import { Input } from './ui/input'
+import type React from 'react'
 const Footer = () => {
   return (
     <footer className='mb-4'>
@@ -66,7 +67,7 @@ const Footer = () => {
 }
 interface FooterColumnProps  {
   title: string
-  children: string
+  children: React.ReactNode
 }
 const FooterColumn = ({ title, children }: FooterColumnProps) => {
   return (

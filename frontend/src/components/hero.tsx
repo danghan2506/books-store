@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router'
 import bg from "../assets/bg.jpg"
 import pencil from "../assets/pencil.png"

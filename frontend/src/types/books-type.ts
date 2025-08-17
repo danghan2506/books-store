@@ -17,6 +17,8 @@ export interface Book {
   price: number;
   stock: number;
   isActive: boolean;
+  createdAt?: string;      
+  updatedAt?: string;    
 }
 export interface Review {
   _id?: string;            

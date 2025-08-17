@@ -384,54 +384,7 @@ const BookDetails = () => {
         </div>
         {/* Enhanced Reviews Section */}
         <Card className="shadow-lg border-gray-200">
-          <CardHeader className="pb-6">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl font-bold text-gray-900">
-                Customer Reviews
-              </CardTitle>
-              {book.reviews && book.reviews.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-5 h-5 ${
-                          star <= Math.round(Number(calculateAverageRating()))
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="font-bold text-lg">{calculateAverageRating()}</span>
-                  <span className="text-gray-500">({book.reviews.length} reviews)</span>
-                </div>
-              )}
-            </div>
-
-            {/* Rating Distribution */}
-            {book.reviews && book.reviews.length > 0 && (
-              <div className="mt-6 space-y-2">
-                {Object.entries(getRatingDistribution()).reverse().map(([rating, count]) => (
-                  <div key={rating} className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 w-16">
-                      <span className="text-sm font-medium">{rating}</span>
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    </div>
-                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-yellow-400 transition-all duration-300"
-                        style={{
-                          width: `${book.reviews.length > 0 ? (count / book.reviews.length) * 100 : 0}%`
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-500 w-8">{count}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardHeader>
+      
           <CardContent>
             <ReviewsSection
               loadingProductReviews={isLoading}

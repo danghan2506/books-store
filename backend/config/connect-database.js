@@ -1,13 +1,30 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv"
 dotenv.config()
-const connectDatabase = async(DATABASE_URI) => {
+
+let cached = global.mongooseConnectionCache;
+if (!cached) {
+    cached = global.mongooseConnectionCache = { conn: null, promise: null };
+}
+
+const connectDatabase = async (DATABASE_URI) => {
     try {
-        await mongoose.connect(DATABASE_URI) 
-        console.log("Connect to database successfully!")
+        if (!DATABASE_URI) {
+            console.error("DATABASE_URI is missing. Set it in your environment variables.");
+            return null;
+        }
+        if (cached.conn) {
+            return cached.conn;
+        }
+        if (!cached.promise) {
+            cached.promise = mongoose.connect(DATABASE_URI).then((m) => m);
+        }
+        cached.conn = await cached.promise;
+        console.log("Connect to database successfully!");
+        return cached.conn;
     } catch (error) {
-         console.log(error)
-        process.exit(1)
+        console.error("Failed to connect to database:", error?.message || error);
+        return null;
     }
 }
 export default connectDatabase

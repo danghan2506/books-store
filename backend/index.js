@@ -17,7 +17,7 @@ app.use(cookieParser())
 const database = process.env.DATABASE_URI
 connectDatabase(database)
 connectCloudinary()
-
+const port = process.env.PORT || 5000
 app.use("/api/users", userRoute)
 app.use("/api/books", bookRoute)
 app.use("/api/orders", orderRoute)
@@ -30,7 +30,7 @@ app.get("/api/config/paypal", (req, res) => {
 app.get("/", (req, res) => {
     res.json({ message: "API is running!" });
 });
-
-export default function handler(req, res) {
-    return app(req, res);
-}
+app.listen(port, (req, res) => {
+    console.log(`Server is running on port ${port}`);
+})
+export default app

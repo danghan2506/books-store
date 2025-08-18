@@ -55,9 +55,9 @@ export default function Login() {
     } catch (err: unknown) {
       if (typeof err === "object" && err !== null && "data" in err) {
         const errorData = (err as { data?: { message?: string } }).data;
-        toast.error(errorData?.message || "Failed to reset password");
+        toast.error(errorData?.message || "Failed to login");
       } else {
-        toast.error("Failed to reset password");
+        toast.error("Failed to login");
       }
     }
     finally {

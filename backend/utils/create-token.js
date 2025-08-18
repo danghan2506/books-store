@@ -7,14 +7,11 @@ const generateToken = (res, userId) => {
         expiresIn: "30d"
     })
 // Send token to client as cookie named jwt 
+    const isProduction = process.env.NODE_ENV === 'production'
     res.cookie('jwt', token, {
-        // only access by server
         httpOnly: true,
-        // cookie only send through HTTPS if not development env
-        secure: process.env.NODE_ENV !== "development",
-        // avdoi CSRF
-        sameSite: "strict",
-        // time to live
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: 30 * 24 * 60 * 60 * 1000
     })
     return token

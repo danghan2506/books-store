@@ -10,9 +10,6 @@ import connectDatabase from "./config/connect-database.js";
 import cors from 'cors';
 const app = express()
 dotenv.config()
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
-app.use(cookieParser())
 const corsOptions = {
   origin: [
     'http://localhost:3000',           // Local dev
@@ -24,6 +21,9 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 }
 app.use(cors(corsOptions));
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
+app.use(cookieParser())
 const database = process.env.DATABASE_URI
 connectDatabase(database)
 connectCloudinary()
@@ -32,7 +32,6 @@ app.use("/api/users", userRoute)
 app.use("/api/books", bookRoute)
 app.use("/api/orders", orderRoute)
 app.use("/api/auth", authRoute)
-
 app.get("/api/config/paypal", (req, res) => {
     res.send({clientId: process.env.PAYPAL_CLIENT_ID})
 })

@@ -23,6 +23,10 @@ app.use("/api/auth", authRoute)
 app.get("/api/config/paypal", (req, res) => {
     res.send({clientId: process.env.PAYPAL_CLIENT_ID})
 })
-app.listen(port, (req, res) => {
-    console.log(`Server is running on port: ${port}`)
-})
+// app.listen(port, (req, res) => {
+//     console.log(`Server is running on port: ${port}`)
+// })
+app.get("/", (req, res) => {
+    res.json({ message: "API is running!" });
+});
+export default app

@@ -1,13 +1,10 @@
-import { FaTrash, FaEdit, FaCheck, FaTimes } from "react-icons/fa";
-import {Trash2, Edit, Check, X, Mail, Users, Shield, ShieldCheck, UserCheck, UserX} from 'lucide-react';
+
+import {Trash2, Edit, Check, X, Mail, Users, Shield} from 'lucide-react';
 import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
-  CardAction,
-  CardFooter,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from '@/components/ui/badge';
@@ -20,43 +17,62 @@ import { useEffect, useState } from "react";
 const UsersList = () => {
     const {data: users, refetch, isLoading, error} = useGetAllUsersQuery()
     const [deleteUser] = useDeleteUserMutation()
-    const [editableUserId, setEditableUserId] = useState(null)
+    const [editableUserId, setEditableUserId] = useState("")
     const [editableUserName, setEditableUserName] = useState("");
     const [updateUser] = useUpdateUserProfileMutation()
     useEffect(() => {
     refetch();
   }, [refetch]);
-  const deleteHandler = async (id) => {
+  const deleteHandler = async (id : string) => {
     if(window.confirm("Are you sure want to delete this user?")) {
       try {
         await deleteUser(id)
         refetch()
-      } catch (error) {
-        toast.error(error?.data?.message || error.error)
-      }
+      } catch (err: unknown) {
+      console.error(err)
+            let message = "Failed to delete user"
+            if (typeof err === "object" && err !== null) {
+              const anyErr = err as { data?: unknown; message?: string }
+              const dataMessage = typeof anyErr.data === "string" ? anyErr.data : undefined
+              message = dataMessage ?? anyErr.message ?? message
+            } else if (typeof err === "string") {
+              message = err
+            }
+            toast.error(message)
+    }
     }
   }
-  const updateHandler = async (id) => {
+  const updateHandler = async (id: string) => {
     try {
       await updateUser({
         userId: id,
         username: editableUserName,
       });
-      setEditableUserId(null);
+      setEditableUserId("");
       refetch();
-    } catch (err) {
-      toast.error(err?.data?.message || err.error);
+      toast.success("User updated successfully");
+    } catch (err: unknown) {
+      console.error(err)
+            let message = "Failed to update user"
+            if (typeof err === "object" && err !== null) {
+              const anyErr = err as { data?: unknown; message?: string }
+              const dataMessage = typeof anyErr.data === "string" ? anyErr.data : undefined
+              message = dataMessage ?? anyErr.message ?? message
+            } else if (typeof err === "string") {
+              message = err
+            }
+            toast.error(message)
     }
   };
-  const toggleEdit = (id, username) => {
+  const toggleEdit = (id: string, username: string) => {
     setEditableUserId(id);
     setEditableUserName(username);
   };
   const cancelEdit = () => {
-    setEditableUserId(null);
+    setEditableUserId("");
     setEditableUserName("");
   };
-   const getRoleBadge = (role) => {
+   const getRoleBadge = (role : 'admin' | 'user') => {
     const roleConfig = {
       admin: { color: 'bg-green-500 text-white', icon: Shield },
       user: { color: 'bg-sky-200 text-black', icon: Users }
@@ -87,7 +103,7 @@ const UsersList = () => {
           <h1 className="text-3xl font-bold mb-6">All Orders</h1>
           <Alert variant="destructive">
             <AlertDescription>
-              {error?.data?.error || error?.error || 'An error occurred while loading your orders'}
+               An error occurred while loading your orders
             </AlertDescription>
           </Alert>
         </div>
@@ -107,7 +123,7 @@ const UsersList = () => {
                 </div>
               </div>
               <Badge className="bg-black text-white text-sm sm:text-lg px-3 py-1 sm:px-4 sm:py-2 self-start sm:self-auto">
-                {users.length} Users
+                {users?.length} Users
               </Badge>
             </div>
           </CardHeader>
@@ -135,7 +151,7 @@ const UsersList = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
+                  {users?.map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50 transition-colors duration-200">
                       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                         <span className="text-xs sm:text-sm font-mono text-gray-600">
@@ -177,7 +193,7 @@ const UsersList = () => {
                               {user.username}
                             </span>
                             <Button
-                              onClick={() => toggleEdit(user._id, user.username, user.email)}
+                              onClick={() => toggleEdit(user._id, user.username)}
                               size="sm"
                               variant="ghost"
                               className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-1 sm:p-2"

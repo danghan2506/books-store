@@ -6,12 +6,18 @@ import {
 } from "@/redux/API/order-api-slice";
 import type { RootState } from "@/redux/features/store";
 import { DISPATCH_ACTION, PayPalButtons, SCRIPT_LOADING_STATE, usePayPalScriptReducer} from "@paypal/react-paypal-js";
-import { type CreateOrderActions , type  CreateOrderData} from "@paypal/paypal-js/types/components/buttons"
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router";
 import { Loader2, Truck, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { 
+  OnApproveData,
+  OnApproveActions,
+  CreateOrderData,
+  CreateOrderActions,
+  OrderResponseBody
+} from "@paypal/paypal-js";
 import {
   Table,
   TableBody,
@@ -27,6 +33,7 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDispatch } from "react-redux";
 import { clearCartItems } from "@/redux/features/cart/cart-slice";
+import type { OrderItems } from "@/types/order-type";
 const OrderSummary = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { userInfo } = useSelector((state: RootState) => state.auth);
@@ -63,9 +70,10 @@ const OrderSummary = () => {
       loadPayPaylScript();
     }
   }, [paypal, order, paypalDispatch]);
-  const createOrder = (data, actions) => {
+  const createOrder = (_data: CreateOrderData, actions: CreateOrderActions): Promise<string> => {
     return actions.order
       .create({
+        intent: "CAPTURE",
         purchase_units: [
           {
             amount: {
@@ -79,25 +87,29 @@ const OrderSummary = () => {
         return orderID;
       });
   };
-  const onApprove = (data, actions) => {
-    return actions.order.capture().then(async function (details) {
-      try {
-        await payOrder({ orderId, details });
-        refetch();
-        toast.success("Order is paid");
-        dispatch(clearCartItems(userInfo?._id))
-      } catch (err: unknown) {
-      if (typeof err === "object" && err !== null && "data" in err) {
-        const errorData = (err as { data?: { message?: string } }).data;
-        toast.error(errorData?.message || "Failed to pay orders");
-      } else {
-        toast.error("Failed to pay orders");
-      }
+  const onApprove = (_data: OnApproveData, actions: OnApproveActions): Promise<void> => {
+    if (actions.order && actions.order.capture) {
+      return actions.order.capture().then(async function (details: OrderResponseBody) {
+        try {
+          await payOrder({ orderId, details });
+          refetch();
+          toast.success("Order is paid");
+          dispatch(clearCartItems(userInfo?._id));
+        } catch (err: unknown) {
+          if (typeof err === "object" && err !== null && "data" in err) {
+            const errorData = (err as { data?: { message?: string } }).data;
+            toast.error(errorData?.message || "Failed to pay orders");
+          } else {
+            toast.error("Failed to pay orders");
+          }
+        }
+      });
     }
-    });
+    // Always return a Promise<void> to satisfy the type
+    return Promise.resolve();
   };
   const onError = (error: unknown) => {
-    if (typeof error === "object" && error !== null && "data" in err) {
+    if (typeof error === "object" && error !== null && "data" in error) {
         const errorData = (error as { data?: { message?: string } }).data;
         toast.error(errorData?.message || "Unknown error occurred during payment");
       } else {
@@ -150,7 +162,7 @@ const OrderSummary = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Alert variant="destructive">
           <AlertDescription>
-            {error?.data?.message || error?.message || "Failed to load order details"}
+            Failed to load order details
           </AlertDescription>
         </Alert>
       </div>
@@ -182,7 +194,7 @@ const OrderSummary = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {order.orderItems.map((item, index: number) => (
+                    {order.orderItems.map((item: OrderItems, index: number) => (
                       <TableRow key={index}>
                         <TableCell>
                           <img

@@ -171,7 +171,7 @@ const PlaceOrders = () => {
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  {error?.message}
+                  An error occurred while placing the order.
                 </AlertDescription>
               </Alert>
             )}

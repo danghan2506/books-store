@@ -2,7 +2,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   useGetBookDetailsQuery,
   useUpdateBookMutation,
-  useDeleteBookMutation,
 } from "@/redux/API/book-api-slice";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
@@ -12,7 +11,6 @@ const UpdateBooks = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const { data: bookData } = useGetBookDetailsQuery(bookId ?? "");
   const navigate = useNavigate();
-  console.log(bookData)
   const [name, setName] = useState(bookData?.name || "");
   const [author, setAuthor] = useState(bookData?.author || "");
   const [description, setDescription] = useState(bookData?.description || "");
@@ -24,7 +22,6 @@ const UpdateBooks = () => {
   const [pageNumber, setPageNumber] = useState(bookData?.pageNumber || "");
   const [stock, setStock] = useState(bookData?.stock || "");
   const [updateBook, {isLoading}] = useUpdateBookMutation()
-  const [deleteBook] = useDeleteBookMutation();
   useEffect(() => {
     if (bookData) {
       setName(bookData.name);
@@ -52,6 +49,10 @@ const UpdateBooks = () => {
         formData.append("price", price.toString())
         formData.append("stock", stock.toString())
         formData.append("pageNumber", pageNumber.toString())
+        const response = await updateBook({bookId, data: formData}).unwrap()
+        if(response.status !== "success"){
+          toast.error(response.message || "Failed to update book")
+        }
         toast.success("Book updated successfully")
         navigate("/admin/books-list", {replace: true})
     }

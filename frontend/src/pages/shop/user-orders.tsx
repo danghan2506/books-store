@@ -1,4 +1,4 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link  } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,8 +6,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Package, Eye } from "lucide-react";
 import { useGetMyOrdersQuery } from "@/redux/API/order-api-slice";
 const UserOrders = () => {
-  const { data: orders, isLoading, error } = useGetMyOrdersQuery();
-  const formatDate = (dateString) => {
+  const { data: orders, isLoading, error } = useGetMyOrdersQuery({});
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toISOString().substring(0, 10);
   };
   const StatusBadge = ({ status }) => {

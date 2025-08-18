@@ -28,9 +28,10 @@ const OrdersList = () => {
   const formatDate = (dateString: Date) => {
     return new Date(dateString).toISOString().substring(0, 10);
   };
-  const orders = allOrders?.orderItems || [];
+  const orders = allOrders?.orders || [];
   const totalPages = allOrders?.pages || 1;
   const hasMore = allOrders?.hasMore || false;
+  console.log(orders)
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -151,7 +152,7 @@ const OrdersList = () => {
                           <td className="p-4">
                             <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
                               <img
-                                src={order.orderItems[0].images[0]?.url || "/api/placeholder/64/64"}
+                                src={order.orderItems[0].images[0].url || "/api/placeholder/64/64"}
                                 alt="Product"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -272,7 +273,7 @@ const OrdersList = () => {
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
                       <img
                         src={
-                          order.orderItems[0].images[0]?.url ||
+                          order.orderItems[0].images[0].url ||
                           "/api/placeholder/64/64"
                         }
                         alt="Product"

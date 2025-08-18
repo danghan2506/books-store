@@ -12,7 +12,7 @@ export interface CartState {
 export interface Order {
     user: UserInterface
     _id: string
-    orderItems: OrderItems
+    orderItems: OrderItems[]
     shippingAddress: ShippingAddress
     paymentMethod: PaymentResult
     itemsPrice: number
@@ -55,7 +55,7 @@ export interface PaymentResult {
     email_address: string
 }
 export interface OrdersQueryResult {
-    orderItems: Order[],
+    orders: Order[],
     page: number;
     pages: number;
     hasMore: boolean;

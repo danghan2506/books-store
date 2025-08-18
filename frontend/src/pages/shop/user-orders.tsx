@@ -5,12 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Package, Eye } from "lucide-react";
 import { useGetMyOrdersQuery } from "@/redux/API/order-api-slice";
+import type { Order} from "@/types/order-type";
+interface StatusBadgeProps {
+  status: boolean
+  type?: "payment" | "delivery"
+}
 const UserOrders = () => {
   const { data: orders, isLoading, error } = useGetMyOrdersQuery({});
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     return new Date(dateString).toISOString().substring(0, 10);
   };
-  const StatusBadge = ({ status }) => {
+  const StatusBadge = ({ status }: StatusBadgeProps) => {
     const variant = status ? "default" : "destructive";
     const className = status
       ? "bg-green-100 text-green-800 hover:bg-green-100"
@@ -40,9 +45,8 @@ const UserOrders = () => {
         <h1 className="text-3xl font-bold mb-6">My Orders</h1>
         <Alert variant="destructive">
           <AlertDescription>
-            {error?.data?.error ||
-              error?.error ||
-              "An error occurred while loading your orders"}
+           
+            An error occurred while loading your orders
           </AlertDescription>
         </Alert>
       </div>
@@ -107,7 +111,7 @@ const UserOrders = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {orders?.map((order, index) => (
+                        {orders?.map((order : Order, index: number) => (
                           <tr
                             key={order._id}
                             className={`border-b transition-colors hover:bg-muted/30 ${
@@ -123,10 +127,17 @@ const UserOrders = () => {
                                   }
                                   alt="Product"
                                   className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.target.style.display = "none";
-                                    e.target.nextSibling.style.display = "flex";
-                                  }}
+ onError={(e) => {
+                                  const target = e.target;
+                                  if (target instanceof HTMLElement) {
+                                    target.style.display = "none";
+
+                                    const nextSibling = target.nextSibling;
+                                    if (nextSibling instanceof HTMLElement) {
+                                      nextSibling.style.display = "flex";
+                                    }
+                                  }
+                                }}
                                 />
                                 <Package
                                   className="h-6 w-6 text-muted-foreground"
@@ -146,10 +157,10 @@ const UserOrders = () => {
                               ${order.totalPrice.toFixed(2)}
                             </td>
                             <td className="p-4">
-                              <StatusBadge status={order.isPaid} />
+                              <StatusBadge status={order.isPaid} type="payment" />
                             </td>
                             <td className="p-4">
-                              <StatusBadge status={order.isDelivered} />
+                              <StatusBadge status={order.isDelivered} type="delivery" />
                             </td>
                             <td className="p-4">
                               <Button
@@ -199,7 +210,7 @@ const UserOrders = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {orders?.map((order, index) => (
+                        {orders?.map((order: Order, index: number) => (
                           <tr
                             key={order._id}
                             className={`border-b transition-colors hover:bg-muted/30 ${
@@ -211,16 +222,22 @@ const UserOrders = () => {
                                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
                                   <img
                                     src={
-                                      order.orderItems[0]?.image ||
+                                      order.orderItems[0]?.images[0].url ||
                                       "/api/placeholder/48/48"
                                     }
                                     alt="Product"
                                     className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      e.target.style.display = "none";
-                                      e.target.nextSibling.style.display =
-                                        "flex";
-                                    }}
+                                     onError={(e) => {
+                                  const target = e.target;
+                                  if (target instanceof HTMLElement) {
+                                    target.style.display = "none";
+
+                                    const nextSibling = target.nextSibling;
+                                    if (nextSibling instanceof HTMLElement) {
+                                      nextSibling.style.display = "flex";
+                                    }
+                                  }
+                                }}
                                   />
                                   <Package
                                     className="h-5 w-5 text-muted-foreground"
@@ -244,8 +261,8 @@ const UserOrders = () => {
                             </td>
                             <td className="p-3">
                               <div className="flex flex-col space-y-1">
-                                <StatusBadge status={order.isPaid} />
-                                <StatusBadge status={order.isDelivered} />
+                                <StatusBadge status={order.isPaid} type="payment" />
+                                <StatusBadge status={order.isDelivered} type="delivery"/>
                               </div>
                             </td>
                             <td className="p-3">
@@ -271,22 +288,29 @@ const UserOrders = () => {
 
             {/* Mobile Card View */}
             <div className="md:hidden space-y-4">
-              {orders?.map((order) => (
+              {orders?.map((order: Order) => (
                 <Card key={order._id} className="overflow-hidden shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-4">
                       <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
                         <img
                           src={
-                            order.orderItems[0]?.image ||
+                            order.orderItems[0]?.images[0].url ||
                             "/api/placeholder/64/64"
                           }
                           alt="Product"
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextSibling.style.display = "flex";
-                          }}
+                                  const target = e.target;
+                                  if (target instanceof HTMLElement) {
+                                    target.style.display = "none";
+
+                                    const nextSibling = target.nextSibling;
+                                    if (nextSibling instanceof HTMLElement) {
+                                      nextSibling.style.display = "flex";
+                                    }
+                                  }
+                                }}
                         />
                         <Package
                           className="h-6 w-6 text-muted-foreground"
@@ -311,8 +335,8 @@ const UserOrders = () => {
                         </div>
 
                         <div className="flex items-center space-x-2 flex-wrap gap-y-2">
-                          <StatusBadge status={order.isPaid} />
-                          <StatusBadge status={order.isDelivered} />
+                          <StatusBadge status={order.isPaid} type="payment" />
+                          <StatusBadge status={order.isDelivered} type="delivery" />
                         </div>
 
                         <div className="pt-2">

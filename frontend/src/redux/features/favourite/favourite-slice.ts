@@ -14,7 +14,7 @@ const favouriteSlice = createSlice({
         removeFromFavourites: (state, action: PayloadAction<string>) => {
             return state.filter(item => item._id !== action.payload);
         },
-        setFavourites: (state, action: PayloadAction<Book[]>) => {
+        setFavourites: (_state, action: PayloadAction<Book[]>) => {
             return action.payload
         }
     }

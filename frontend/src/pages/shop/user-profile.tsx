@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updatePasswordSchema, updateProfileSchema, type UpdatePasswordSchema, type UpdateProfileFormData } from "@/validation/auth-schema"
+import { updatePasswordSchema, updateProfileSchema, type UpdatePasswordFormData, type UpdateProfileFormData } from "@/validation/auth-schema"
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth)
@@ -43,10 +43,10 @@ const UserProfile = () => {
     register: updatePassword,
     handleSubmit: handleSubmitPassword,
     formState: {errors: passwordErrors}
-  } = useForm<UpdatePasswordSchema>({
+  } = useForm<UpdatePasswordFormData>({
     resolver: zodResolver(updatePasswordSchema)
   })
-  const handleUpdatePassword = async (data: UpdatePasswordSchema) => {
+  const handleUpdatePassword = async (data: UpdatePasswordFormData) => {
     try {
       const res = await updateProfile({
         userId: userInfo?._id,
@@ -56,7 +56,7 @@ const UserProfile = () => {
       }).unwrap()
 
       // If backend signals logout after password change
-      if ((res as any)?.loggedOut) {
+      if ((res)?.loggedOut) {
         toast.success("Password changed. Please log in again.")
         await triggerLogout().unwrap()
         dispatch(logout())
@@ -67,10 +67,13 @@ const UserProfile = () => {
       // Fallback: if backend returns user info (shouldn't for password change)
       dispatch(setCredentials({ ...res }))
       toast.success("Profile updated successfully")
-    } catch (error) {
-      // @ts-ignore
-      const message = error?.data?.message || "Failed to update password"
-      toast.error(message)
+    } catch (err: unknown) {
+      if (typeof err === "object" && err !== null && "data" in err) {
+        const errorData = (err as { data?: { message?: string } }).data;
+        toast.error(errorData?.message || "Failed to update password");
+      } else {
+        toast.error("Failed to update password");
+      }
     }
   }
   const handleUpdateProfile = async (data: UpdateProfileFormData) => {
@@ -89,10 +92,13 @@ const UserProfile = () => {
       }).unwrap()
       dispatch(setCredentials({ ...res }))
       toast.success("Profile updated successfully")
-    } catch (error) {
-      // @ts-ignore
-      const message = error?.data?.message || "Failed to update profile"
-      toast.error(message)
+    } catch (err: unknown) {
+      if (typeof err === "object" && err !== null && "data" in err) {
+        const errorData = (err as { data?: { message?: string } }).data;
+        toast.error(errorData?.message || "Failed to update profile");
+      } else {
+        toast.error("Failed to update profile");
+      }
     }
   }
 

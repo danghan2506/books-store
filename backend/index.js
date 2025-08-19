@@ -11,7 +11,6 @@ import authRoute from "./routes/auth-routes.js";
 import connectDatabase from "./config/connect-database.js";
 import cors from "cors";
 import { errorHandler } from "./middlewares/error-handler.js";
-import serverless from "serverless-http";
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -57,4 +56,6 @@ if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => console.log(`Server running on port ${port}`));
 }
 app.use(errorHandler)
-export default app;
+export default (req, res) => {
+  return app(req, res);
+};

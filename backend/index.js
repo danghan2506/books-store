@@ -56,6 +56,6 @@ if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => console.log(`Server running on port ${port}`));
 }
 app.use(errorHandler)
-export default (req, res) => {
-  return app(req, res);
-};
+
+// For Vercel serverless deployment
+export default app;

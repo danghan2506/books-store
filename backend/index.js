@@ -23,26 +23,10 @@ const database = process.env.DATABASE_URI;
 connectDatabase(database);
 connectCloudinary();
 const port = process.env.PORT || 5000;
-app.use("/api/users", userRoute, (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.json({ message: "Users route is working!" });
-  next();
-});
-app.use("/api/books", bookRoute), (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.json({ message: "Users route is working!" });
-  next();
-};
-app.use("/api/orders", orderRoute, (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.json({ message: "Users route is working!" });
-  next();
-});
-app.use("/api/auth", authRoute, (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.json({ message: "Users route is working!" });
-  next();
-});
+app.use("/api/users", userRoute);
+app.use("/api/books", bookRoute);
+app.use("/api/orders", orderRoute);
+app.use("/api/auth", authRoute);
 app.get("/api/config/paypal", (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });

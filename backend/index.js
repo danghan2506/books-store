@@ -12,7 +12,6 @@ import { errorHandler } from "./middlewares/error-handler.js";
 import serverless from "serverless-http";
 const app = express();
 dotenv.config();
-
 app.use(cors({
   origin: "https://bstore-frontend.vercel.app", // ví dụ: "https://book-store.vercel.app"
   credentials: true
@@ -38,4 +37,5 @@ if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
-export default serverless(app);
+app.use(errorHandler)
+export default app;

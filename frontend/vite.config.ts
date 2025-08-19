@@ -11,7 +11,7 @@ export default defineConfig({
 
   server: {
     proxy: {
-      "/api/": "https://bstore-backend.vercel.app/",
+      "/api/": "http://localhost:5000/",
     },
   }, 
   resolve: {

@@ -106,7 +106,7 @@ const getOrderById = asyncHandler(async(req, res) => {
         res.status(500).json("Server error!")
     }
 })
-const calcualteTotalSalesByDate = async (req, res) => {
+const calculateTotalSalesByDate = async (req, res) => {
   try {
     const salesByDate = await Order.aggregate([
       {
@@ -189,4 +189,4 @@ const markOrderAsDelivered = asyncHandler(async(req, res) => {
         res.status(500).json("Server error!")
     }
 })
-export {createOrder, getAllOrders, getOrderById, getUserOrders, countTotalOrders, calculateTotalSales, calcualteTotalSalesByDate, markOrderAsDelivered, markOrderAsPaid}
+export {createOrder, getAllOrders, getOrderById, getUserOrders, countTotalOrders, calculateTotalSales, calculateTotalSalesByDate, markOrderAsDelivered, markOrderAsPaid}

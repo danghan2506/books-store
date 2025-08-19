@@ -13,7 +13,7 @@ const app = express();
 dotenv.config();
 
 app.use(cors({
-  origin: process.env.CLIENT_URL, // ví dụ: "https://book-store.vercel.app"
+  origin: "https://bstore-frontend.vercel.app", // ví dụ: "https://book-store.vercel.app"
   credentials: true
 }));
 app.use(express.json());
@@ -37,4 +37,4 @@ if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
-export default app;
+export const handler = serverless(app);

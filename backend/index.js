@@ -9,6 +9,7 @@ import authRoute from "./routes/auth-routes.js";
 import connectDatabase from "./config/connect-database.js";
 import cors from "cors";
 import { errorHandler } from "./middlewares/error-handler.js";
+import serverless from "serverless-http";
 const app = express();
 dotenv.config();
 
@@ -37,4 +38,4 @@ if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
-export const handler = serverless(app);
+export default serverless(app);

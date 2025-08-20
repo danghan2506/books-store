@@ -1,7 +1,5 @@
 import express from "express";
-import dotenv from "dotenv";
-import { fileURLToPath } from "url";
-import { dirname, resolve } from "path";
+import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import { connectCloudinary } from "./utils/cloudinary.js";
 import userRoute from "./routes/users-routes.js";
@@ -12,29 +10,8 @@ import connectDatabase from "./config/connect-database.js";
 import cors from "cors";
 import { errorHandler } from "./middlewares/error-handler.js";
 const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-dotenv.config({ path: resolve(__dirname, "..", ".env") });
-app.use(cors({
-  origin: [
-    process.env.CORS_ORIGIN,
-    "https://www.sandbox.paypal.com",
-  ]
-    , // ví dụ: "https://book-store.vercel.app"
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Set-Cookie'],
-  preflightContinue: true,
-  optionsSuccessStatus: 204
-}));
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  next();
-});
+config()
+app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -55,7 +32,4 @@ app.get("/", (req, res) => {
 if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => console.log(`Server running on port ${port}`));
 }
-app.use(errorHandler)
-
-// For Vercel serverless deployment
-export default app;
+app.listen(port, () => console.log(`Server running on port ${port}`))

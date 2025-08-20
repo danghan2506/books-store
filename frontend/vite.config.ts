@@ -11,8 +11,12 @@ export default defineConfig({
 
   server: {
     proxy: {
-      "/api/": "http://localhost:5000",
+      "/api/": process.env.VITE_REACT_APP_BACKEND_BASEURL || "http://localhost:5000",
     },
+  },
+  
+  define: {
+    __API_URL__: JSON.stringify(process.env.VITE_REACT_APP_BACKEND_BASEURL || "http://localhost:5000"),
   }, 
   resolve: {
     alias: {

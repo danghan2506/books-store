@@ -29,7 +29,10 @@ app.get("/api/config/paypal", (req, res) => {
 app.get("/", (req, res) => {
   res.json({ message: "API is running!" });
 });
+// Export app for Vercel
+export default app;
+
+// Start server only in development
 if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => console.log(`Server running on port ${port}`));
 }
-app.listen(port, () => console.log(`Server running on port ${port}`))

@@ -9,7 +9,6 @@ import authRoute from "./routes/auth-routes.js";
 import connectDatabase from "./config/connect-database.js";
 import cors from "cors";
 import { errorHandler } from "./middlewares/error-handler.js";
-import ensureDatabaseConnection from "./middlewares/database-middleware.js";
 const app = express();
 config()
 app.use(cors({
@@ -22,15 +21,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Add database connection middleware for all API routes
-app.use("/api", ensureDatabaseConnection);
-
 const database = process.env.DATABASE_URI;
 const port = process.env.PORT || 5000;
 
 // Connect to database and cloudinary
 connectDatabase(database);
 connectCloudinary();
+
 app.use("/api/users", userRoute);
 app.use("/api/books", bookRoute);
 app.use("/api/orders", orderRoute);

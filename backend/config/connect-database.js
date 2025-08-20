@@ -9,12 +9,16 @@ const connectDatabase = async (DATABASE_URI) => {
     try {
         if (!DATABASE_URI) {
             console.error("DATABASE_URI is missing. Set it in your environment variables.");
-            return null;
+            throw new Error("DATABASE_URI is missing");
         }
+        
         if (cached.conn) {
+            console.log("Using cached database connection");
             return cached.conn;
         }
+        
         if (!cached.promise) {
+            console.log("Creating new database connection...");
             const opts = {
                 bufferCommands: false,
                 serverSelectionTimeoutMS: 5000,
@@ -22,8 +26,9 @@ const connectDatabase = async (DATABASE_URI) => {
                 maxPoolSize: 10,
                 minPoolSize: 5
             };
-            cached.promise = mongoose.connect(DATABASE_URI, opts).then((m) => m);
+            cached.promise = mongoose.connect(DATABASE_URI, opts);
         }
+        
         cached.conn = await cached.promise;
         console.log("Connect to database successfully!");
         return cached.conn;
@@ -31,7 +36,7 @@ const connectDatabase = async (DATABASE_URI) => {
         console.error("Failed to connect to database:", error?.message || error);
         cached.conn = null;
         cached.promise = null;
-        return null;
+        throw error;
     }
 }
 export default connectDatabase

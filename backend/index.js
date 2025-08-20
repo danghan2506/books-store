@@ -29,12 +29,10 @@ const port = process.env.PORT || 5000;
 connectCloudinary();
 
 // Ensure database connection for all API routes
-app.use("/api", ensureDatabaseConnection);
-
-app.use("/api/users", userRoute);
-app.use("/api/books", bookRoute);
-app.use("/api/orders", orderRoute);
-app.use("/api/auth", authRoute);
+app.use("/api/users", ensureDatabaseConnection, userRoute);
+app.use("/api/books", ensureDatabaseConnection, bookRoute);
+app.use("/api/orders", ensureDatabaseConnection, orderRoute);
+app.use("/api/auth", ensureDatabaseConnection, authRoute);
 app.get("/api/config/paypal", (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });

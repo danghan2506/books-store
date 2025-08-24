@@ -28,5 +28,4 @@ const testConnection = async () => {
         process.exit(1);
     }
 };
-
 testConnection();

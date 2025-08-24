@@ -1,7 +1,18 @@
 import { useDeleteBookMutation, useGetBooksQuery } from "@/redux/API/book-api-slice"
 import moment from "moment"
 import { Link  } from "react-router-dom"
+import { Card } from "@/components/ui/card"
 import { Edit, Trash2, Eye } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
   Table,
   TableBody,
@@ -27,6 +38,19 @@ const BooksList = () => {
    const { data, isLoading, error, refetch } = useGetBooksQuery({
     page: currentPage,
     keyword: keyword
+    return {
+    data: {
+      books: keyword ?.filter(book => 
+        book.name.toLowerCase().includes(keyword.toLowerCase())
+      ) : mockBooks,
+      pages: 1,
+      hasMore: false
+    },
+    isLoading: false,
+    error: null,
+    refetch: () => {},
+    isFetching: false
+  }
   })
   const [deleteBook] = useDeleteBookMutation()
   const books = data?.books || []
@@ -36,7 +60,22 @@ const BooksList = () => {
     return <div>Loading...</div>;
   }
   if (error) {
-    return <div>Error loading products</div>;
+    return (
+      <div className="container mx-auto px-4 py-8 pt-24 max-w-7xl">
+        <Card className="p-8 text-center">
+          <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-foreground mb-2">
+            Error Loading Books
+          </h2>
+          <p className="text-muted-foreground mb-4">
+            Something went wrong while loading the books. Please try again.
+          </p>
+          <Button onClick={() => refetch()} variant="outline">
+            Try Again
+          </Button>
+        </Card>
+      </div>
+    )
   }
   const handlePageChange = (page: number) => {
     setCurrentPage(page)

@@ -43,6 +43,17 @@ const router = createBrowserRouter(
       <Route path="/request-reset-password" element={<ResetPasswordForm/>}/>
       <Route path="/verify-otp" element={<VerifyOtp/>}/>
       <Route path="/reset-password" element={<ResetPassword/>}/>
+      {/* Admin routes */}
+        <Route element={<AdminRoute />}>
+          <Route path="admin" element={<AdminLayout/>}>
+            <Route index element={<AdminDashBoard />} /> {/* /admin */}
+            <Route path="users-list" element={<UsersList />} />
+            <Route path="books-form" element={<BooksForm />} />
+            <Route path="books-list" element={<BooksList/>}/>
+            <Route path="create-books" element={<BooksForm/>}/>
+            <Route path="update-books/:bookId" element={<UpdateBooks/>}/>
+          </Route>
+        </Route>
       <Route path="/" element={<App />}>
         {/* User routes */}
         <Route path="" element={<PrivateRoutes />}>
@@ -57,18 +68,6 @@ const router = createBrowserRouter(
           <Route path="my-profile" element={<UserProfile/>}/>
         </Route>
         <Route path="shop/:id" element={<BookDetails />} />
-        {/* Admin routes */}
-        <Route element={<AdminRoute />}>
-          <Route path="admin" element={<AdminLayout/>}>
-            <Route index element={<AdminDashBoard />} /> {/* /admin */}
-            <Route path="users-list" element={<UsersList />} />
-            <Route path="books-form" element={<BooksForm />} />
-            <Route path="books-list" element={<BooksList/>}/>
-            <Route path="create-books" element={<BooksForm/>}/>
-            <Route path="update-books/:bookId" element={<UpdateBooks/>}/>
-          </Route>
-        </Route>
-          
           {/* /admin/users-list */}
         </Route>
     </>

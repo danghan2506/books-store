@@ -93,7 +93,7 @@ const Hero = () => {
     }
   };
   return (
-    <motion.section 
+ <motion.section 
       className='mx-auto max-w-[1440px] px-6 lg:px-12 py-12 xl:py-20'
       variants={containerVariants}
       initial="hidden"
@@ -117,33 +117,33 @@ const Hero = () => {
             {/* Books with animated B circle */}
             <span className='inline-flex items-center'>
               <motion.span 
-                className='inline-flex items-center justify-center p-5 h-16 w-16 bg-primary text-primary-foreground rounded-full mr-2 cursor-pointer'
-                style={{ rotate: -31 }}
-                initial={{ scale: 0, rotate: -31 }}
-                animate={{ scale: 1, rotate: -31 }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  rotate: shouldReduceMotion ? -31 : -25,
-                  transition: { type: "spring", stiffness: 300, damping: 10 }
-                }}
-                whileTap={{ scale: 0.95 }}
-                transition={{
-                  duration: 0.8,
-                  delay: 1.2,
-                  type: "spring",
-                  stiffness: 100,
-                  damping: 8
-                }}
-              >
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.4, duration: 0.3 }}
-                  className="text-2xl font-bold"
-                >
-                  B
-                </motion.span>
-              </motion.span>
+  className='inline-flex items-center justify-center p-5 h-16 w-16 bg-[var(--custom-yellow)] text-white rounded-full mr-2 cursor-pointer'
+  style={{ rotate: -31 }}
+  initial={{ scale: 0, rotate: -31 }}
+  animate={{ scale: 1, rotate: -31 }}
+  whileHover={{ 
+    scale: 1.1, 
+    rotate: shouldReduceMotion ? -31 : -25,
+    transition: { type: "spring", stiffness: 300, damping: 10 }
+  }}
+  whileTap={{ scale: 0.95 }}
+  transition={{
+    duration: 0.8,
+    delay: 1.2,
+    type: "spring",
+    stiffness: 100,
+    damping: 8
+  }}
+>
+  <motion.span
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 1.4, duration: 0.3 }}
+    className="text-2xl font-bold"
+  >
+    B
+  </motion.span>
+</motion.span>
               
               <AnimatedText text="ooks" className="" delay={1.3} staggerDelay={0.1} />
             </span>
@@ -217,19 +217,8 @@ const Hero = () => {
           </motion.div>
         </motion.div>
 
-        {/* Right side - Image with floating animation */}
-        <motion.div 
-          className='flex flex-1 relative z-10 top-12'
-          variants={itemVariants}
-          initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{
-            duration: 0.8,
-            delay: 0.6,
-            ease: "easeOut"
-          }}
-        >
-          <motion.div
+        {/* Right side - Card Stack Animation */}
+        <motion.div
             animate={shouldReduceMotion ? {} : {
               y: [0, -10, 0],
             }}
@@ -265,7 +254,6 @@ const Hero = () => {
               }}
             />
           </motion.div>
-        </motion.div>
       </div>
     </motion.section>
   );

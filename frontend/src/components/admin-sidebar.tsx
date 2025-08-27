@@ -28,7 +28,7 @@ const AdminSidebar = () => {
   },
   {
     title: "Settings",
-    url: "/settings",
+    url: "/my-profile",
     icon: Settings,
   }
 ];
@@ -123,7 +123,7 @@ const { userInfo } = useSelector((state: RootState) => state.auth);
                       
                     )}
                     <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link to="/profile">
+                      <Link to="/my-profile">
                        <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
@@ -140,5 +140,4 @@ const { userInfo } = useSelector((state: RootState) => state.auth);
     </Sidebar>
   )
 }
-
 export default AdminSidebar

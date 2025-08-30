@@ -6,6 +6,7 @@ import { addFavouritesToLocalStorage, removeFavouritesFromLocalStorage, getFavou
 import type { RootState } from "@/redux/features/store";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import * as motion from "motion/react-client"
 interface BookItemsProps {
   book: Book;
 }
@@ -26,43 +27,90 @@ const BookItems = ({ book }: BookItemsProps) => {
     if (isFavourite) {
       removeFavouritesFromLocalStorage(book._id, userInfo?._id);
       setIsFavourite(false);
-      toast.success("Đã xóa khỏi danh sách yêu thích");
+      toast.info("Removed from favourite list");
     } else {
       addFavouritesToLocalStorage(book, userInfo?._id);
       setIsFavourite(true);
-      toast.success("Đã thêm vào danh sách yêu thích");
+      toast.success("Added to favourite list!");
     }
   };
 
   return (
     <Link to={`/shop/${book._id}`}>
-      <div>
-        <div className="flex items-center justify-center bg-zinc-50 p-6 rounded-3xl overflow-hidden relative group">
-          <img
+      <motion.div
+        initial={{ scale: 1 }}
+        whileHover={{ 
+          scale: 1.03,
+          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+        }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="cursor-pointer will-change-transform"
+      >
+        <motion.div
+          whileHover={{ y: -8 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="flex items-center justify-center bg-zinc-50 p-6 rounded-3xl overflow-hidden relative group"
+        >
+          <motion.img
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             src={book.images && book.images.length > 0 ? book.images[0].url : '/placeholder-book.jpg'} 
             alt={book.slug}
-            className="shadow-xl shadow-slate-900/30 rounded-lg w-full aspect-[3/4] object-cover mx-auto"
-          ></img>
-        </div>
+            className="shadow-xl shadow-slate-900/30 rounded-lg w-full aspect-[3/4] object-cover mx-auto will-change-transform"
+            loading="lazy"
+          />
+        </motion.div>
+        
         <div className="p-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-[12px] md:text-[14px] mb-2 font-bold line-clamp-4 !my-0">
+            <motion.h4 
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="text-[12px] md:text-[14px] mb-2 font-bold line-clamp-4 !my-0"
+            >
               {book.name}
-            </h4>
-            <span 
-              className="flex items-center justify-center h-8 w-8 rounded cursor-pointer hover:bg-neutral-200"
+            </motion.h4>
+            
+            <motion.span 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex items-center justify-center h-8 w-8 rounded cursor-pointer hover:bg-neutral-200 will-change-transform"
               onClick={handleToggleFavourite}
             >
-              <Heart className={`text-lg ${isFavourite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}/>
-            </span>
+              <Heart className={`text-lg transition-colors duration-200 ${
+                isFavourite ? 'fill-red-500 text-red-500' : 'text-gray-400'
+              }`}/>
+            </motion.span>
           </div>
+          
           <div className="flex items-center justify-between pt-1">
-            <p className="font-bold capitalize text-[12px]">{book.category.categoryName}</p>
-            <h5 className="text-red-400 pr-2"> $ {book.price}</h5>
+            <motion.p 
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="font-bold capitalize text-[12px]"
+            >
+              {book.category.categoryName}
+            </motion.p>
+            
+            <motion.h5 
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="pr-2 font-bold text-red-400 hover:text-red-500"
+            >
+              $ {book.price}
+            </motion.h5>
           </div>
-          <p className="line-clamp-2 py-1">{book.description}</p>
+          
+          <motion.p 
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="line-clamp-2 py-1 text-gray-600"
+          >
+            {book.description}
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 };

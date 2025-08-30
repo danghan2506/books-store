@@ -82,7 +82,7 @@ const Header = () => {
             className="hidden sm:flex mr-2"
             alt="Book Store Logo"
           ></img>
-          <h4 className="font-bold text-xl text-gray-800">Book Store</h4>
+          <h4 className="font-bold text-xl text-gray-800">BookHub</h4>
         </Link>
         {/* Center - Navigation */}
         <div className="flex-1 flex justify-center">

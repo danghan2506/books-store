@@ -8,7 +8,7 @@ const Footer = () => {
     <footer className='mb-4'>
       <div className='rounded-tr-3xl rounded-tl-3xl pt-12 xl:pt-20 pb-8'>
         <h3 className='h3'>Discover books that ignite your imagination</h3>
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Magni, ducimus iste?</p>
+        <p>BookHub is a platform that offers a wide range of books for you to explore and enjoy. Whether you're looking for a new adventure, a classic novel, or a self-help book, we've got you covered. Our collection includes books from various genres, authors, and publishers, ensuring you find something that resonates with your interests.</p>
         <hr className='my-8 bg-slate-900/30 h-[2px]' />
         {/* container */}
         <div className='flex justify-between flex-wrap gap-2
@@ -17,9 +17,9 @@ const Footer = () => {
             {/* logo */}
             <Link to={'/'} className='flex-1 flex items-center justify-start'>
               <img src={logo} alt="" height={36} width={36} className='hidden sm:flex mr-2' />
-              <h4 className='bold-24'>Bacala</h4>
+              <h4 className='bold-24'>BookHub</h4>
             </Link>
-            <p className='py-4'>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nulla recusandae voluptatibus excepturi nostrum cum delectus repellat?</p>
+            <p className='py-4'>BookHub is a platform that offers a wide range of books for you to explore and enjoy. Whether you're looking for a new adventure, a classic novel, or a self-help book, we've got you covered. Our collection includes books from various genres, authors, and publishers, ensuring you find something that resonates with your interests.</p>
             <div className='flexBetween pl-3 h-[3rem] w-full max-w-[333px] rounded-full ring-1 ring-slate-500/5 mb-4'>
               <Input type="email" placeholder="Email" className='bg-transparent border-none outline-none'/>
             </div>
@@ -61,7 +61,7 @@ const Footer = () => {
         </div>
       </div>
       {/* copyrights */}
-      <p className='text-white bg-tertiary medium-14 py-2 px-8 rounded flexBetween '><span>2025 Bacala</span><span>All rights reserved</span></p>
+      <p className='text-white bg-tertiary medium-14 py-2 px-8 rounded flexBetween '><span>2025 BookHub</span><span>All rights reserved</span></p>
     </footer>
   )
 }

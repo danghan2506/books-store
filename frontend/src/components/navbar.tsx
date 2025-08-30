@@ -1,7 +1,7 @@
 import { CircleX, Heart, Home, Library} from 'lucide-react'
 import { NavLink, useLocation, Link } from 'react-router-dom'
 
-import { AnimatePresence, type Variants, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 interface NavbarProps {
   containerStyles?: string
   toggleMenu?: () => void
@@ -25,7 +25,7 @@ const Navbar = ({containerStyles, toggleMenu, menuOpenned}: NavbarProps) => {
           <>
             <CircleX onClick={toggleMenu} className='text-xl self-end cursor-pointer relative left-8'/>
             <Link to={'/'} className='font-bold mb-10'>
-              <h4 className='text-gray-800'>Book Store</h4>
+              <h4 className='text-gray-800'>BookHub</h4>
             </Link>
           </>
         )}

@@ -122,10 +122,10 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="user bg-user border-user-border hover:bg-user-hover transition-smooth focus:ring-2 focus:ring-primary/20"
+                    className="user bg-user border-user-border hover:bg-user-hover transition-smooth focus:ring-2 focus:ring-white/20"
                   >
                     {/* Mobile: Show only initials */}
-                    <div className="sm:hidden w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                    <div className="sm:hidden w-6 h-6 bg-white text-white-foreground rounded-full flex items-center justify-center text-xs font-medium">
                       {getUserInitials(userInfo.username)}
                     </div>
                     

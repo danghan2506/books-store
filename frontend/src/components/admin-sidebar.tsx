@@ -49,7 +49,7 @@ const { userInfo } = useSelector((state: RootState) => state.auth);
      <Sidebar className="z-10">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>HT Shop</SidebarGroupLabel>
+          <SidebarGroupLabel>BookHub</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

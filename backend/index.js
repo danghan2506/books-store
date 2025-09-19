@@ -11,13 +11,16 @@ import cors from "cors";
 import { errorHandler } from "./middlewares/error-handler.js";
 import ensureDatabaseConnection from "./middlewares/database-middleware.js";
 const app = express();
-config()
-app.use(cors({
-  origin: process.env.NODE_ENV === "production" 
-    ? process.env.FRONTEND_URL 
-    : "http://localhost:5173",
-  credentials: true
-}))
+config();
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL
+        : "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -46,7 +49,4 @@ app.use(errorHandler);
 // Export app for Vercel
 export default app;
 
-// Start server only in development
-if (process.env.NODE_ENV !== "production") {
-  app.listen(port, () => console.log(`Server running on port ${port}`));
-}
+app.listen(port, () => console.log(`Server running on port ${port}`));

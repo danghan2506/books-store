@@ -34,7 +34,6 @@ import UserProfile from "./pages/shop/user-profile.tsx";
 import ResetPasswordForm from "./pages/auth/request-password-form.tsx";
 import VerifyOtp from "./pages/auth/verify-otp.tsx";
 import ResetPassword from "./pages/auth/reset-password";
-
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>

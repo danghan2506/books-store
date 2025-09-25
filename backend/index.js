@@ -10,6 +10,7 @@ import connectDatabase from "./config/connect-database.js";
 import cors from "cors";
 import { errorHandler } from "./middlewares/error-handler.js";
 import ensureDatabaseConnection from "./middlewares/database-middleware.js";
+import { apiLimiter } from "./middlewares/rate-limiter.js";
 const app = express();
 config();
 app.use(
@@ -41,17 +42,16 @@ const port = process.env.PORT || 5000;
 connectCloudinary();
 
 // Ensure database connection for all API routes
-app.use("/api/users", ensureDatabaseConnection, userRoute);
-app.use("/api/books", ensureDatabaseConnection, bookRoute);
-app.use("/api/orders", ensureDatabaseConnection, orderRoute);
-app.use("/api/auth", ensureDatabaseConnection, authRoute);
-app.get("/api/config/paypal", (req, res) => {
+app.use("/api/users", apiLimiter, ensureDatabaseConnection, userRoute);
+app.use("/api/books", apiLimiter,  ensureDatabaseConnection, bookRoute);
+app.use("/api/orders", apiLimiter,  ensureDatabaseConnection, orderRoute);
+app.use("/api/auth",apiLimiter, ensureDatabaseConnection, authRoute);
+app.get("/api/config/paypal", apiLimiter, (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });
 app.get("/", (req, res) => {
   res.json({ message: "API is running!" });
 });
-
 // Error handler middleware must be last
 app.use(errorHandler);
 

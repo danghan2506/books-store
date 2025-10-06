@@ -34,6 +34,7 @@
     "chart.js": "^4.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "firebase": "^12.3.0",
     "flowbite": "^3.1.2",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.533.0",

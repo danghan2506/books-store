@@ -181,7 +181,7 @@ export default function Login() {
               )}
             </Button>
 
-            {/* <div className="relative w-full">
+            <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-gray-200" />
               </div>
@@ -215,7 +215,7 @@ export default function Login() {
                 />
               </svg>
               Continue with Google
-            </Button> */}
+            </Button> 
 
             <div className="text-center text-sm text-gray-600">
               Don't have an account?{" "}

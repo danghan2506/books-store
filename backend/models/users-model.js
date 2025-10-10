@@ -2,7 +2,9 @@ import mongoose, { mongo } from "mongoose";
 const userSchema = new mongoose.Schema({
     username: {type: String, required: true},
     email: {type: String, required: true, unique: true},
-    password: {type: String, required: true},
+    password: {type: String, },
+    firebaseUid: {type: String, required: true, unique: true},
+    provider: {type: String, default: "firebase"},
     phoneNumber: {type: String, default: ""},
     addressBook: {
         city: {type: String, default: ""},

@@ -5,7 +5,7 @@ import {
 import moment from "moment";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Edit, Trash2, Eye, AlertTriangle } from "lucide-react";
+import { Edit, Trash, Eye, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -297,7 +297,7 @@ const BooksList = () => {
                                 disabled={isDeleting}
                                 className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0 transition-smooth hover:shadow-soft"
                               >
-                                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <Trash className="h-3 w-3 sm:h-4 sm:w-4" />
                               </Button>
                             </div>
                           </TableCell>

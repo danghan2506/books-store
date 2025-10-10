@@ -32,7 +32,7 @@ const Favourite = () => {
                 {/* Header Section */}
                 <div className="mb-8">
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                        FAVOURITE PRODUCTS
+                        FAVOURITE BOOKS
                     </h1>
                     <p className="text-gray-600 mt-2 text-sm sm:text-base">
                         {favourites.length} {favourites.length === 1 ? 'item' : 'items'} in your wishlist

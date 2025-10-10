@@ -7,6 +7,7 @@ import {
   Settings,
   DollarSign,
   Smile,
+  Baby,
 } from "lucide-react";
 import {
   useGetBooksQuery,
@@ -123,7 +124,8 @@ const Shop = () => {
   "Kinh tế": <DollarSign size={44} />,
   "Tâm lý-Kỹ năng sống": <Brain size={44} />,
   "Tiểu sử hồi ký": <BookOpenText size={44} />,
-  "Sách học ngoại ngữ": <BookType size={44} />
+  "Sách học ngoại ngữ": <BookType size={44} />,
+  "Thiếu nhi": <Baby size={44} />,
   };
 
   // Loading states

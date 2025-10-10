@@ -20,12 +20,16 @@ import {useForm} from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type LoginFormData, loginSchema } from "@/validation/auth-schema";
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/utils/firebase";
+import { useLoginWithFirebaseMutation } from "@/redux/API/user-api-slice";
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [login] = useLoginMutation();
+  const [loginWithFirebase] = useLoginWithFirebaseMutation();
   const { search } = useLocation();
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const sp = new URLSearchParams(search);
@@ -61,6 +65,24 @@ export default function Login() {
       }
     }
     finally {
+      setIsLoading(false);
+    }
+  };
+  const handleFirebaseLogin = async () => {
+    setIsLoading(true);
+    try {
+      // Đăng nhập với Google (hoặc provider khác nếu muốn)
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+      // Gửi idToken lên backend
+      const res = await loginWithFirebase({ idToken }).unwrap();
+      dispatch(setCredentials({ ...res.user }));
+      toast.success("Login with Firebase successfully!");
+      navigate(redirect);
+    } catch {
+      toast.error("Login with Firebase failed");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -195,6 +217,8 @@ export default function Login() {
               type="button"
               size="lg"
               className="w-full h-12 text-base border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300"
+              onClick={handleFirebaseLogin}
+              disabled={isLoading}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path

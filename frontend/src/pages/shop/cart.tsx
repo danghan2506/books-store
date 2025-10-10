@@ -25,7 +25,7 @@ const Cart = () => {
   const totalPrice = cartItems.reduce((acc: number, item) => acc + item.quantity * item.price, 0)
   const removeFromCartHandler = (itemId: string) => {
     dispatch(removeFromCart({ itemId, userId: userInfo?._id }))
-    toast.success("Đã xóa khỏi giỏ hàng");
+    toast.success("Removed from cart successfully");
   }
   const checkoutHandler = () => {
     navigate("/shipping-address")

@@ -31,7 +31,7 @@ const AdminDashBoard = () => {
           <CardContent className="p-4">
             <CardTitle className="text-blue-100">Total Revenues</CardTitle>
             <div className="text-2xl font-bold mt-2">
-              {loadingSales ? <Skeleton className="w-20 h-6" /> : `$${sales}`}
+              {loadingSales ? <Skeleton className="w-20 h-6" /> : `$${sales?.toFixed(2)}`}
             </div>
           </CardContent>
         </Card>

@@ -3,6 +3,35 @@ import User from "../models/users-model.js";
 import { VALIDATION_MESSAGES } from "../constants/validation-messages.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/create-token.js";
+import admin from "../config/firebase-admin.js";
+const loginWithGoogle = async (req, res) => {
+  try {
+    // Lấy token từ header Authorization: 'Bearer <token>'
+    const token = req.body.idToken;
+    if (!token) {
+      return res.status(401).json(VALIDATION_MESSAGES.FIREBASE_TOKEN_MISSING);
+    }
+    const decoded = await admin.auth().verifyIdToken(token);
+    let user = await User.findOne({ email: decoded.email });
+    if (!user) {
+      user = await User.create({
+        email: decoded.email,
+        firebaseUid: decoded.uid,
+        provider: decoded.firebase?.sign_in_provider || "firebase",
+        role: "user",
+        username: decoded.name || decoded.email,
+        phoneNumber: decoded.phone_number || "",
+        // Có thể lưu thêm ảnh đại diện nếu muốn
+        // photoURL: decoded.picture || "",
+      });
+    }
+    // Sinh JWT backend
+    generateToken(res, user._id);
+    return res.json({ message: "Authenticated", user });
+  } catch (error) {
+    return res.status(401).json(VALIDATION_MESSAGES.FIREBASE_TOKEN_INVALID);
+  }
+};
 const createUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
   switch (true) {
@@ -81,7 +110,6 @@ const logoutCurrentUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     expires: new Date(0),
   });
-
   res.status(200).json(VALIDATION_MESSAGES.LOGOUT_SUCCESS);
 });
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -151,7 +179,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   // 3. Password update flow (MUST validate + hash)
   let passwordChanged = false;
   const isPasswordUpdateRequested =
-    currentPassword !== undefined || newPassword !== undefined || confirmPassword !== undefined;
+    currentPassword !== undefined ||
+    newPassword !== undefined ||
+    confirmPassword !== undefined;
 
   if (isPasswordUpdateRequested) {
     // Ensure all required fields are present
@@ -161,7 +191,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 
     // Validate current password correctness
-    const isCurrentPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+    const isCurrentPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
     if (!isCurrentPasswordCorrect) {
       res.status(401);
       throw new Error(VALIDATION_MESSAGES.INVALID_CREDENTIALS);
@@ -210,7 +243,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         httpOnly: true,
         expires: new Date(0),
       });
-      return res.status(200).json({ message: VALIDATION_MESSAGES.PASSWORD_UPDATED, loggedOut: true });
+      return res.status(200).json({
+        message: VALIDATION_MESSAGES.PASSWORD_UPDATED,
+        loggedOut: true,
+      });
     }
 
     res.json({
@@ -269,4 +305,5 @@ export {
   updateUserProfile,
   getUserById,
   deleteUserProfile,
+  loginWithGoogle,
 };

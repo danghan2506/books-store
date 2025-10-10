@@ -11,6 +11,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    loginWithFirebase: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/login-with-google`,
+        method: "POST",
+        body: data,
+      })
+    }),
     logout: builder.mutation<void, void>({
       query: () => ({
         url: `${USERS_URL}/logout`,
@@ -52,4 +59,4 @@ export const userApiSlice = apiSlice.injectEndpoints({
   }),
 });
 export const {
-  useLoginMutation,useLogoutMutation,useSignupMutation,useGetAllUsersQuery,useGetUserProfileQuery, useDeleteUserMutation, useUpdateUserProfileMutation} = userApiSlice;
+  useLoginMutation,useLoginWithFirebaseMutation,useLogoutMutation,useSignupMutation,useGetAllUsersQuery,useGetUserProfileQuery, useDeleteUserMutation, useUpdateUserProfileMutation} = userApiSlice;

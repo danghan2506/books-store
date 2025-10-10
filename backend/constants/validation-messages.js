@@ -29,7 +29,8 @@ export const VALIDATION_MESSAGES = {
   USER_NOT_FOUND: "User not found",
   INVALID_ROLE: "Role must be user or admin",
   UNAUTHORIZED: "You are not authorized to perform this action",
-  
+  FIREBASE_TOKEN_MISSING: "Firebase token is missing",
+  FIREBASE_TOKEN_INVALID: "Firebase token is invalid",
   // Server errors
   SERVER_ERROR: "Something went wrong. Please try again later",
   VALIDATION_ERROR: "Please check your input and try again",

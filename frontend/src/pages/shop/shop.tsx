@@ -65,7 +65,6 @@ const Shop = () => {
     },
     { skip: !selectedCategoryName }
   );
-  console.log({ categorySlug: selectedCategoryName ? slugify(selectedCategoryName) : null, categoryBooks, categoryError })
   // Xác định books để hiển thị
   const books = selectedCategoryName 
     ? categoryBooks

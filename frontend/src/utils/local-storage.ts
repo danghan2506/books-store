@@ -4,7 +4,6 @@ const getFavouritesFromLocalStorage = (userId?: string): Book[] => {
     const favouritesJSON = localStorage.getItem(key)
     return favouritesJSON ? JSON.parse(favouritesJSON) : []
 }
-
 const addFavouritesToLocalStorage = (book: Book, userId?: string) : void => {
     const key = userId ? `favourites_${userId}` : "favourites"
     const favourites = getFavouritesFromLocalStorage(userId)

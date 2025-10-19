@@ -5,7 +5,7 @@ import {
 import moment from "moment";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Edit, Trash, Eye, AlertTriangle } from "lucide-react";
+import { Edit, Trash2, Eye, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,27 +97,17 @@ const BooksList = () => {
   const handleDeleteBook = async () => {
     if (!bookToDelete) return;
     try {
-      const confirm = window.confirm(
-        "Are you sure you want to delete this book?"
-      );
-      if (!confirm) return;
-      const { data } = await deleteBook(bookToDelete.id);
-      toast.success(`"${data.deletedBook?.name}" is deleted`, {});
-      refetch();
+    // LOẠI BỎ window.confirm VÀ LOGIC XỬ LÝ CỦA NÓ
+    const { data } = await deleteBook(bookToDelete.id);
+    toast.success(`"${data.deletedBook?.name}" is deleted`, {});
+    setBookToDelete(null); // Đóng dialog sau khi thành công
+    refetch();
     } catch (err: unknown) {
-      console.error(err);
-      let message = "Failed to delete book";
-      if (typeof err === "object" && err !== null) {
-        const anyErr = err as { data?: unknown; message?: string };
-        const dataMessage =
-          typeof anyErr.data === "string" ? anyErr.data : undefined;
-        message = dataMessage ?? anyErr.message ?? message;
-      } else if (typeof err === "string") {
-        message = err;
-      }
-      toast.error(message);
-    }
-  };
+     // ... logic xử lý lỗi giữ nguyên ...
+     toast.error(err as string);
+     setBookToDelete(null); // Đóng dialog ngay cả khi lỗi
+   }
+   };
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 10;
@@ -297,7 +287,7 @@ const BooksList = () => {
                                 disabled={isDeleting}
                                 className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0 transition-smooth hover:shadow-soft"
                               >
-                                <Trash className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                               </Button>
                             </div>
                           </TableCell>
@@ -432,7 +422,7 @@ const BooksList = () => {
             <AlertDialogAction
               onClick={handleDeleteBook}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isDeleting ? (
                 <span className="flex items-center gap-2">

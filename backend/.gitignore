@@ -1,4 +1,5 @@
 .env
 .env.test
 .env*.local
-./utils/firebase-service-account.json
+utils/firebase-service-account.json
+**/firebase-service-account.json

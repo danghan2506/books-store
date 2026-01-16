@@ -116,10 +116,10 @@ const deleteBook = asyncHandler(async (req, res) => {
     if(!book){
       return res.status(404).json({ message: "Book not found" });
     }
-    if (book.image && book.image.length > 0) {
-  for (const img of book.image) {
+    if (book.images) {
+  for (const img of book.images) {
     if (img.public_id) {
-      await cloudinary.uploader.destroy(img.public_id);
+      await cloudinary.uploader.destroy(img.public_id, {resource_type : 'image'}).then(result => console.log(result));
     }
   }
 }

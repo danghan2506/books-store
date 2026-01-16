@@ -3,10 +3,10 @@ import apiSlice from "./api-slice";
 export const authApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         requestPasswordReset: builder.mutation({
-            query: (email) => ({
+            query: (data) => ({
                 url: `${AUTH_URL}/request`,
                 method: "POST",
-                body: email
+                body: {email: data.email}
             })
         }),
         verifyOtp: builder.mutation({

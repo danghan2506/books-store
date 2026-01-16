@@ -46,7 +46,7 @@ const { userInfo } = useSelector((state: RootState) => state.auth);
     }
   }
   return (
-     <Sidebar className="z-10">
+     <Sidebar className="z-10" collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>BookHub</SidebarGroupLabel>

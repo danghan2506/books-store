@@ -28,8 +28,8 @@ const ResetPasswordForm = () => {
   const [sendEmail, {isLoading, error}] = useRequestPasswordResetMutation()
   const onSubmit = async (data: EmailOnlyFormData) => {
     try {
-      // Đúng: gửi chỉ email string
-      await sendEmail({email: data.email}).unwrap();
+      // Gửi dữ liệu form directly
+      await sendEmail(data).unwrap();
       toast.success("OTP has been sent to your email");
       // if success, redirect to verify OTP page 
       localStorage.setItem("resetEmail", data.email);

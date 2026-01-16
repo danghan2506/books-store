@@ -51,13 +51,18 @@ const verifyOtp = async (req, res) => {
     }
 }
 const resetPassword = async (req, res) => {
-    const user = await User.findOne({email: req.body.email})
+    const { email, newPassword, confirmPassword } = req.body;
+    
+    // Validate inputs
+    if (!email || !newPassword || !confirmPassword) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
+    
+    const user = await User.findOne({email: email})
     if(!user){
-        res.status(404).json({message: VALIDATION_MESSAGES.EMAIL_INVALID})
+        return res.status(404).json({message: VALIDATION_MESSAGES.EMAIL_INVALID})
     }
     try {
-        const { email, newPassword, confirmPassword } = req.body;
-
         if (!otpStore[email]) {
             return res.status(400).json({ message: "OTP chưa được xác thực" });
         }

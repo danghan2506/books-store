@@ -45,7 +45,7 @@ connectCloudinary();
 app.use("/api/users", ensureDatabaseConnection, userRoute);
 app.use("/api/books",ensureDatabaseConnection, bookRoute);
 app.use("/api/orders",ensureDatabaseConnection, orderRoute);
-app.use("/api/auth",apiLimiter, ensureDatabaseConnection, authRoute);
+app.use("/api/auth", ensureDatabaseConnection, authRoute);
 app.get("/api/config/paypal", apiLimiter, (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });

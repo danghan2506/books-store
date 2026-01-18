@@ -27,6 +27,10 @@ export const VALIDATION_MESSAGES = {
   USERNAME_TAKEN: "Username is already taken",
   INVALID_CREDENTIALS: "Invalid email or password",
   USER_NOT_FOUND: "User not found",
+  OTP_INVALID: "OTP is not valid",
+  OTP_NOT_FOUND: "OTP has not been requested or OTP has expired",
+  OTP_EXPIRED: "OTP has expired",
+  OTP_NOT_MATCH: "OTP does not match",
   INVALID_ROLE: "Role must be user or admin",
   UNAUTHORIZED: "You are not authorized to perform this action",
   FIREBASE_TOKEN_MISSING: "Firebase token is missing",
@@ -42,5 +46,9 @@ export const VALIDATION_MESSAGES = {
   LOGOUT_SUCCESS: "Logged out successfully",
   PROFILE_UPDATED: "Profile updated successfully",
   USER_DELETED: "Deleted user's profile successfully", 
-  PASSWORD_UPDATED: "Password updated successfully"
+  PASSWORD_UPDATED: "Password updated successfully",
+  BOOK_DELETED_SUCCESSFULLY:  "Book and associated images deleted successfully",
+  PASSWORD_RESET_SUCCESS: "Password reset successfully",
+  OTP_SEND_SUCCESS: "OTP has been send to your email.",
+  OTP_VALID: "OTP is valid",
 };

@@ -2,6 +2,7 @@ import asyncHandler from "../middlewares/async-handler.js";
 import Book from "../models/books-model.js";
 import { v2 as cloudinary } from "cloudinary";
 import { generateSlug } from "../utils/create-slug.js";
+import { VALIDATION_MESSAGES } from "../constants/validation-messages.js";
 const addBook = asyncHandler(async (req, res) => {
   const {
     name,
@@ -125,12 +126,12 @@ const deleteBook = asyncHandler(async (req, res) => {
 }
     const deletedBook = await Book.findByIdAndDelete(bookId)
     res.json({
-      message: "Book and associated images deleted successfully",
+      message: VALIDATION_MESSAGES.BOOK_DELETED,
       deletedBook,
     });
   } catch (error) {
-    console.error("Delete error:", error);
-    res.status(500).json({ error: "Server error while deleting book" });
+    console.error(error);
+    res.status(500).json({ error: VALIDATION_MESSAGES.SERVER_ERROR });
   }
 });
 const getBookDetails = asyncHandler(async (req, res) => {
@@ -147,7 +148,8 @@ const getAllBooks = asyncHandler(async (req, res) => {
     const books = await Book.find({}).sort({ createdAt: -1 });
     res.json(books);
   } catch (error) {
-    console.log(error);
+    console.error(error)
+    res.status(500).json({error: VALIDATION_MESSAGES.SERVER_ERROR})
   }
 });
 const getBooks = asyncHandler(async (req, res) => {
@@ -167,7 +169,7 @@ const getBooks = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ error: VALIDATION_MESSAGES.SERVER_ERROR });
   }
 });
 

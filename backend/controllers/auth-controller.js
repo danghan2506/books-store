@@ -25,7 +25,7 @@ const requestPasswordReset = async (req, res) => {
       subject: "OTP reset password",
       text: `Your OTP is: ${otp}, it will expire in 5 minutes`
     })
-    res.json({message: "OTP has been send to your email."})
+    res.json({message: VALIDATION_MESSAGES.OTP_SEND_SUCCESS})
   }
   catch (error) {
     res.status(500).json({ message: error.message });
@@ -35,53 +35,72 @@ const verifyOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;
         if (!otpStore[email]) {
-            return res.status(400).json({ message: "Chưa yêu cầu OTP hoặc OTP đã hết hạn" });
+            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_NOT_FOUND });
         }
         const { otp: storedOtp, expires } = otpStore[email];
         if (Date.now() > expires) {
             delete otpStore[email];
-            return res.status(400).json({ message: "OTP đã hết hạn" });
+            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_EXPIRED });
         }
         if (storedOtp !== otp) {
-            return res.status(400).json({ message: "OTP không chính xác" });
+            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_NOT_MATCH });
         }
-        res.json({ message: "OTP hợp lệ" });
+        res.json({ message: VALIDATION_MESSAGES.OTP_VALID });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
 const resetPassword = async (req, res) => {
     const { email, newPassword, confirmPassword } = req.body;
-    
     // Validate inputs
     if (!email || !newPassword || !confirmPassword) {
-        return res.status(400).json({ message: "Missing required fields" });
+        return res.status(400).json({ message: VALIDATION_MESSAGES.REQUIRED_FIELD });
     }
-    
-    const user = await User.findOne({email: email})
-    if(!user){
-        return res.status(404).json({message: VALIDATION_MESSAGES.EMAIL_INVALID})
+    const user = await User.findOne({ email: email });
+    if (!user) {
+        return res.status(404).json({ message: VALIDATION_MESSAGES.EMAIL_INVALID });
     }
     try {
         if (!otpStore[email]) {
-            return res.status(400).json({ message: "OTP chưa được xác thực" });
+            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_INVALID });
+        }
+        if (newPassword !== confirmPassword) {
+            res.status(400);
+            throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
+        }
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        delete otpStore[email];
+        res.json({ message: VALIDATION_MESSAGES.PASSWORD_RESET_SUCCESS });
+    } catch (error) {
+        // Log error stack for debugging
+        console.error("[ERROR]", error);
+        res.status(500).json({ message: error.message });
+    }
+}
+const forgotPassword = async (req, res) => {
+    const { email, newPassword, confirmPassword } = req.body;
+    if (!email || !newPassword || !confirmPassword) {
+        return res.status(400).json({ message: VALIDATION_MESSAGES.REQUIRED_FIELD });
+    }
+    const user = await User.findOne({email: email})
+    if(!user){
+        return res.status(404).jsocn({message: VALIDATION_MESSAGES.EMAIL_INVALID})
+    }
+    try {
+        if (!otpStore[email]) {
+            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_INVALID });
         }
         if (newPassword !== confirmPassword) {
       res.status(400);
       throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
     }
-    const isNewSameAsOld = await bcrypt.compare(newPassword, user.password);
-        if (isNewSameAsOld) {
-          res.status(400);
-          throw new Error("New password must be different from current password");
-        }
         user.password = await bcrypt.hash(newPassword, 10)
         await user.save()
-        // Xóa OTP sau khi đổi mật khẩu
         delete otpStore[email];
-        res.json({ message: "Mật khẩu đã được thay đổi thành công" });
+        res.json({ message: VALIDATION_MESSAGES.PASSWORD_RESET_SUCCESS });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-};
+}
 export {requestPasswordReset, verifyOtp, resetPassword}

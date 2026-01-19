@@ -6,7 +6,7 @@ import { ShoppingCart, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { RootState } from "@/redux/features/store";
 import { useDispatch, useSelector } from "react-redux";
-import { useLogoutMutation } from "@/redux/API/user-api-slice";
+import { useLogoutMutation } from "@/redux/API/auth-api-slice";
 import { logout } from "@/redux/features/auth/auth-slice";
 import { useNavigate } from "react-router-dom";
 import {

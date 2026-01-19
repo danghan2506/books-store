@@ -3,35 +3,6 @@ import User from "../models/users-model.js";
 import { VALIDATION_MESSAGES } from "../constants/validation-messages.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/create-token.js";
-import admin from "../config/firebase-admin.js";
-const loginWithGoogle = async (req, res) => {
-  try {
-    // Lấy token từ header Authorization: 'Bearer <token>'
-    const token = req.body.idToken;
-    if (!token) {
-      return res.status(401).json(VALIDATION_MESSAGES.FIREBASE_TOKEN_MISSING);
-    }
-    const decoded = await admin.auth().verifyIdToken(token);
-    let user = await User.findOne({ email: decoded.email });
-    if (!user) {
-      user = await User.create({
-        email: decoded.email,
-        firebaseUid: decoded.uid,
-        provider: decoded.firebase?.sign_in_provider || "firebase",
-        role: "user",
-        username: decoded.name || decoded.email,
-        phoneNumber: decoded.phone_number || "",
-        // Có thể lưu thêm ảnh đại diện nếu muốn
-        // photoURL: decoded.picture || "",
-      });
-    }
-    // Sinh JWT backend
-    generateToken(res, user._id);
-    return res.json({ message: "Authenticated", user });
-  } catch (error) {
-    return res.status(401).json(VALIDATION_MESSAGES.FIREBASE_TOKEN_INVALID);
-  }
-};
 const createUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
   switch (true) {
@@ -126,10 +97,10 @@ const getCurrentUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
       phoneNumber: user.phoneNumber,
       addressBook: {
-        city: user.addressBook.city, // FIX: Changed from newUser to user
-        district: user.addressBook.district, // FIX: Changed from newUser to user
-        country: user.addressBook.country, // FIX: Changed from newUser to user
-        address: user.addressBook.address, // FIX: Changed from newUser to user
+        city: user.addressBook.city, 
+        district: user.addressBook.district, 
+        country: user.addressBook.country, 
+        address: user.addressBook.address, 
       },
     });
   } else {
@@ -139,58 +110,38 @@ const getCurrentUserProfile = asyncHandler(async (req, res) => {
 });
 const updateUserProfile = asyncHandler(async (req, res) => {
   const userId = req.params.userId;
-  const {
-    username,
-    email,
-    phoneNumber,
-    role,
-    addressBook,
-    currentPassword,
-    newPassword,
-    confirmPassword,
-  } = req.body;
+  const {username,email,phoneNumber,role,addressBook,currentPassword,newPassword,confirmPassword} = req.body;
   const user = await User.findById(userId);
   if (!user) {
     res.status(404);
     throw new Error(VALIDATION_MESSAGES.USER_NOT_FOUND);
   }
-
-  // CRITICAL validations only (security & data integrity)
-
-  // 1. Email uniqueness (MUST validate - data integrity)
   if (email && email !== user.email) {
     const emailExists = await User.findOne({ email, _id: { $ne: userId } });
     if (emailExists) {
       return res.status(400).json({
         success: false,
-        message: "Email already exists",
+        message: VALIDATION_MESSAGES.EMAIL_EXIST,
       });
     }
   }
-
-  // 2. Role validation (MUST validate - security)
   if (role && !["user", "admin"].includes(role)) {
     return res.status(400).json({
       success: false,
-      message: "Invalid role",
+      message: VALIDATION_MESSAGES.INVALID_ROLE,
     });
   }
-
-  // 3. Password update flow (MUST validate + hash)
   let passwordChanged = false;
   const isPasswordUpdateRequested =
     currentPassword !== undefined ||
     newPassword !== undefined ||
     confirmPassword !== undefined;
-
   if (isPasswordUpdateRequested) {
     // Ensure all required fields are present
     if (!currentPassword || !newPassword || !confirmPassword) {
       res.status(400);
       throw new Error(VALIDATION_MESSAGES.PASSWORD_REQUIRED);
     }
-
-    // Validate current password correctness
     const isCurrentPasswordCorrect = await bcrypt.compare(
       currentPassword,
       user.password
@@ -199,33 +150,24 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       res.status(401);
       throw new Error(VALIDATION_MESSAGES.INVALID_CREDENTIALS);
     }
-
-    // Validate new password confirmation
     if (newPassword !== confirmPassword) {
       res.status(400);
       throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
     }
-
-    // Ensure new password is different from current
     const isNewSameAsOld = await bcrypt.compare(newPassword, user.password);
     if (isNewSameAsOld) {
       res.status(400);
-      throw new Error("New password must be different from current password");
+      throw new Error(VALIDATION_MESSAGES.PASSWORD_SAME_AS_OLD);
     }
-
-    // Hash and set new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     passwordChanged = true;
   }
   try {
-    // Update fields (let Mongoose schema handle basic validation)
     if (username) user.username = username;
     if (email) user.email = email;
     if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
     if (role) user.role = role;
-
-    // Update addressBook
     if (addressBook) {
       Object.keys(addressBook).forEach((key) => {
         if (addressBook[key] !== undefined) {
@@ -248,7 +190,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         loggedOut: true,
       });
     }
-
     res.json({
       _id: updatedUser._id,
       username: updatedUser.username,
@@ -259,19 +200,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       updatedAt: updatedUser.updatedAt,
     });
   } catch (error) {
-    // Handle Mongoose validation errors
-    if (error.name === "ValidationError") {
-      res.status(400);
-      throw new Error("Invalid data provided");
-    }
-
-    if (error.code === 11000) {
-      res.status(400);
-      throw new Error("Email already exists");
-    }
-
     res.status(500);
-    throw new Error("Server error");
+    throw new Error(VALIDATION_MESSAGES.SERVER_ERROR);
   }
 });
 const deleteUserProfile = asyncHandler(async (req, res) => {
@@ -305,5 +235,4 @@ export {
   updateUserProfile,
   getUserById,
   deleteUserProfile,
-  loginWithGoogle,
 };

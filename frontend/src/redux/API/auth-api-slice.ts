@@ -2,6 +2,33 @@ import { AUTH_URL } from "../features/constants";
 import apiSlice from "./api-slice";
 export const authApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
+            login: builder.mutation({
+              query: (data) => ({
+                url: `${AUTH_URL}/login`,
+                method: "POST",
+                body: data,
+              }),
+            }),
+            loginWithFirebase: builder.mutation({
+              query: (data) => ({
+                url: `${AUTH_URL}/login-with-google`,
+                method: "POST",
+                body: data,
+              })
+            }),
+            logout: builder.mutation<void, void>({
+              query: () => ({
+                url: `${AUTH_URL}/logout`,
+                method: "POST",
+              }),
+            }),
+            signup: builder.mutation({
+              query: (data) => ({
+                url: `${AUTH_URL}/`,
+                method: "POST",
+                body: data,
+              }),
+            }),
         requestPasswordReset: builder.mutation({
             query: (data) => ({
                 url: `${AUTH_URL}/request`,
@@ -25,4 +52,4 @@ export const authApiSlice = apiSlice.injectEndpoints({
         })
     })
 })
-export const{useRequestPasswordResetMutation, useResetPasswordMutation, useVerifyOtpMutation} = authApiSlice
+export const{useLoginMutation, useLoginWithFirebaseMutation, useLogoutMutation, useSignupMutation, useRequestPasswordResetMutation, useResetPasswordMutation, useVerifyOtpMutation} = authApiSlice

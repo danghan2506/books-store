@@ -10,12 +10,14 @@ export const VALIDATION_MESSAGES = {
   // Format validation
   EMAIL_INVALID: "Please enter a valid email address",
   PHONE_INVALID: "Please enter a valid phone number",
+  EMAIL_EXIST: "Email already exists",
   
   // Password validation
   PASSWORD_MIN_LENGTH: "Password must be at least 8 characters",
   PASSWORD_WEAK: "Password must contain uppercase, lowercase, number and special character",
   PASSWORD_MAX_LENGTH: "Password cannot exceed 128 characters",
   PASSWORD_MISMATCH: "Passwords do not match",
+  PASSWORD_SAME_AS_OLD: "New password must be different from current password",
   
   // Username validation
   USERNAME_MIN_LENGTH: "Username must be at least 3 characters",

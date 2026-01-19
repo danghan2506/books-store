@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { setCredentials } from "@/redux/features/auth/auth-slice";
 import { toast } from "sonner";
-import { useSignupMutation } from "@/redux/API/user-api-slice";
+import { useSignupMutation } from "@/redux/API/auth-api-slice";
 import type { RootState } from "@/redux/features/store";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useLoginMutation } from "@/redux/API/user-api-slice";
+import { useLoginMutation, useLoginWithFirebaseMutation } from "@/redux/API/auth-api-slice";
 import { setCredentials } from "@/redux/features/auth/auth-slice";
 import { toast } from "sonner"
 import type { RootState } from "@/redux/features/store";
@@ -22,7 +22,6 @@ import { type LoginFormData, loginSchema } from "@/validation/auth-schema";
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/utils/firebase";
-import { useLoginWithFirebaseMutation } from "@/redux/API/user-api-slice";
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();

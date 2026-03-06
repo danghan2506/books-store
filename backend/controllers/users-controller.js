@@ -2,86 +2,32 @@ import asyncHandler from "../middlewares/async-handler.js";
 import User from "../models/users-model.js";
 import { VALIDATION_MESSAGES } from "../constants/validation-messages.js";
 import bcrypt from "bcryptjs";
-import generateToken from "../utils/create-token.js";
-const createUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
-  switch (true) {
-    case !username:
-      throw new Error(VALIDATION_MESSAGES.USERNAME_REQUIRED);
-    case !email:
-      throw new Error(VALIDATION_MESSAGES.EMAIL_REQUIRED);
-    case !password:
-      throw new Error(VALIDATION_MESSAGES.PASSWORD_REQUIRED);
+const changeUserPassword = asyncHandler(async (user, currentPassword, newPassword, confirmPassword) => {
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    const err = new Error(VALIDATION_MESSAGES.PASSWORD_REQUIRED);
+    err.status = 400;
+    throw err;
   }
-  const userExisted = await User.findOne({ email });
-  if (userExisted) {
-    res.status(400).send(VALIDATION_MESSAGES.USER_ALREADY_EXISTS);
-    return;
+  const isCurrentPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+  if (!isCurrentPasswordCorrect) {
+    const err = new Error(VALIDATION_MESSAGES.INVALID_CREDENTIALS);
+    err.status = 401;
+    throw err;
+  }
+  if (newPassword !== confirmPassword) {
+    const err = new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
+    err.status = 400;
+    throw err;
+  }
+  const isNewSameAsOld = await bcrypt.compare(newPassword, user.password);
+  if (isNewSameAsOld) {
+    const err = new Error(VALIDATION_MESSAGES.PASSWORD_SAME_AS_OLD);
+    err.status = 400;
+    throw err;
   }
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  const newUser = new User({ username, email, password: hashedPassword });
-  try {
-    await newUser.save();
-    generateToken(res, newUser._id);
-    res.status(201).json({
-      _id: newUser._id,
-      username: newUser.username,
-      email: newUser.email,
-      password: newUser.hashedPassword,
-      role: newUser.role,
-      phoneNumber: newUser.phoneNumber,
-      addressBook: {
-        city: newUser.addressBook.city,
-        district: newUser.addressBook.district,
-        country: newUser.addressBook.country,
-        address: newUser.addressBook.address,
-      },
-    });
-  } catch (error) {
-    res.status(400);
-    throw new Error(VALIDATION_MESSAGES.SERVER_ERROR);
-  }
-});
-const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  switch (true) {
-    case !email:
-      throw new Error(VALIDATION_MESSAGES.EMAIL_REQUIRED);
-    case !password:
-      throw new Error(VALIDATION_MESSAGES.PASSWORD_REQUIRED);
-  }
-  const existingUser = await User.findOne({ email });
-  if (!existingUser) {
-    res.status(401);
-    throw new Error(VALIDATION_MESSAGES.INVALID_CREDENTIALS);
-  }
-  const isValidPassword = await bcrypt.compare(password, existingUser.password);
-  if (!isValidPassword) {
-    res.status(401);
-    throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
-  }
-  generateToken(res, existingUser._id);
-  res.status(200).json({
-    _id: existingUser._id,
-    username: existingUser.username,
-    email: existingUser.email,
-    role: existingUser.role,
-    phoneNumber: existingUser.phoneNumber,
-    addressBook: {
-      city: existingUser.addressBook.city,
-      district: existingUser.addressBook.district,
-      country: existingUser.addressBook.country,
-      address: existingUser.addressBook.address,
-    },
-  });
-});
-const logoutCurrentUser = asyncHandler(async (req, res) => {
-  res.cookie("jwt", "", {
-    httpOnly: true,
-    expires: new Date(0),
-  });
-  res.status(200).json(VALIDATION_MESSAGES.LOGOUT_SUCCESS);
+  user.password = await bcrypt.hash(newPassword, salt);
+  return true;
 });
 const getAllUsers = asyncHandler(async (req, res) => {
   const allUsers = await User.find({});
@@ -137,31 +83,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     newPassword !== undefined ||
     confirmPassword !== undefined;
   if (isPasswordUpdateRequested) {
-    // Ensure all required fields are present
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      res.status(400);
-      throw new Error(VALIDATION_MESSAGES.PASSWORD_REQUIRED);
+    try {
+      await changeUserPassword(user, currentPassword, newPassword, confirmPassword);
+      passwordChanged = true;
+    } catch (err) {
+      res.status(err.status || 400);
+      throw err;
     }
-    const isCurrentPasswordCorrect = await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
-    if (!isCurrentPasswordCorrect) {
-      res.status(401);
-      throw new Error(VALIDATION_MESSAGES.INVALID_CREDENTIALS);
-    }
-    if (newPassword !== confirmPassword) {
-      res.status(400);
-      throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
-    }
-    const isNewSameAsOld = await bcrypt.compare(newPassword, user.password);
-    if (isNewSameAsOld) {
-      res.status(400);
-      throw new Error(VALIDATION_MESSAGES.PASSWORD_SAME_AS_OLD);
-    }
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-    passwordChanged = true;
   }
   try {
     if (username) user.username = username;
@@ -227,9 +155,6 @@ const getUserById = asyncHandler(async (req, res) => {
 });
 
 export {
-  createUser,
-  login,
-  logoutCurrentUser,
   getAllUsers,
   getCurrentUserProfile,
   updateUserProfile,

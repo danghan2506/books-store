@@ -9,9 +9,8 @@ const __dirname = path.dirname(__filename);
 let serviceAccount;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-  serviceAccount = JSON.parse(
-    Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString("utf-8")
-  );
+  const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString("utf-8").replace(/\r/g, "");
+  serviceAccount = JSON.parse(decoded);
 }
 else {
   const filePath = path.join(__dirname, "../utils/firebase-service-account.json");

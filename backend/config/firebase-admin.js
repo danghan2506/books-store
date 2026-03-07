@@ -9,8 +9,25 @@ const __dirname = path.dirname(__filename);
 let serviceAccount;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-  const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString("utf-8").replace(/\r/g, "");
-  serviceAccount = JSON.parse(decoded);
+  let accountString = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!accountString.trim().startsWith("{")) {
+    accountString = Buffer.from(accountString, "base64").toString("utf-8").replace(/\r/g, "");
+  }
+  try {
+    serviceAccount = JSON.parse(accountString);
+  } catch (error) {
+    console.error("Can't parse firebase credentials! Check your environment variables or firebase-service-account.json file", error.message);
+    if (accountString.trim().startsWith("{")) {
+       const fixedString = accountString.replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+       try {
+         serviceAccount = JSON.parse(fixedString);
+       } catch (fallbackError) {
+         throw error;
+       }
+    } else {
+       throw error;
+    }
+  }
 }
 else {
   const filePath = path.join(__dirname, "../utils/firebase-service-account.json");

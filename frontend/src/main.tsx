@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { ClerkProvider } from "@clerk/clerk-react";
 import "./index.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/features/store.ts";
@@ -77,11 +78,17 @@ const initialPayPalOptions = {
   currency: "USD",
   intent: "capture",
 };
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+if (!clerkPubKey) {
+  throw new Error("Missing Publishable Key");
+}
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <Toaster position="top-right" richColors closeButton />
     <PayPalScriptProvider options={initialPayPalOptions}>
-      <RouterProvider router={router} />
+      <ClerkProvider publishableKey={clerkPubKey}>
+        <RouterProvider router={router} />
+      </ClerkProvider>
     </PayPalScriptProvider>
   </Provider>
 );

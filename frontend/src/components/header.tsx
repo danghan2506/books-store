@@ -8,6 +8,7 @@ import type { RootState } from "@/redux/features/store";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/API/auth-api-slice";
 import { logout } from "@/redux/features/auth/auth-slice";
+import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoutApiCall] = useLogoutMutation()
+  const { signOut } = useAuth();
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const { cartItems } = useSelector((state: RootState) => state.cart);
   const toggleMenu = () => {
@@ -34,6 +36,7 @@ const Header = () => {
     try {
       await logoutApiCall().unwrap()
       dispatch(logout())
+      await signOut()
       navigate("/login")
     } catch (error) {
       console.log(error)

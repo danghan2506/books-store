@@ -3,31 +3,39 @@ import nodemailer from "nodemailer"
 import { VALIDATION_MESSAGES } from "../constants/validation-messages.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/create-token.js";
-import admin from "../config/firebase-admin.js";
+import { clerkClient } from "@clerk/clerk-sdk-node";
 import asyncHandler from "../middlewares/async-handler.js";
 let otpStore = {}
-const loginWithGoogle = async (req, res) => {
+const loginWithClerk = async (req, res) => {
   try {
-    const token = req.body.idToken;
-    if (!token) {
-      return res.status(401).json(VALIDATION_MESSAGES.FIREBASE_TOKEN_MISSING);
+    const clerkId = req.auth.userId;
+    if (!clerkId) {
+      return res.status(401).json({ message: "Clerk auth missing" });
     }
-    const decoded = await admin.auth().verifyIdToken(token);
-    let user = await User.findOne({ email: decoded.email });
+    // Fallback explicit configuration in case singleton has empty constructor
+    const clerkUser = await clerkClient.users.getUser(clerkId);
+    const email = clerkUser.emailAddresses[0]?.emailAddress;
+    if (!email) {
+      return res.status(400).json({ message: "No email associated with this Clerk account" });
+    }
+    let user = await User.findOne({ email: email });
     if (!user) {
       user = await User.create({
-        email: decoded.email,
-        firebaseUid: decoded.uid,
-        provider: decoded.firebase?.sign_in_provider || "firebase",
+        email: email,
+        clerkId: clerkUser.id,
+        provider: "clerk",
         role: "user",
-        username: decoded.name || decoded.email,
-        phoneNumber: decoded.phone_number || "",
+        username: (clerkUser.firstName || "") + " " + (clerkUser.lastName || "") || email,
       });
+    } else if (!user.clerkId) {
+       user.clerkId = clerkUser.id;
+       await user.save();
     }
     generateToken(res, user._id)
     return res.json({ message: "Authenticated", user });
   } catch (error) {
-    return res.status(401).json(VALIDATION_MESSAGES.FIREBASE_TOKEN_INVALID, error);
+    console.error("Clerk login error:", error);
+    return res.status(401).json({ message: "Invalid Clerk token", error: error.message });
   }
 };
 const createUser = asyncHandler(async (req, res) => {
@@ -210,4 +218,4 @@ const forgotPassword = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
-export {requestPasswordReset, verifyOtp, resetPassword, login, loginWithGoogle, logoutCurrentUser, createUser}
+export {requestPasswordReset, verifyOtp, resetPassword, login, loginWithClerk, logoutCurrentUser, createUser}

@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/API/auth-api-slice";
 import { logout } from "@/redux/features/auth/auth-slice";
+import { useAuth } from "@clerk/clerk-react";
 import type { RootState } from "@/redux/features/store";
 const AdminSidebar = () => {
   const items = [
@@ -35,11 +36,13 @@ const AdminSidebar = () => {
 const { userInfo } = useSelector((state: RootState) => state.auth);  
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [logoutApi] = useLogoutMutation()
   const handleLogout = async () => {
     try {
         await logoutApi().unwrap()
         dispatch(logout())
+        await signOut()
         navigate("/login")
     } catch (error) {
         console.error(error)

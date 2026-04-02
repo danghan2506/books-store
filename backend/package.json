@@ -7,6 +7,7 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
@@ -16,7 +17,6 @@
     "express-async-handler": "^1.2.0",
     "express-formidable": "^1.2.0",
     "express-rate-limit": "^8.1.0",
-    "firebase-admin": "^13.5.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.4",
     "multer": "^2.0.2",

@@ -6,13 +6,12 @@ import userRoute from "./routes/users-routes.js";
 import bookRoute from "./routes/books-routes.js";
 import orderRoute from "./routes/orders-routes.js";
 import authRoute from "./routes/auth-routes.js";
-import connectDatabase from "./config/connect-database.js";
 import cors from "cors";
 import { errorHandler } from "./middlewares/error-handler.js";
 import ensureDatabaseConnection from "./middlewares/database-middleware.js";
 import { apiLimiter } from "./middlewares/rate-limiter.js";
 const app = express();
-config();
+config({path: './backend/.env'});
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -34,14 +33,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-const database = process.env.DATABASE_URI;
 const port = process.env.PORT || 5000;
-
 // Connect to cloudinary
 connectCloudinary();
-
-// Ensure database connection for all API routes
 app.use("/api/users", ensureDatabaseConnection, userRoute);
 app.use("/api/books",ensureDatabaseConnection, bookRoute);
 app.use("/api/orders",ensureDatabaseConnection, orderRoute);
@@ -54,8 +48,5 @@ app.get("/", (req, res) => {
 });
 // Error handler middleware must be last
 app.use(errorHandler);
-
-// Export app for Vercel
 export default app;
-
 app.listen(port, () => console.log(`Server running on port ${port}`));

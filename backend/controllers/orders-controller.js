@@ -153,13 +153,18 @@ const markOrderAsPaid = asyncHandler(async(req, res) => {
 
         const updatedOrder = await order.save()
 
-        // Increment salesCount for each purchased book by the quantity bought
+        // Decrement stock and increment salesCount for each purchased book by the quantity bought
         if (Array.isArray(order.orderItems) && order.orderItems.length > 0) {
             await Promise.all(
                 order.orderItems.map((item) =>
                     Book.updateOne(
                         { _id: item.book },
-                        { $inc: { salesCount: item.quantity ?? 1 } }
+                        { 
+                            $inc: { 
+                                salesCount: item.quantity ?? 1,
+                                stock: -(item.quantity ?? 1)
+                            } 
+                        }
                     )
                 )
             )
@@ -176,12 +181,24 @@ const markOrderAsDelivered = asyncHandler(async(req, res) => {
         const {orderId} = req.params
         const order = await Order.findById(orderId)
         if(!order){
-            res.status(404).json("An error occured")
+            res.status(404)
+            throw new Error("Order not found")
         }
-        else{
-            order.isDelivered = true
-            order.deliveredAt = Date.now()
+        
+        // Prevent marking as delivered if not yet paid
+        if (!order.isPaid) {
+            res.status(400)
+            throw new Error("Order must be paid before marking as delivered")
         }
+        
+        // Prevent double processing if already delivered
+        if (order.isDelivered) {
+            return res.status(200).json(order)
+        }
+        
+        order.isDelivered = true
+        order.deliveredAt = Date.now()
+        
         const updateOrder = await order.save()
         res.status(201).json(updateOrder)
     } catch (error) {

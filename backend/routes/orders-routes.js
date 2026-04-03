@@ -8,6 +8,6 @@ router.route("/total-orders").get(authenticate, countTotalOrders)
 router.route("/total-sales").get(authenticate, authorizedAdmin, calculateTotalSales)
 router.route("/total-sales/by-date").get(authenticate, calculateTotalSalesByDate)
 router.route("/:orderId").get(authenticate, getOrderById)
-router.route("/:orderId/payment").put(authenticate, markOrderAsPaid)
-router.route("/:orderId/delivery").put(authenticate, markOrderAsDelivered)
+router.route("/:orderId/payment").put(authenticate, authorizedAdmin, markOrderAsPaid)
+router.route("/:orderId/delivery").put(authenticate, authorizedAdmin, markOrderAsDelivered)
 export default router

@@ -142,32 +142,45 @@ const markOrderAsPaid = asyncHandler(async(req, res) => {
             return res.status(200).json(order)
         }
 
+        // For PayPal orders, payment is handled by PayPal, mark as paid automatically
+        // For CoD orders, admin manually marks as paid
         order.isPaid = true;
         order.paidAt = Date.now();
-        order.paymentResult = {
-            id: req.body.id,
-            status: req.body.status,
-            update_time: req.body.update_time,
-            email_address: req.body.payer?.email_address,
-        };
+        
+        // Only set paymentResult if details are provided (PayPal callback)
+        if (req.body.id || req.body.status) {
+            order.paymentResult = {
+                id: req.body.id,
+                status: req.body.status,
+                update_time: req.body.update_time,
+                email_address: req.body.payer?.email_address,
+            };
+        }
 
         const updatedOrder = await order.save()
 
         // Decrement stock and increment salesCount for each purchased book by the quantity bought
+        // Only do this once when payment is first marked as paid
         if (Array.isArray(order.orderItems) && order.orderItems.length > 0) {
-            await Promise.all(
-                order.orderItems.map((item) =>
-                    Book.updateOne(
-                        { _id: item.book },
-                        { 
-                            $inc: { 
-                                salesCount: item.quantity ?? 1,
-                                stock: -(item.quantity ?? 1)
-                            } 
-                        }
+            try {
+                await Promise.all(
+                    order.orderItems.map((item) =>
+                        Book.updateOne(
+                            { _id: item.book },
+                            { 
+                                $inc: { 
+                                    salesCount: item.quantity ?? 1,
+                                    stock: -(item.quantity ?? 1)
+                                } 
+                            }
+                        )
                     )
                 )
-            )
+            } catch (stockError) {
+                console.error("Stock update error:", stockError);
+                // Log but don't fail - payment is already processed
+                // In production, you might want to trigger an alert or manual review
+            }
         }
 
         return res.status(201).json(updatedOrder)

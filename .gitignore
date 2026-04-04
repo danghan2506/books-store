@@ -6,7 +6,9 @@
 
 # KDE directory preferences
 .directory
-
+.github
+.shared
+.agent
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
 

@@ -1,4 +1,4 @@
-import {ChevronsUpDown,User2,Settings,LayoutDashboard,BookA,Users
+import {ChevronsUpDown,User2,Settings,LayoutDashboard,BookA,Users, ShoppingCart
 } from "lucide-react";
 import {Sidebar,SidebarContent,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarFooter,
 } from "@/components/ui/sidebar";
@@ -26,6 +26,11 @@ const AdminSidebar = () => {
     title: "Users",
     url: "users-list",
     icon: Users,
+  },
+  {
+    title: "Orders List",
+    url: "orders-list",
+    icon: ShoppingCart,
   },
   {
     title: "Settings",

@@ -14,7 +14,8 @@ export interface Order {
     _id: string
     orderItems: OrderItems[]
     shippingAddress: ShippingAddress
-    paymentMethod: PaymentResult
+    paymentMethod: string
+    paymentResult?: PaymentResult
     itemsPrice: number
     taxPrice: number
     shippingPrice: number

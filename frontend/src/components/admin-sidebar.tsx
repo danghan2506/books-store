@@ -28,14 +28,14 @@ const AdminSidebar = () => {
     icon: Users,
   },
   {
-    title: "Orders List",
+    title: "Orders",
     url: "orders-list",
     icon: ShoppingCart,
   },
   {
-    title: "Settings",
-    url: "/my-profile",
-    icon: Settings,
+    title: "Add products",
+    url: "create-books",
+    icon: BookA,
   }
 ];
 const { userInfo } = useSelector((state: RootState) => state.auth);  
@@ -110,31 +110,6 @@ const { userInfo } = useSelector((state: RootState) => state.auth);
                   </>
                 ) : (
                   <>
-                    {userInfo.role === "admin" && (
-                      <> 
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin">
-                          <span>Dashboard</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/users-list">
-                          <span>Users</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                      <Link to="/admin/create-books">
-                        <span>Create books</span>
-                      </Link>
-                    </DropdownMenuItem>
-                      </>
-                      
-                    )}
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link to="/my-profile">
-                       <span>Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                       <span>Logout</span>
                     </DropdownMenuItem>

@@ -46,11 +46,19 @@ const getAllOrders = asyncHandler(async(req, res) => {
         .populate("user", "id username")
         .limit(pageSize)
         .skip(pageSize * (page - 1))
+
+        const paidCount = await Order.countDocuments({ isPaid: true });
+        const deliveredCount = await Order.countDocuments({ isDelivered: true });
+        const pendingCount = count - paidCount;
+
         res.json({
             orders,
             page,
             pages: Math.ceil(count / pageSize),
             hasMore: page < Math.ceil(count / pageSize),
+            paidCount,
+            deliveredCount,
+            pendingCount,
         })
     } catch (error) {
         console.error(error)

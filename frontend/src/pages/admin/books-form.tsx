@@ -5,6 +5,13 @@ import { Label } from "@/components/ui/label";
 import FileUpload from "@/components/comp-549";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import {
+  BookPlus,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+
 const BooksForm = () => {
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("")
@@ -53,192 +60,232 @@ const BooksForm = () => {
       toast.error(message)
     }
   }, [name, author, category, publishingHouse, publishYear, language, description, price, stock, pageNumber, images, createBook, navigate])
+
   return (
-    <div className="min-h-screen pt-16 pb-12 px-4 sm:px-6 lg:px-8 lg:ml-[160px] xl:ml-[60px] lg:pr-2 xl:pr-4">
-    <div className="max-w-5xl md:max-w-6xl mx-auto">
-      <div className="rounded-lg border p-4 sm:p-6 lg:p-8 bg-transparent">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 text-center">
-          Add New Book
-        </h1>
-        
-        <div className="space-y-6">
-          {/* Image Upload */}
-          <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">
-              Book Images
-            </Label>
-            <FileUpload 
-              multiple 
-              accept="image/*" 
-              maxFiles={5} 
-              maxSize={10 * 1024 * 1024} 
-              onChange={onFilesChange} 
-            />
-          </div>
-
-          {/* Book Name & Author - Top Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1 block">
-                Book Name
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                className="h-10 sm:h-11"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter book name"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Back + Header */}
+        <div className="mb-6">
+          {/* <Link
+            to="/admin/books-list"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 group mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            Back to Books
+          </Link> */}
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
+              <BookPlus className="h-6 w-6 text-white" />
             </div>
             <div>
-              <Label htmlFor="author" className="text-sm font-medium text-gray-700 mb-1 block">
-                Author
-              </Label>
-              <Input
-                id="author"
-                type="text"
-                className="h-10 sm:h-11"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Enter author name"
-              />
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+                Add new book
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                Fill in the details to add a new book to your store
+              </p>
             </div>
           </div>
+        </div>
 
-          {/* Publishing House, Year & Language */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="publishingHouse" className="text-sm font-medium text-gray-700 mb-1 block">
-                Publishing House
-              </Label>
-              <Input
-                id="publishingHouse"
-                type="text"
-                className="h-10 sm:h-11"
-                value={publishingHouse}
-                onChange={(e) => setPublishingHouse(e.target.value)}
-                placeholder="Enter publisher"
-              />
-            </div>
-            <div>
-              <Label htmlFor="publishYear" className="text-sm font-medium text-gray-700 mb-1 block">
-                Publish Year
-              </Label>
-              <Input
-                id="publishYear"
-                type="number"
-                className="h-10 sm:h-11"
-                value={publishYear}
-                onChange={(e) => setPublishYear(e.target.value)}
-                placeholder="2024"
-              />
-            </div>
-            <div className="sm:col-span-2 lg:col-span-1">
-              <Label htmlFor="language" className="text-sm font-medium text-gray-700 mb-1 block">
-                Language
-              </Label>
-              <Input
-                id="language"
-                type="text"
-                className="h-10 sm:h-11"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                placeholder="English"
-              />
-            </div>
-          </div>
+        {/* Image Upload Card */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border-0 p-5 mb-5">
+          <Label className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3 block">
+            Book Images
+          </Label>
+          <FileUpload
+            multiple
+            accept="image/*"
+            maxFiles={5}
+            maxSize={10 * 1024 * 1024}
+            onChange={onFilesChange}
+          />
+        </div>
 
-          {/* Price, Stock & Page Number */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1 block">
-                Price ($)
+        {/* Main Form Card */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border-0 p-5 sm:p-6">
+          <div className="space-y-5">
+            {/* Book Name & Author */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Book Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter book name"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="author" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Author <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="author"
+                  type="text"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+                  placeholder="Enter author name"
+                />
+              </div>
+            </div>
+
+            {/* Category, Publishing House & Language */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="category" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Category <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="category"
+                  type="text"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="e.g. Fiction, Science"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="publishingHouse" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Publishing House
+                </Label>
+                <Input
+                  id="publishingHouse"
+                  type="text"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={publishingHouse}
+                  onChange={(e) => setPublishingHouse(e.target.value)}
+                  placeholder="Enter publisher"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="language" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Language
+                </Label>
+                <Input
+                  id="language"
+                  type="text"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  placeholder="English"
+                />
+              </div>
+            </div>
+
+            {/* Publish Year, Price, Stock & Page Count */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="publishYear" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Publish Year
+                </Label>
+                <Input
+                  id="publishYear"
+                  type="number"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={publishYear}
+                  onChange={(e) => setPublishYear(e.target.value)}
+                  placeholder="2024"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="price" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Price ($) <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="stock" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Stock <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="pageNumber" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Page Count
+                </Label>
+                <Input
+                  id="pageNumber"
+                  type="number"
+                  className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 transition-colors"
+                  value={pageNumber}
+                  onChange={(e) => setPageNumber(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Description
               </Label>
-              <Input
-                id="price"
-                type="number"
-                className="h-10 sm:h-11"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="0.00"
-                step="0.01"
+              <textarea
+                id="description"
+                className="w-full min-h-[100px] p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-vertical text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Write a brief description of the book..."
               />
             </div>
-            <div>
-              <Label htmlFor="stock" className="text-sm font-medium text-gray-700 mb-1 block">
-                Stock Quantity
-              </Label>
-              <Input
-                id="stock"
-                type="number"
-                className="h-10 sm:h-11"
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
-                placeholder="0"
-              />
+
+            {/* Divider + Actions */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Fields marked with <span className="text-red-500">*</span> are required
+              </p>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <Link
+                  to="/admin/books-list"
+                  className="flex-1 sm:flex-none px-5 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200 text-center"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-blue-300 disabled:to-blue-400 text-white font-medium rounded-lg shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <BookPlus className="h-4 w-4" />
+                      Create Book
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="sm:col-span-2 lg:col-span-1">
-              <Label htmlFor="pageNumber" className="text-sm font-medium text-gray-700 mb-1 block">
-                Page Count
-              </Label>
-              <Input
-                id="pageNumber"
-                type="number"
-                className="h-10 sm:h-11"
-                value={pageNumber}
-                onChange={(e) => setPageNumber(e.target.value)}
-                placeholder="0"
-              />
-            </div>
-          </div>
-
-          {/* Category */}
-          <div>
-            <Label htmlFor="category" className="text-sm font-medium text-gray-700 mb-1 block">
-              Category
-            </Label>
-            <Input
-              id="category"
-              type="text"
-              className="h-10 sm:h-11"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g. Fiction, Non-fiction, Science"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <Label htmlFor="description" className="text-sm font-medium text-gray-700 mb-1 block">
-              Description
-            </Label>
-            <textarea
-              id="description"
-              className="w-full min-h-[100px] sm:min-h-[120px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical text-sm"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter book description..."
-            />
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm sm:text-base"
-            >
-              {isLoading ? "Adding Book to database..." : "Create Book"}
-            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
-)
-
+  )
 }
 
 export default BooksForm

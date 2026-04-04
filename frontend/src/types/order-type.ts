@@ -60,4 +60,7 @@ export interface OrdersQueryResult {
     page: number;
     pages: number;
     hasMore: boolean;
+    paidCount: number;
+    deliveredCount: number;
+    pendingCount: number;
 }

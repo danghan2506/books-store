@@ -5,7 +5,7 @@ const AdminLayout = () => {
   return (
      <SidebarProvider>
       <AdminSidebar/>
-      <main>
+      <main className="flex-1 w-full overflow-auto">
         <Outlet /> 
       </main>
       

@@ -6,6 +6,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Package, Eye, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { Order } from "@/types/order-type";
 import {
   Pagination,
@@ -25,7 +26,7 @@ const isPayPalOrder = (paymentMethod: string): boolean => {
 };
 
 const isCoDbOrder = (paymentMethod: string): boolean => {
-  return paymentMethod?.toUpperCase?.() === "COD";
+  return paymentMethod === "Cash on Delivery" || paymentMethod?.toUpperCase?.() === "COD";
 };
 
 export const OrdersTable = ({ isDashboard = false }: OrdersTableProps) => {
@@ -44,9 +45,10 @@ export const OrdersTable = ({ isDashboard = false }: OrdersTableProps) => {
     try {
       await payOrder({ orderId, details: { status: value } }).unwrap();
       await refetch();
+      toast.success("Payment status updated successfully");
     } catch (err) {
       console.error("Error updating payment status:", err);
-      alert("Failed to update payment status. Please try again.");
+      toast.error("Failed to update payment status. Please try again.");
     }
   };
 
@@ -54,9 +56,10 @@ export const OrdersTable = ({ isDashboard = false }: OrdersTableProps) => {
     try {
       await deliverOrder({ orderId, details: { status: value } }).unwrap();
       await refetch();
+      toast.success("Delivery status updated successfully");
     } catch (err) {
       console.error("Error updating delivery status:", err);
-      alert("Failed to update delivery status. Please try again.");
+      toast.error("Failed to update delivery status. Please try again.");
     }
   };
 
@@ -205,7 +208,7 @@ export const OrdersTable = ({ isDashboard = false }: OrdersTableProps) => {
                   <td className="px-4 py-3">
                     <NativeSelect
                       size="sm"
-                      disabled={!order.isPaid}
+                      disabled={!order.isPaid && !isCoDbOrder(order.paymentMethod)}
                       value={order.isDelivered ? "delivered" : "pending"}
                       onChange={(e) => handleDeliveryStatusChange(order._id, e.target.value)}
                     >
@@ -291,7 +294,7 @@ export const OrdersTable = ({ isDashboard = false }: OrdersTableProps) => {
                     <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Delivery:</span>
                     <NativeSelect
                       size="sm"
-                      disabled={!order.isPaid}
+                      disabled={!order.isPaid && !isCoDbOrder(order.paymentMethod)}
                       value={order.isDelivered ? "delivered" : "pending"}
                       onChange={(e) => handleDeliveryStatusChange(order._id, e.target.value)}
                       className="w-24"

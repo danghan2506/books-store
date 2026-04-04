@@ -45,9 +45,15 @@ const orderApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    calculateTotalSalesByDate: builder.query<number, void>({
+    calculateTotalSalesByDate: builder.query<any[], number | void>({
+      query: (year) => ({
+        url: `${ORDERS_URL}/total-sales/by-date${year ? `?year=${year}` : ""}`,
+        method: "GET",
+      }),
+    }),
+    getDashboardStats: builder.query<{sales: {total: number, percentage: number}, orders: {total: number, percentage: number}, avg: {percentage: number}}, void>({
       query: () => ({
-        url: `${ORDERS_URL}/total-sales/by-date`,
+        url: `${ORDERS_URL}/dashboard-stats`,
         method: "GET",
       }),
     }),
@@ -72,4 +78,4 @@ const orderApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
-export const { useCreateOrderMutation, useGetAllOrdersQuery, useGetMyOrdersQuery, useCalculateTotalSalesQuery, useCalculateTotalSalesByDateQuery, useCountTotalOrdersQuery, useDeliverOrderMutation, useGetOrderDetailsQuery, useGetPaypalClientIdQuery, usePayOrderMutation } = orderApiSlice;
+export const { useCreateOrderMutation, useGetAllOrdersQuery, useGetMyOrdersQuery, useCalculateTotalSalesQuery, useCalculateTotalSalesByDateQuery, useCountTotalOrdersQuery, useDeliverOrderMutation, useGetOrderDetailsQuery, useGetPaypalClientIdQuery, usePayOrderMutation, useGetDashboardStatsQuery } = orderApiSlice;

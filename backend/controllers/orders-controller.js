@@ -108,22 +108,50 @@ const getOrderById = asyncHandler(async(req, res) => {
 })
 const calculateTotalSalesByDate = async (req, res) => {
   try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1; // 1-12
+
+    const startOfYear = new Date(Date.UTC(year, 0, 1));
+    const endOfYear = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
     const salesByDate = await Order.aggregate([
       {
         $match: {
-          isPaid: true,
+          createdAt: { $gte: startOfYear, $lte: endOfYear }
         },
       },
       {
         $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$paidAt" },
+          _id: { $month: "$createdAt" },
+          totalSales: { 
+            $sum: {
+              $cond: [{ $eq: ["$isPaid", true] }, "$totalPrice", 0]
+            } 
           },
-          totalSales: { $sum: "$totalPrice" },
+          totalOrders: { $sum: 1 },
         },
       },
+      {
+        $sort: { "_id": 1 }
+      }
     ]);
-    res.json(salesByDate);
+
+    // Zero-filling
+    const maxMonths = year === currentYear ? currentMonth : 12;
+    const formattedData = [];
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    for (let i = 1; i <= maxMonths; i++) {
+      const foundData = salesByDate.find(item => item._id === i);
+      formattedData.push({
+        _id: monthNames[i - 1], // frontend uses _id for the axis
+        totalSales: foundData ? foundData.totalSales : 0,
+        totalOrders: foundData ? foundData.totalOrders : 0
+      });
+    }
+
+    res.json(formattedData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -198,8 +226,8 @@ const markOrderAsDelivered = asyncHandler(async(req, res) => {
             throw new Error("Order not found")
         }
         
-        // Prevent marking as delivered if not yet paid
-        if (!order.isPaid) {
+        // Prevent marking as delivered if not yet paid, unless it's Cash on Delivery
+        if (!order.isPaid && order.paymentMethod !== "Cash on Delivery") {
             res.status(400)
             throw new Error("Order must be paid before marking as delivered")
         }
@@ -219,4 +247,91 @@ const markOrderAsDelivered = asyncHandler(async(req, res) => {
         res.status(500).json("Server error!")
     }
 })
-export {createOrder, getAllOrders, getOrderById, getUserOrders, countTotalOrders, calculateTotalSales, calculateTotalSalesByDate, markOrderAsDelivered, markOrderAsPaid}
+
+const getDashboardStats = asyncHandler(async (req, res) => {
+  const now = new Date();
+  
+  // Start of this month
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const startOfYesterday = new Date(now);
+  startOfYesterday.setDate(now.getDate() - 1);
+  startOfYesterday.setHours(0, 0, 0, 0);
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+
+  // 1. Revenues and Avg Order Value (Sales this month vs last month)
+  const thisMonthData = await Order.aggregate([
+    { $match: { createdAt: { $gte: startOfThisMonth } } },
+    { $group: { 
+        _id: null, 
+        totalSales: { $sum: { $cond: [{ $eq: ["$isPaid", true] }, "$totalPrice", 0] } }, 
+        totalOrders: { $sum: 1 },
+        totalPaidOrders: { $sum: { $cond: [{ $eq: ["$isPaid", true] }, 1, 0] } }
+      } 
+    }
+  ]);
+  
+  const lastMonthData = await Order.aggregate([
+    { $match: { createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth } } },
+    { $group: { 
+        _id: null, 
+        totalSales: { $sum: { $cond: [{ $eq: ["$isPaid", true] }, "$totalPrice", 0] } }, 
+        totalOrders: { $sum: 1 },
+        totalPaidOrders: { $sum: { $cond: [{ $eq: ["$isPaid", true] }, 1, 0] } }
+      } 
+    }
+  ]);
+
+  const thisMonthSales = thisMonthData.length > 0 ? thisMonthData[0].totalSales : 0;
+  const lastMonthSales = lastMonthData.length > 0 ? lastMonthData[0].totalSales : 0;
+  const thisMonthOrdersPaid = thisMonthData.length > 0 ? thisMonthData[0].totalPaidOrders : 0;
+  const lastMonthOrdersPaid = lastMonthData.length > 0 ? lastMonthData[0].totalPaidOrders : 0;
+  
+  let salesPercentage = 0;
+  if (lastMonthSales > 0) salesPercentage = ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+  else if (thisMonthSales > 0) salesPercentage = 100;
+
+  const thisMonthAvg = thisMonthOrdersPaid > 0 ? thisMonthSales / thisMonthOrdersPaid : 0;
+  const lastMonthAvg = lastMonthOrdersPaid > 0 ? lastMonthSales / lastMonthOrdersPaid : 0;
+  let avgPercentage = 0;
+  if (lastMonthAvg > 0) avgPercentage = ((thisMonthAvg - lastMonthAvg) / lastMonthAvg) * 100;
+  else if (thisMonthAvg > 0) avgPercentage = 100;
+
+  // 2. Orders (Today vs Yesterday)
+  const todayOrdersTotal = await Order.countDocuments({
+    createdAt: { $gte: startOfToday }
+  });
+  
+  const yesterdayOrdersTotal = await Order.countDocuments({
+    createdAt: { $gte: startOfYesterday, $lt: startOfToday }
+  });
+
+  let ordersPercentage = 0;
+  if (yesterdayOrdersTotal > 0) ordersPercentage = ((todayOrdersTotal - yesterdayOrdersTotal) / yesterdayOrdersTotal) * 100;
+  else if (todayOrdersTotal > 0) ordersPercentage = 100;
+
+  // 3. Overall Totals for the stats
+  const allTimeSalesData = await Order.aggregate([
+    { $match: { isPaid: true } },
+    { $group: { _id: null, totalSales: { $sum: "$totalPrice" } } }
+  ]);
+  const allTimeSales = allTimeSalesData.length > 0 ? allTimeSalesData[0].totalSales : 0;
+  const allTimeOrders = await Order.countDocuments();
+  
+  res.json({
+    sales: {
+      total: allTimeSales,
+      percentage: parseFloat(salesPercentage.toFixed(2))
+    },
+    orders: {
+      total: allTimeOrders,
+      percentage: parseFloat(ordersPercentage.toFixed(2))
+    },
+    avg: {
+      percentage: parseFloat(avgPercentage.toFixed(2))
+    }
+  });
+});
+
+export {createOrder, getAllOrders, getOrderById, getUserOrders, countTotalOrders, calculateTotalSales, calculateTotalSalesByDate, markOrderAsDelivered, markOrderAsPaid, getDashboardStats}

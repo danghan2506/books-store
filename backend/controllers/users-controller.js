@@ -154,10 +154,44 @@ const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserStats = asyncHandler(async (req, res) => {
+  const now = new Date();
+  
+  // Start of this week (Monday)
+  const startOfThisWeek = new Date(now);
+  startOfThisWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+  startOfThisWeek.setHours(0, 0, 0, 0);
+
+  // Start of last week
+  const startOfLastWeek = new Date(startOfThisWeek);
+  startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+  
+  const thisWeekUsersData = await User.countDocuments({
+    createdAt: { $gte: startOfThisWeek }
+  });
+  
+  const lastWeekUsersData = await User.countDocuments({
+    createdAt: { $gte: startOfLastWeek, $lt: startOfThisWeek }
+  });
+
+  let percentage = 0;
+  if (lastWeekUsersData > 0) {
+    percentage = ((thisWeekUsersData - lastWeekUsersData) / lastWeekUsersData) * 100;
+  } else if (thisWeekUsersData > 0) {
+    percentage = 100; // infinite actually but 100% makes sense visually 
+  }
+
+  res.json({
+    totalNewUsers: thisWeekUsersData,
+    percentage: parseFloat(percentage.toFixed(2)),
+  });
+});
+
 export {
   getAllUsers,
   getCurrentUserProfile,
   updateUserProfile,
   getUserById,
   deleteUserProfile,
+  getUserStats,
 };

@@ -1,53 +1,52 @@
-import { useCalculateTotalSalesQuery, useCalculateTotalSalesByDateQuery, useCountTotalOrdersQuery } from "@/redux/API/order-api-slice"
-import { useGetAllUsersQuery } from "@/redux/API/user-api-slice"
+import { useCalculateTotalSalesByDateQuery, useGetDashboardStatsQuery } from "@/redux/API/order-api-slice"
+import { useGetUserStatsQuery } from "@/redux/API/user-api-slice"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ShoppingCart, ArrowUp, ArrowDown, BarChart2, PieChart, Percent } from "lucide-react";
 
 const AdminDashBoard = () => {
-    const {data: sales, isLoading: loadingSales} = useCalculateTotalSalesQuery()
-    const {data: customers, isLoading: loadingCustomers} = useGetAllUsersQuery()
-    const { data: orders, isLoading: loadingOrders } = useCountTotalOrdersQuery();
-    const {data: salesDetails} = useCalculateTotalSalesByDateQuery()
+    const currentYear = new Date().getFullYear();
+    const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+    const {data: dashboardStats, isLoading: loadingDashboardStats} = useGetDashboardStatsQuery()
+    const {data: userStats, isLoading: loadingUserStats} = useGetUserStatsQuery()
+    const {data: salesDetails} = useCalculateTotalSalesByDateQuery(selectedYear)
+
+    const availableYears = Array.from({ length: currentYear - 2024 + 1 }, (_, i) => 2024 + i);
 
    const chartData = useMemo(() => {
         if (!salesDetails || !Array.isArray(salesDetails)) return [];
         return salesDetails.map((item) => ({
             date: item._id,
             sales: item.totalSales,
-            // simulate orders count for bar chart purely for visual distinction since we don't have historical orders
-            orders: Math.floor(item.totalSales / 20) + 1 
+            orders: item.totalOrders || 0
         }));
     }, [salesDetails]);
 
   const chartConfig = {
         sales: {
             label: "Sales",
-            color: "#5e72e4", // Argon blue line
+            color: "#5e72e4", 
         },
         orders: {
             label: "Orders",
-            color: "#fb6340", // Argon orange bar
+            color: "#fb6340", 
         }
     };
 
-    const avgOrderValue = (sales && orders && orders > 0) ? (sales / orders).toFixed(2) : "0.00";
+    const avgOrderValue = (dashboardStats?.sales.total && dashboardStats?.orders.total && dashboardStats.orders.total > 0) 
+      ? (dashboardStats.sales.total / dashboardStats.orders.total).toFixed(2) 
+      : "0.00";
 
   return (
     <div className="relative min-h-screen bg-slate-100 dark:bg-slate-950 w-full transition-all duration-300 overflow-hidden">
-      
-      {/* Main Content Wrapper */}
       <div className="relative z-10 p-4 md:p-6 w-full mx-auto max-w-[1600px]">
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-slate-800 dark:text-white text-base md:text-lg font-semibold tracking-wider">DASHBOARD</h1>
         </div>
-
-        {/* 4 Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* TRAFFIC / REVENUES */}
           <Card className="bg-white dark:bg-slate-900 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border-0">
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
@@ -56,7 +55,7 @@ const AdminDashBoard = () => {
                     Total Revenues
                   </p>
                   <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                    {loadingSales ? <Skeleton className="w-24 h-7" /> : `$${sales?.toLocaleString(undefined, {minimumFractionDigits: 2})}`}
+                    {loadingDashboardStats ? <Skeleton className="w-24 h-7" /> : `$${dashboardStats?.sales.total.toLocaleString(undefined, {minimumFractionDigits: 2})}`}
                   </h3>
                 </div>
                 <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-sm bg-[#f5365c] text-white">
@@ -64,15 +63,16 @@ const AdminDashBoard = () => {
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="flex items-center text-emerald-500 font-bold mr-2">
-                  <ArrowUp size={14} className="mr-0.5" /> 3.48%
-                </span>
-                <span className="text-slate-400 dark:text-slate-500">Since last month</span>
+                {!loadingDashboardStats && dashboardStats?.sales.percentage !== undefined && (
+                  <span className={`flex items-center font-bold mr-2 ${dashboardStats.sales.percentage >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                    {dashboardStats.sales.percentage >= 0 ? <ArrowUp size={14} className="mr-0.5" /> : <ArrowDown size={14} className="mr-0.5" />} 
+                    {Math.abs(dashboardStats.sales.percentage)}%
+                  </span>
+                )}
+                <span className="text-slate-400 dark:text-slate-500"> Since last month</span>
               </div>
             </CardContent>
           </Card>
-
-          {/* NEW USERS / CUSTOMERS */}
           <Card className="bg-white dark:bg-slate-900 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border-0">
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
@@ -81,7 +81,7 @@ const AdminDashBoard = () => {
                     New Users
                   </p>
                   <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                    {loadingCustomers ? <Skeleton className="w-24 h-7" /> : customers?.length?.toLocaleString()}
+                    {loadingUserStats ? <Skeleton className="w-24 h-7" /> : userStats?.totalNewUsers.toLocaleString()}
                   </h3>
                 </div>
                 <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-sm bg-[#fb6340] text-white">
@@ -89,9 +89,12 @@ const AdminDashBoard = () => {
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="flex items-center text-red-500 font-bold mr-2">
-                  <ArrowDown size={14} className="mr-0.5" /> 3.48%
-                </span>
+                {!loadingUserStats && userStats?.percentage !== undefined && (
+                  <span className={`flex items-center font-bold mr-2 ${userStats.percentage >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                    {userStats.percentage >= 0 ? <ArrowUp size={14} className="mr-0.5" /> : <ArrowDown size={14} className="mr-0.5" />} 
+                    {Math.abs(userStats.percentage)}%
+                  </span>
+                )}
                 <span className="text-slate-400 dark:text-slate-500">Since last week</span>
               </div>
             </CardContent>
@@ -106,7 +109,7 @@ const AdminDashBoard = () => {
                     Total Orders
                   </p>
                   <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                    {loadingOrders ? <Skeleton className="w-24 h-7" /> : orders?.toLocaleString()}
+                    {loadingDashboardStats ? <Skeleton className="w-24 h-7" /> : dashboardStats?.orders.total.toLocaleString()}
                   </h3>
                 </div>
                 <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-sm bg-[#ffd600] text-white">
@@ -114,9 +117,12 @@ const AdminDashBoard = () => {
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="flex items-center text-red-500 font-bold mr-2">
-                  <ArrowDown size={14} className="mr-0.5" /> 1.10%
-                </span>
+                {!loadingDashboardStats && dashboardStats?.orders.percentage !== undefined && (
+                  <span className={`flex items-center font-bold mr-2 ${dashboardStats.orders.percentage >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                    {dashboardStats.orders.percentage >= 0 ? <ArrowUp size={14} className="mr-0.5" /> : <ArrowDown size={14} className="mr-0.5" />} 
+                    {Math.abs(dashboardStats.orders.percentage)}%
+                  </span>
+                )}
                 <span className="text-slate-400 dark:text-slate-500">Since yesterday</span>
               </div>
             </CardContent>
@@ -131,7 +137,7 @@ const AdminDashBoard = () => {
                     Avg Order Value
                   </p>
                   <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                    {loadingSales || loadingOrders ? <Skeleton className="w-24 h-7" /> : `$${avgOrderValue}`}
+                    {loadingDashboardStats ? <Skeleton className="w-24 h-7" /> : `$${avgOrderValue}`}
                   </h3>
                 </div>
                 <div className="flex items-center justify-center w-12 h-12 rounded-full shadow-sm bg-[#11cdef] text-white">
@@ -139,9 +145,12 @@ const AdminDashBoard = () => {
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="flex items-center text-emerald-500 font-bold mr-2">
-                  <ArrowUp size={14} className="mr-0.5" /> 12%
-                </span>
+                {!loadingDashboardStats && dashboardStats?.avg.percentage !== undefined && (
+                  <span className={`flex items-center font-bold mr-2 ${dashboardStats.avg.percentage >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                    {dashboardStats.avg.percentage >= 0 ? <ArrowUp size={14} className="mr-0.5" /> : <ArrowDown size={14} className="mr-0.5" />} 
+                    {Math.abs(dashboardStats.avg.percentage)}%
+                  </span>
+                )}
                 <span className="text-slate-400 dark:text-slate-500">Since last month</span>
               </div>
             </CardContent>
@@ -157,9 +166,16 @@ const AdminDashBoard = () => {
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Overview</p>
                 <CardTitle className="text-xl font-bold text-slate-800 dark:text-white mt-1">Sales value</CardTitle>
               </div>
-              <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-                <button className="px-3 py-1 text-sm font-semibold rounded-md bg-[#5e72e4] text-white shadow-sm">Month</button>
-                <button className="px-3 py-1 text-sm font-semibold rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-800 transition-colors">Week</button>
+              <div className="flex gap-2 items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                <select 
+                  value={selectedYear} 
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="px-3 py-1 text-sm font-semibold rounded-md bg-[#5e72e4] text-white shadow-sm border-0 focus:ring-0 cursor-pointer outline-none"
+                >
+                  {availableYears.map(year => (
+                    <option key={year} value={year} className="bg-white text-slate-800">{year}</option>
+                  ))}
+                </select>
               </div>
             </CardHeader>
             <CardContent className="p-6">
@@ -188,7 +204,7 @@ const AdminDashBoard = () => {
                     <Line
                       type="monotone"
                       dataKey="sales"
-                      stroke={chartConfig.sales.color}
+                      stroke="var(--color-sales)"
                       strokeWidth={3}
                       dot={false}
                       activeDot={{ r: 6, fill: chartConfig.sales.color, strokeWidth: 0 }}

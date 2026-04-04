@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         address: {type: String, default: ""},
     },
     role: {type: String, default: "user"}
-}, {timeStamps: true})
+}, {timestamps: true})
 
 const User = mongoose.model("User", userSchema)
 export default User

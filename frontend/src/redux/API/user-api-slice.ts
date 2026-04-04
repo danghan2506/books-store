@@ -29,6 +29,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getUserStats: builder.query<{totalNewUsers: number, percentage: number}, void>({
+      query: () => ({
+        url: `${USERS_URL}/stats`,
+        method: "GET",
+      }),
+    }),
   }),
 });
-export const {useGetAllUsersQuery,useGetUserProfileQuery, useDeleteUserMutation, useUpdateUserProfileMutation} = userApiSlice;
+export const {useGetAllUsersQuery,useGetUserProfileQuery, useDeleteUserMutation, useUpdateUserProfileMutation, useGetUserStatsQuery} = userApiSlice;

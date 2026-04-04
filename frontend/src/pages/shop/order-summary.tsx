@@ -384,7 +384,7 @@ const OrderSummary = () => {
           {/* Admin Delivery Button */}
           {userInfo &&
             userInfo.role === "admin" &&
-            order.isPaid &&
+            (order.isPaid || order.paymentMethod === "Cash on Delivery") &&
             !order.isDelivered && (
               <Card>
                 <CardContent className="pt-6">

@@ -6,6 +6,7 @@ import {
   getUserById,
   updateUserProfile,
   getAllUsers,
+  getUserStats,
 } from "../controllers/users-controller.js";
 import {
   authenticate,
@@ -16,6 +17,7 @@ router
   .get(authenticate, getCurrentUserProfile)
   .put(authenticate, updateUserProfile);
 router.route("/all-users").get(authenticate, authorizedAdmin, getAllUsers);
+router.route("/stats").get(authenticate, authorizedAdmin, getUserStats);
 // Admin routes
 router
   .route("/:userId")

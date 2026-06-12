@@ -5,7 +5,7 @@ import User from "../models/users-model.js"
 dotenv.config()
 const authenticate = asyncHandler(async(req, res, next) => {
     var token
-    token = req.cookies.jwt
+    token = req.cookies.accessToken
     if(token){
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)

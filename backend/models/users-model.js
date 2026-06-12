@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
         country: {type: String, default: ""},
         address: {type: String, default: ""},
     },
-    role: {type: String, default: "user"}
+    role: {type: String, default: "user"},
+    refreshToken: {type: String, default: ""}
 }, {timestamps: true})
 
 const User = mongoose.model("User", userSchema)

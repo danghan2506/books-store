@@ -1,4 +1,4 @@
-import {ChevronsUpDown,User2,Settings,LayoutDashboard,BookA,Users, ShoppingCart
+import {ChevronsUpDown,User2,LayoutDashboard,BookA,Users, ShoppingCart
 } from "lucide-react";
 import {Sidebar,SidebarContent,SidebarGroup,SidebarGroupContent,SidebarGroupLabel,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarFooter,
 } from "@/components/ui/sidebar";

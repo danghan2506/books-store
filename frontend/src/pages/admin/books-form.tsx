@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import {
   BookPlus,
-  ArrowLeft,
   Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";

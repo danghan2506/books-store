@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import generateToken from "../utils/create-token.js";
 import { clerkClient } from "@clerk/clerk-sdk-node";
 import asyncHandler from "../middlewares/async-handler.js";
+import jwt from "jsonwebtoken";
 let otpStore = {}
 const loginWithClerk = async (req, res) => {
   try {
@@ -31,7 +32,7 @@ const loginWithClerk = async (req, res) => {
        user.clerkId = clerkUser.id;
        await user.save();
     }
-    generateToken(res, user._id)
+    await generateToken(res, user)
     return res.json({ message: "Authenticated", user });
   } catch (error) {
     console.error("Clerk login error:", error);
@@ -58,7 +59,7 @@ const createUser = asyncHandler(async (req, res) => {
   const newUser = new User({ username, email, password: hashedPassword });
   try {
     await newUser.save();
-    generateToken(res, newUser._id);
+    await generateToken(res, newUser);
     res.status(201).json({
       _id: newUser._id,
       username: newUser.username,
@@ -96,7 +97,7 @@ const login = asyncHandler(async (req, res) => {
     res.status(401);
     throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
   }
-  generateToken(res, existingUser._id);
+  await generateToken(res, existingUser);
   res.status(200).json({
     _id: existingUser._id,
     username: existingUser.username,
@@ -112,8 +113,22 @@ const login = asyncHandler(async (req, res) => {
   });
 });
 const logoutCurrentUser = asyncHandler(async (req, res) => {
-  res.cookie("jwt", "", {
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
+    await User.updateOne({ refreshToken }, { $set: { refreshToken: "" } });
+  }
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.cookie("accessToken", "", {
     httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    expires: new Date(0),
+  });
+  res.cookie("refreshToken", "", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     expires: new Date(0),
   });
   res.status(200).json(VALIDATION_MESSAGES.LOGOUT_SUCCESS);
@@ -218,4 +233,40 @@ const forgotPassword = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
-export {requestPasswordReset, verifyOtp, resetPassword, login, loginWithClerk, logoutCurrentUser, createUser}
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "No refresh token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY || process.env.JWT_SECRET_KEY);
+    const user = await User.findById(decoded.userId);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+
+    // Generate a new Access Token (15 mins)
+    const accessToken = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "15m" }
+    );
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.json({ message: "Access token refreshed successfully" });
+  } catch (error) {
+    res.status(403).json({ message: "Invalid refresh token", error: error.message });
+  }
+});
+
+export {requestPasswordReset, verifyOtp, resetPassword, login, loginWithClerk, logoutCurrentUser, createUser, refreshAccessToken}

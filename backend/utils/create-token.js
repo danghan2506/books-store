@@ -7,7 +7,7 @@ const generateToken = async (res, user) => {
     const accessToken = jwt.sign(
         { userId: user._id, role: user.role },
         process.env.JWT_SECRET_KEY,
-        { expiresIn: "15m" }
+        { expiresIn: "1m" }
     )
 
     // 2. Generate Refresh Token (7 days)

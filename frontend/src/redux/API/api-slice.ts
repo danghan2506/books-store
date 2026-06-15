@@ -13,9 +13,15 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  console.log("🔄 RTK Query calling:", args);
   let result = await baseQuery(args, api, extraOptions);
 
+  if (result.error) {
+    console.warn("❌ Request failed with error:", result.error);
+  }
+
   if (result.error && result.error.status === 401) {
+    console.log("🔑 Access token expired (401). Attempting to refresh token...");
     // Attempt to get a new access token
     const refreshResult = await baseQuery(
       {
@@ -26,10 +32,14 @@ const baseQueryWithReauth: BaseQueryFn<
       extraOptions
     );
 
+    console.log("🔄 Refresh result received:", refreshResult);
+
     if (refreshResult.data) {
+      console.log("✅ Refresh token successful! Retrying original request...");
       // Retry the initial query with the new access token cookie
       result = await baseQuery(args, api, extraOptions);
     } else {
+      console.error("❌ Refresh token failed or expired. Logging out user...");
       // Refresh token is expired or invalid, log out the user
       api.dispatch(logout());
     }

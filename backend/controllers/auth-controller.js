@@ -237,6 +237,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
+    console.warn("⚠️ Refresh Token request failed: No refreshToken cookie provided");
     return res.status(401).json({ message: "No refresh token provided" });
   }
 
@@ -244,7 +245,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY || process.env.JWT_SECRET_KEY);
     const user = await User.findById(decoded.userId);
 
-    if (!user || user.refreshToken !== refreshToken) {
+    if (!user) {
+      console.warn("⚠️ Refresh Token failed: User not found in database for ID:", decoded.userId);
+      return res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+    
+    if (user.refreshToken !== refreshToken) {
+      console.warn(`⚠️ Refresh Token mismatch: Token in cookie does not match the stored token for user ${user.email}`);
       return res.status(403).json({ message: "Invalid or expired refresh token" });
     }
 
@@ -263,8 +270,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       maxAge: 15 * 60 * 1000 // 15 minutes
     });
 
+    console.log(`✅ Access token successfully refreshed for user: ${user.email}`);
     res.json({ message: "Access token refreshed successfully" });
   } catch (error) {
+    console.error("❌ Refresh Token Verification Failed:", error.message);
     res.status(403).json({ message: "Invalid refresh token", error: error.message });
   }
 });

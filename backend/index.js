@@ -33,6 +33,11 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use((req, res, next) => {
+  console.log(`[Request] ${req.method} ${req.url}`);
+  console.log(`[Cookies]`, req.cookies);
+  next();
+});
 const port = process.env.PORT || 5000;
 // Connect to cloudinary
 connectCloudinary();

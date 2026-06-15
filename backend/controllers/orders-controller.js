@@ -2,23 +2,51 @@ import asyncHandler from "../middlewares/async-handler.js";
 import Book from "../models/books-model.js";
 import { Order } from "../models/orders-model.js";
 import calculatePrice from "../utils/orders.js";
+
+// Helper function to decrease book stock and increase sales count safely
+const decreaseBookStock = async (orderItems) => {
+    if (Array.isArray(orderItems) && orderItems.length > 0) {
+        await Promise.all(
+            orderItems.map((item) =>
+                Book.updateOne(
+                    { _id: item.book },
+                    { 
+                        $inc: { 
+                            salesCount: item.quantity ?? 1,
+                            stock: -(item.quantity ?? 1)
+                        } 
+                    }
+                )
+            )
+        );
+    }
+};
+
 const createOrder = asyncHandler(async(req, res) => {
     try {
         const {orderItems, shippingAddress, paymentMethod} = req.body
         const itemsFromDatabase = await Book.find({_id: {$in: orderItems.map((x) => x._id)}})
-        const databaseOrderItems = orderItems.map((itemFromClient) => {
+        const databaseOrderItems = []
+
+        for (const itemFromClient of orderItems) {
             const matchingItemFromDatabase = itemsFromDatabase.find((itemFromDatabase) => itemFromDatabase._id.toString() === itemFromClient._id)
             if(!matchingItemFromDatabase){
                 res.status(404)
                 throw new Error(`Product not found: ${itemFromClient._id}`)
             }
-            return {
+            const quantity = itemFromClient.quantity ?? 1
+            if (matchingItemFromDatabase.stock < quantity) {
+                res.status(400)
+                throw new Error(`Product "${matchingItemFromDatabase.name}" has insufficient stock. Available: ${matchingItemFromDatabase.stock}, Requested: ${quantity}`)
+            }
+            databaseOrderItems.push({
                 ...itemFromClient,
                 book: itemFromClient._id,
                 price: matchingItemFromDatabase.price,
                 _id: undefined
-            }
-        })
+            })
+        }
+
         const {itemsPrice, taxPrice, shippingPrice, totalPrice} = calculatePrice(databaseOrderItems)
         const order = new Order({
             orderItems: databaseOrderItems,
@@ -34,7 +62,11 @@ const createOrder = asyncHandler(async(req, res) => {
         res.status(201).json(createdOrder)
     } catch (error) {
         console.error(error)
-        res.status(500).json("server Error!")
+        const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message || "Server Error!"
+        })
     }
 })
 const getAllOrders = asyncHandler(async(req, res) => {
@@ -197,32 +229,22 @@ const markOrderAsPaid = asyncHandler(async(req, res) => {
 
         // Decrement stock and increment salesCount for each purchased book by the quantity bought
         // Only do this once when payment is first marked as paid
-        if (Array.isArray(order.orderItems) && order.orderItems.length > 0) {
-            try {
-                await Promise.all(
-                    order.orderItems.map((item) =>
-                        Book.updateOne(
-                            { _id: item.book },
-                            { 
-                                $inc: { 
-                                    salesCount: item.quantity ?? 1,
-                                    stock: -(item.quantity ?? 1)
-                                } 
-                            }
-                        )
-                    )
-                )
-            } catch (stockError) {
-                console.error("Stock update error:", stockError);
-                // Log but don't fail - payment is already processed
-                // In production, you might want to trigger an alert or manual review
-            }
+        try {
+            await decreaseBookStock(order.orderItems)
+        } catch (stockError) {
+            console.error("Stock update error:", stockError);
+            // Log but don't fail - payment is already processed
+            // In production, you might want to trigger an alert or manual review
         }
 
         return res.status(201).json(updatedOrder)
     } catch (error) {
         console.error(error)
-        res.status(500).json("Server error!")
+        const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message || "Server error!"
+        })
     }
 })
 const markOrderAsDelivered = asyncHandler(async(req, res) => {
@@ -248,11 +270,32 @@ const markOrderAsDelivered = asyncHandler(async(req, res) => {
         order.isDelivered = true
         order.deliveredAt = Date.now()
         
+        // If COD and not yet paid, mark as paid and trigger stock decrement since the product is now received and paid
+        let stockUpdated = false;
+        if (order.paymentMethod === "Cash on Delivery" && !order.isPaid) {
+            order.isPaid = true;
+            order.paidAt = Date.now();
+            stockUpdated = true;
+        }
+        
         const updateOrder = await order.save()
+        
+        if (stockUpdated) {
+            try {
+                await decreaseBookStock(updateOrder.orderItems);
+            } catch (stockError) {
+                console.error("Stock update error during COD delivery:", stockError);
+            }
+        }
+        
         res.status(201).json(updateOrder)
     } catch (error) {
         console.error(error)
-        res.status(500).json("Server error!")
+        const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message || "Server error!"
+        })
     }
 })
 

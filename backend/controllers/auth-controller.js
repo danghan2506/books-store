@@ -175,6 +175,8 @@ const verifyOtp = async (req, res) => {
         if (storedOtp !== otp) {
             return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_NOT_MATCH });
         }
+        // Đánh dấu OTP đã được xác thực thành công cho email này
+        otpStore[email].verified = true;
         res.json({ message: VALIDATION_MESSAGES.OTP_VALID });
     } catch (error) {
         res.status(500).json({ message: error.message });

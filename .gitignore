@@ -422,3 +422,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+BACKEND_REVIEW.md
+.gitignore
+BACKEND_REVIEW.vi.md

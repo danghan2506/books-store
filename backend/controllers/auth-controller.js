@@ -6,7 +6,11 @@ import generateToken from "../utils/create-token.js";
 import { clerkClient } from "@clerk/clerk-sdk-node";
 import asyncHandler from "../middlewares/async-handler.js";
 import jwt from "jsonwebtoken";
-let otpStore = {}
+import AuthToken from "../models/auth-token-model.js";
+import hashToken from "../utils/hash-token.js";
+
+const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_OTP_ATTEMPTS = 5;
 const loginWithClerk = async (req, res) => {
   try {
     const clerkId = req.auth.userId;
@@ -115,7 +119,11 @@ const login = asyncHandler(async (req, res) => {
 const logoutCurrentUser = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (refreshToken) {
-    await User.updateOne({ refreshToken }, { $set: { refreshToken: "" } });
+    // Chỉ thu hồi đúng phiên (thiết bị) hiện tại, không động tới phiên khác
+    await AuthToken.deleteOne({
+      type: "refresh",
+      tokenHash: hashToken(refreshToken),
+    });
   }
 
   const isProduction = process.env.NODE_ENV === 'production';
@@ -133,108 +141,90 @@ const logoutCurrentUser = asyncHandler(async (req, res) => {
   });
   res.status(200).json(VALIDATION_MESSAGES.LOGOUT_SUCCESS);
 });
-const requestPasswordReset = async (req, res) => {
-  try{
-    const {email} = req.body
-    const user = await User.findOne({email})
-    if(!user){
-      return res.status(404).json(VALIDATION_MESSAGES.EMAIL_INVALID)
-    }
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 }
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    })
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "OTP reset password",
-      text: `Your OTP is: ${otp}, it will expire in 5 minutes`
-    })
-    res.json({message: VALIDATION_MESSAGES.OTP_SEND_SUCCESS})
+const requestPasswordReset = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json(VALIDATION_MESSAGES.EMAIL_INVALID);
   }
-  catch (error) {
-    res.status(500).json({ message: error.message });
-}
-}
-const verifyOtp = async (req, res) => {
-    try {
-        const { email, otp } = req.body;
-        if (!otpStore[email]) {
-            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_NOT_FOUND });
-        }
-        const { otp: storedOtp, expires } = otpStore[email];
-        if (Date.now() > expires) {
-            delete otpStore[email];
-            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_EXPIRED });
-        }
-        if (storedOtp !== otp) {
-            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_NOT_MATCH });
-        }
-        // Đánh dấu OTP đã được xác thực thành công cho email này
-        otpStore[email].verified = true;
-        res.json({ message: VALIDATION_MESSAGES.OTP_VALID });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
-const resetPassword = async (req, res) => {
-    const { email, newPassword, confirmPassword } = req.body;
-    // Validate inputs
-    if (!email || !newPassword || !confirmPassword) {
-        return res.status(400).json({ message: VALIDATION_MESSAGES.REQUIRED_FIELD });
-    }
-    const user = await User.findOne({ email: email });
-    if (!user) {
-        return res.status(404).json({ message: VALIDATION_MESSAGES.EMAIL_INVALID });
-    }
-    try {
-        if (!otpStore[email]) {
-            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_INVALID });
-        }
-        if (newPassword !== confirmPassword) {
-            res.status(400);
-            throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
-        }
-        user.password = await bcrypt.hash(newPassword, 10);
-        await user.save();
-        delete otpStore[email];
-        res.json({ message: VALIDATION_MESSAGES.PASSWORD_RESET_SUCCESS });
-    } catch (error) {
-        // Log error stack for debugging
-        console.error("[ERROR]", error);
-        res.status(500).json({ message: error.message });
-    }
-}
-const forgotPassword = async (req, res) => {
-    const { email, newPassword, confirmPassword } = req.body;
-    if (!email || !newPassword || !confirmPassword) {
-        return res.status(400).json({ message: VALIDATION_MESSAGES.REQUIRED_FIELD });
-    }
-    const user = await User.findOne({email: email})
-    if(!user){
-        return res.status(404).jsocn({message: VALIDATION_MESSAGES.EMAIL_INVALID})
-    }
-    try {
-        if (!otpStore[email]) {
-            return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_INVALID });
-        }
-        if (newPassword !== confirmPassword) {
-      res.status(400);
-      throw new Error(VALIDATION_MESSAGES.PASSWORD_MISMATCH);
-    }
-        user.password = await bcrypt.hash(newPassword, 10)
-        await user.save()
-        delete otpStore[email];
-        res.json({ message: VALIDATION_MESSAGES.PASSWORD_RESET_SUCCESS });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  // Mỗi user chỉ giữ 1 OTP reset_otp hiện hành: upsert đè OTP cũ, reset attempts/verified
+  await AuthToken.findOneAndUpdate(
+    { user: user._id, type: "reset_otp" },
+    {
+      tokenHash: hashToken(otp),
+      attempts: 0,
+      verified: false,
+      expiresAt: new Date(Date.now() + OTP_TTL_MS),
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "OTP reset password",
+    text: `Your OTP is: ${otp}, it will expire in 5 minutes`,
+  });
+  res.json({ message: VALIDATION_MESSAGES.OTP_SEND_SUCCESS });
+});
+const verifyOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: VALIDATION_MESSAGES.EMAIL_INVALID });
+  }
+  // TTL index có thể xoá doc hết hạn -> không tìm thấy = chưa yêu cầu hoặc đã hết hạn
+  const record = await AuthToken.findOne({ user: user._id, type: "reset_otp" });
+  if (!record) {
+    return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_NOT_FOUND });
+  }
+  if (record.expiresAt.getTime() < Date.now()) {
+    await record.deleteOne();
+    return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_EXPIRED });
+  }
+  if (record.attempts >= MAX_OTP_ATTEMPTS) {
+    await record.deleteOne();
+    return res.status(429).json({ message: VALIDATION_MESSAGES.OTP_INVALID });
+  }
+  if (record.tokenHash !== hashToken(otp)) {
+    record.attempts += 1;
+    await record.save();
+    return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_NOT_MATCH });
+  }
+  // OTP đúng -> đánh dấu verified để bước /reset được phép đổi mật khẩu
+  record.verified = true;
+  await record.save();
+  res.json({ message: VALIDATION_MESSAGES.OTP_VALID });
+});
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, newPassword, confirmPassword } = req.body;
+  if (!email || !newPassword || !confirmPassword) {
+    return res.status(400).json({ message: VALIDATION_MESSAGES.REQUIRED_FIELD });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: VALIDATION_MESSAGES.EMAIL_INVALID });
+  }
+  // Chỉ cho đổi mật khẩu khi OTP đã được xác thực và còn hạn
+  const record = await AuthToken.findOne({ user: user._id, type: "reset_otp" });
+  if (!record || !record.verified || record.expiresAt.getTime() < Date.now()) {
+    return res.status(400).json({ message: VALIDATION_MESSAGES.OTP_INVALID });
+  }
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ message: VALIDATION_MESSAGES.PASSWORD_MISMATCH });
+  }
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+  await record.deleteOne(); // OTP dùng một lần
+  res.json({ message: VALIDATION_MESSAGES.PASSWORD_RESET_SUCCESS });
+});
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -251,9 +241,15 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       console.warn("⚠️ Refresh Token failed: User not found in database for ID:", decoded.userId);
       return res.status(403).json({ message: "Invalid or expired refresh token" });
     }
-    
-    if (user.refreshToken !== refreshToken) {
-      console.warn(`⚠️ Refresh Token mismatch: Token in cookie does not match the stored token for user ${user.email}`);
+
+    // Phiên refresh phải còn tồn tại trong AuthToken (chưa logout / chưa hết hạn TTL)
+    const session = await AuthToken.findOne({
+      user: user._id,
+      type: "refresh",
+      tokenHash: hashToken(refreshToken),
+    });
+    if (!session) {
+      console.warn(`⚠️ Refresh Token mismatch: no active session for user ${user.email}`);
       return res.status(403).json({ message: "Invalid or expired refresh token" });
     }
 

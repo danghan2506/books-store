@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
         address: {type: String, default: ""},
     },
     role: {type: String, default: "user"},
-    refreshToken: {type: String, default: ""}
 }, {timestamps: true})
 
 const User = mongoose.model("User", userSchema)

@@ -30,7 +30,7 @@ const changeUserPassword = asyncHandler(async (user, currentPassword, newPasswor
   return true;
 });
 const getAllUsers = asyncHandler(async (req, res) => {
-  const allUsers = await User.find({});
+  const allUsers = await User.find({}).select("-password -refreshToken");
   res.json(allUsers);
 });
 const getCurrentUserProfile = asyncHandler(async (req, res) => {
@@ -145,7 +145,7 @@ const deleteUserProfile = asyncHandler(async (req, res) => {
 });
 const getUserById = asyncHandler(async (req, res) => {
   const userId = req.params.userId;
-  const user = await User.findById(userId).select("-password");
+  const user = await User.findById(userId).select("-password -refreshToken");
   if (user) {
     res.json(user);
   } else {

@@ -1,5 +1,6 @@
 import asyncHandler from "../middlewares/async-handler.js";
 import User from "../models/users-model.js";
+import AuthToken from "../models/auth-token-model.js";
 import { VALIDATION_MESSAGES } from "../constants/validation-messages.js";
 import bcrypt from "bcryptjs";
 const changeUserPassword = asyncHandler(async (user, currentPassword, newPassword, confirmPassword) => {
@@ -107,12 +108,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
     const updatedUser = await user.save();
 
-    // If password changed, log user out by clearing auth cookie
+    // Đổi mật khẩu -> thu hồi mọi phiên của user bị sửa để buộc đăng nhập lại.
+    // KHÔNG xoá cookie ở đây: cookie trong request thuộc về admin đang gọi, không phải user mục tiêu.
     if (passwordChanged) {
-      res.cookie("jwt", "", {
-        httpOnly: true,
-        expires: new Date(0),
-      });
+      await AuthToken.deleteMany({ user: user._id, type: "refresh" });
       return res.status(200).json({
         message: VALIDATION_MESSAGES.PASSWORD_UPDATED,
         loggedOut: true,
@@ -131,6 +130,80 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     res.status(500);
     throw new Error(VALIDATION_MESSAGES.SERVER_ERROR);
   }
+});
+// Cập nhật hồ sơ của CHÍNH user đang đăng nhập (route /profile).
+// Tách hẳn khỏi handler admin: KHÔNG nhận `role` -> không có đường leo thang quyền.
+const updateCurrentUserProfile = asyncHandler(async (req, res) => {
+  const { username, email, phoneNumber, addressBook, currentPassword, newPassword, confirmPassword } = req.body;
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    res.status(404);
+    throw new Error(VALIDATION_MESSAGES.USER_NOT_FOUND);
+  }
+  // Đổi email: chỉ kiểm tra trùng khi thực sự thay đổi, loại trừ chính mình
+  if (email && email !== user.email) {
+    const emailExists = await User.findOne({ email, _id: { $ne: user._id } });
+    if (emailExists) {
+      return res.status(400).json({
+        success: false,
+        message: VALIDATION_MESSAGES.EMAIL_EXIST,
+      });
+    }
+  }
+  let passwordChanged = false;
+  const isPasswordUpdateRequested =
+    currentPassword !== undefined ||
+    newPassword !== undefined ||
+    confirmPassword !== undefined;
+  if (isPasswordUpdateRequested) {
+    try {
+      await changeUserPassword(user, currentPassword, newPassword, confirmPassword);
+      passwordChanged = true;
+    } catch (err) {
+      res.status(err.status || 400);
+      throw err;
+    }
+  }
+  if (username) user.username = username;
+  if (email) user.email = email;
+  if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+  // Chỉ cho cập nhật các field địa chỉ đã định nghĩa sẵn -> chặn inject key lạ
+  if (addressBook && typeof addressBook === "object" && !Array.isArray(addressBook)) {
+    Object.keys(addressBook).forEach((key) => {
+      if (addressBook[key] !== undefined && user.addressBook[key] !== undefined) {
+        user.addressBook[key] = addressBook[key];
+      }
+    });
+    user.markModified("addressBook");
+  }
+  const updatedUser = await user.save();
+
+  // Đổi mật khẩu -> thu hồi mọi phiên (refresh token) và xoá đúng cookie để buộc đăng nhập lại
+  if (passwordChanged) {
+    await AuthToken.deleteMany({ user: user._id, type: "refresh" });
+    const isProduction = process.env.NODE_ENV === "production";
+    const expiredCookie = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      expires: new Date(0),
+    };
+    res.cookie("accessToken", "", expiredCookie);
+    res.cookie("refreshToken", "", expiredCookie);
+    return res.status(200).json({
+      message: VALIDATION_MESSAGES.PASSWORD_UPDATED,
+      loggedOut: true,
+    });
+  }
+  res.json({
+    _id: updatedUser._id,
+    username: updatedUser.username,
+    email: updatedUser.email,
+    phoneNumber: updatedUser.phoneNumber,
+    role: updatedUser.role,
+    addressBook: updatedUser.addressBook,
+    updatedAt: updatedUser.updatedAt,
+  });
 });
 const deleteUserProfile = asyncHandler(async (req, res) => {
   const userId = req.params.userId;
@@ -190,6 +263,7 @@ const getUserStats = asyncHandler(async (req, res) => {
 export {
   getAllUsers,
   getCurrentUserProfile,
+  updateCurrentUserProfile,
   updateUserProfile,
   getUserById,
   deleteUserProfile,

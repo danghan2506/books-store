@@ -134,13 +134,18 @@ const calculateTotalSales = asyncHandler(async(req, res) => {
 const getOrderById = asyncHandler(async(req, res) => {
     try {
         const {orderId} = req.params
-        const orders = await Order.findById(orderId).populate("user", "username email")
-        if(!orders){
-            res.status(404).json("No order found!")
+        const order = await Order.findById(orderId).populate("user", "username email")
+        if(!order){
+            return res.status(404).json("No order found!")
         }
-        else{
-            res.json(orders)
+        // Chỉ chủ đơn hoặc admin được xem - tránh IDOR (đọc đơn của người khác)
+        // Dùng optional chaining phòng đơn "mồ côi" (user đã bị xoá) khỏi gây crash
+        const isOwner = order.user?._id?.equals(req.user._id) ?? false
+        const isAdmin = req.user.role === "admin"
+        if(!isOwner && !isAdmin){
+            return res.status(404).json("No order found!")
         }
+        res.json(order)
     } catch (error) {
         console.error(error)
         res.status(500).json("Server error!")

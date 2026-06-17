@@ -4,6 +4,7 @@ import {
   getCurrentUserProfile,
   deleteUserProfile,
   getUserById,
+  updateCurrentUserProfile,
   updateUserProfile,
   getAllUsers,
   getUserStats,
@@ -15,7 +16,7 @@ import {
 router
   .route("/profile")
   .get(authenticate, getCurrentUserProfile)
-  .put(authenticate, updateUserProfile);
+  .put(authenticate, updateCurrentUserProfile);
 router.route("/all-users").get(authenticate, authorizedAdmin, getAllUsers);
 router.route("/stats").get(authenticate, authorizedAdmin, getUserStats);
 // Admin routes
